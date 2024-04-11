@@ -2,10 +2,11 @@ package utils
 
 import (
 	"os"
+	"sort"
 	"strings"
 )
 
-// ReadFilesToMap reads the contents of the given files and returns a map of words
+// ReadFilesToMap reads the contents of the multiple files and returns a map of words
 //
 // Args:
 //
@@ -13,9 +14,11 @@ import (
 //
 // Returns:
 //
-//	(map[string]bool): A map of words from the files
-func ReadFilesToMap(filenames []string) map[string]bool {
-	wordMap := make(map[string]bool)
+//	(map[string]int): A map of words from the files
+func ReadFilesToMap(filenames []string) map[string]int {
+	wordMap := make(map[string]int)
+
+	// Read the contents of the files and add the words to the map
 	for _, filename := range filenames {
 		data, err := os.ReadFile(filename)
 		if err != nil {
@@ -23,8 +26,36 @@ func ReadFilesToMap(filenames []string) map[string]bool {
 		}
 		fileWords := strings.Split(string(data), "\n")
 		for _, word := range fileWords {
-			wordMap[word] = true
+			wordMap[word]++
 		}
 	}
+
+	// Remove empty strings from the map
+	delete(wordMap, "")
+
 	return wordMap
+}
+
+// FrequencySortMap sorts a map of items by frequency
+// in descending order
+//
+// Args:
+//
+//	freq (map[string]int): A map of item frequencies
+//
+// Returns:
+//
+//	[]string: A slice of items sorted by frequency
+func FrequencySortMap(freq map[string]int) []string {
+	items := make([]string, 0, len(freq))
+
+	for item := range freq {
+		items = append(items, item)
+	}
+
+	sort.Slice(items, func(i, j int) bool {
+		return freq[items[i]] > freq[items[j]]
+	})
+
+	return items
 }
