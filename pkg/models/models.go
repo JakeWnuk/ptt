@@ -1,3 +1,4 @@
+// Package models contains models used by the application
 package models
 
 import "fmt"
@@ -9,14 +10,15 @@ import "fmt"
 // interface. The intention is to provide a way to define the flags can be used
 // for multiple file arguments.
 
+// FileArgumentFlag is a custom type that is used to store the file arguments
 type FileArgumentFlag []string
 
-// This method is used to implement the flag.Value interface
+// String is used to implement the flag.Value interface
 func (w *FileArgumentFlag) String() string {
 	return fmt.Sprint(*w)
 }
 
-// This method is used to implement the flag.Value interface
+// Set is used to implement the flag.Value interface
 func (w *FileArgumentFlag) Set(value string) error {
 	*w = append(*w, value)
 	return nil
@@ -29,6 +31,7 @@ func (w *FileArgumentFlag) Set(value string) error {
 // final output to the console. The intention is to provide a way to efficiently
 // sort the map[string]int that is used to store the word count in o(n log n) time.
 
+// Pair is used to store the key value pair of the map[string]int
 type Pair struct {
 	Key   string
 	Value int

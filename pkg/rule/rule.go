@@ -1,0 +1,262 @@
+// Package rule contains the transformation logic to convert input into Hashcat
+// rules
+package rule
+
+import (
+	"fmt"
+	"os"
+	"ppt/pkg/utils"
+	"strconv"
+	"strings"
+	"unicode"
+)
+
+// ----------------------------------------
+// Transformation functions
+// ----------------------------------------
+
+// LenToRule converts a string to a rule by its length
+//
+// Args:
+//
+//	str (string): Input string to transform
+//	rule (string): Rule to insert per length
+//
+// Returns:
+//
+//	(string): Transformed string
+func LenToRule(str string, rule string) string {
+	return strings.TrimSpace(strings.Repeat(rule+" ", len(str)))
+}
+
+// CharToRule converts a string to a rule by its characters
+//
+// Args:
+//
+//	str (string): Input string to transform
+//	rule (string): Rule to insert per character
+//
+// Returns:
+//
+//	(string): Transformed string
+func CharToRule(str string, rule string) string {
+	return rule + strings.Join(strings.Split(str, ""), " "+rule)
+}
+
+// CharToIteratingRule converts a string to a rule by its characters but
+// increments along with each character
+//
+// Args:
+//
+//	str (string): Input string to transform
+//	rule (string): Rule to insert per length
+//	index (int): Index to start at
+//
+// Returns:
+//
+//	(string): Transformed string
+func CharToIteratingRule(str string, rule string, index int) string {
+	var result strings.Builder
+	for i, r := range str {
+		if i+index < 10 {
+			result.WriteString(fmt.Sprintf("%s%d%c ", rule, i+index, r))
+		} else {
+			result.WriteString(fmt.Sprintf("%s%c%c ", rule, 'A'+i+index-10, r))
+		}
+	}
+	return strings.TrimSpace(result.String())
+}
+
+// StringToToggle converts a string to toggle rules by looking for upper chars
+//
+// Args:
+//
+//	str (string): Input string to transform
+//	rule (string): Rule to insert per length
+//	index (int): Index to start at
+//
+// Returns:
+//
+//	(string): Transformed string
+func StringToToggle(str string, rule string, index int) string {
+	var result strings.Builder
+	for i, r := range str {
+		if unicode.IsUpper(r) {
+			if i+index < 10 {
+				result.WriteString(fmt.Sprintf("%s%d ", rule, i+index))
+			} else if i+index-10 < 26 {
+				result.WriteString(fmt.Sprintf("%s%c ", rule, 'A'+i+index-10))
+			}
+		}
+	}
+	return strings.TrimSpace(result.String())
+}
+
+// ----------------------------------------
+// Output functions
+// ----------------------------------------
+
+// FormatCharToRuleOutput handles formatting of rule output
+// for CharToRule functions
+//
+// Args:
+//
+//	strs (...string): Input strings to print
+//
+// Returns:
+//
+//	output (string): Formatted output
+func FormatCharToRuleOutput(strs ...string) (output string) {
+	output = ""
+	for _, str := range strs {
+		if utils.CheckASCIIString(str) {
+			output += str + " "
+		} else {
+			output += utils.ConvertMultiByteCharToRule(str)
+		}
+	}
+
+	if output != "" && len(output) <= 93 {
+		return strings.TrimSpace(output)
+	}
+
+	return ""
+}
+
+// FormatCharToIteratingRuleOutput handles formatting of rule output
+// for CharToIteratingRule functions
+//
+// Args:
+//
+//	strs (...string): Input strings to print
+//
+// Returns:
+//
+//	output (string): Formatted output
+func FormatCharToIteratingRuleOutput(strs ...string) (output string) {
+	output = ""
+	for _, str := range strs {
+		if utils.CheckASCIIString(str) {
+			output += str + " "
+		} else {
+			output += utils.ConvertMultiByteCharToRule(str)
+		}
+	}
+
+	if output != "" && len(output) <= 93 {
+		return strings.TrimSpace(output)
+	}
+
+	return ""
+}
+
+// AppendRules transforms input into append rules
+//
+// Args:
+//
+//	items (map[string]int): Items to use in the operation
+//	operation (string): Operation to use in the function
+//
+// Returns:
+//
+// returnMap (map[string]int): Map of items to return
+func AppendRules(items map[string]int, operation string) (returnMap map[string]int) {
+	returnMap = make(map[string]int)
+	switch operation {
+	// remove will remove characters then append
+	case "append-remove":
+		for key, value := range items {
+			rule := CharToRule(key, "$")
+			remove := LenToRule(key, "]")
+			appendRemoveRule := FormatCharToRuleOutput(remove, rule)
+			if appendRemoveRule != "" {
+				returnMap[appendRemoveRule] = value
+			}
+		}
+		return returnMap
+	// shift will shift characters back to front then append
+	case "append-shift":
+		for key, value := range items {
+			rule := CharToRule(key, "$")
+			shift := LenToRule(key, "}")
+			appendShiftRule := FormatCharToRuleOutput(shift, rule)
+			if appendShiftRule != "" {
+				returnMap[appendShiftRule] = value
+			}
+		}
+		return returnMap
+	default:
+		for key, value := range items {
+			rule := CharToRule(key, "$")
+			appendRule := FormatCharToRuleOutput(rule)
+			if appendRule != "" {
+				returnMap[appendRule] = value
+			}
+		}
+		return returnMap
+	}
+}
+
+// PrependRules transforms input into prepend rules
+//
+// Args:
+//
+//	items (map[string]int): Items to use in the operation
+//	operation (string): Operation to use in the function
+//
+// Returns:
+//
+//	returnMap (map[string]int): Map of items to return
+func PrependRules(items map[string]int, operation string) (returnMap map[string]int) {
+	returnMap = make(map[string]int)
+	switch operation {
+	// remove will remove characters then prepend
+	case "prepend-remove":
+		for key, value := range items {
+			rule := CharToRule(utils.ReverseString(key), "^")
+			remove := LenToRule(key, "]")
+			prependRemoveRule := FormatCharToRuleOutput(rule, remove)
+			if prependRemoveRule != "" {
+				returnMap[prependRemoveRule] = value
+			}
+		}
+		return returnMap
+	// shift will shift characters front to back then prepend
+	case "prepend-shift":
+		for key, value := range items {
+			rule := CharToRule(utils.ReverseString(key), "^")
+			shift := LenToRule(key, "{")
+			prependShiftRule := FormatCharToRuleOutput(rule, shift)
+			if prependShiftRule != "" {
+				returnMap[prependShiftRule] = value
+			}
+		}
+		return returnMap
+	default:
+		for key, value := range items {
+			rule := CharToRule(utils.ReverseString(key), "^")
+			prependRule := FormatCharToRuleOutput(rule)
+			if prependRule != "" {
+				returnMap[prependRule] = value
+			}
+		}
+		return returnMap
+	}
+}
+
+func InsertRules(items map[string]int, index string) (returnMap map[string]int) {
+	returnMap = make(map[string]int)
+	i, err := strconv.Atoi(index)
+	if err != nil {
+		fmt.Printf("Error: %s\n", err)
+		os.Exit(1)
+	}
+	for key, value := range items {
+		rule := CharToIteratingRule(key, "i", i)
+		insertRule := FormatCharToIteratingRuleOutput(rule)
+		if insertRule != "" {
+			returnMap[insertRule] = value
+		}
+	}
+	return returnMap
+}

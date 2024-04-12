@@ -1,10 +1,48 @@
+// Package output contains functions for printing and formatting output to the console
 package output
 
 import (
 	"fmt"
 	"ppt/pkg/models"
+	"ppt/pkg/rule"
 	"sort"
 )
+
+// ----------------------------------------------------------------------------
+// Controllers
+// ----------------------------------------------------------------------------
+// TransformationController is the main entry point for the CLI
+// application. Operates a switch statement to determine the
+// mode to use.
+//
+// Modes:
+// -
+//
+// Args:
+//
+//	input (map[string]int): A map of input values.
+//	mode (string): The mode to run the CLI in.
+//
+// Returns:
+//
+//	None
+func TransformationController(input map[string]int, mode string) (output map[string]int) {
+	switch mode {
+	case "append", "append-remove", "append-shift":
+		output = rule.AppendRules(input, mode)
+	case "prepend", "prepend-remove", "prepend-shift":
+		output = rule.PrependRules(input, mode)
+	case "insert":
+		output = rule.InsertRules(input, "0")
+
+		return output
+	}
+	return nil
+}
+
+// ----------------------------------------------------------------------------
+// Functions
+// ----------------------------------------------------------------------------
 
 // PrintArrayToSTDOUT prints an array of items to stdout
 //
