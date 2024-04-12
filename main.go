@@ -24,7 +24,7 @@ func main() {
 	// Parse command line arguments
 	flag.Usage = func() {
 		fmt.Fprintf(os.Stderr, "Usage of Password Transformation Tool (ptt) version (%s):\n\n", version)
-		fmt.Fprintf(os.Stderr, "ptt [options] [URLS/FILES] [...]\nAccepts standard input and/or additonal arguments.\n\n")
+		fmt.Fprintf(os.Stderr, "ptt [options] [...]\nAccepts standard input and/or additonal arguments.\n\n")
 		fmt.Fprintf(os.Stderr, "Options:\n")
 		flag.PrintDefaults()
 	}
@@ -61,6 +61,8 @@ func main() {
 	} else if len(readFilesMap) > 0 {
 		primaryMap = utils.CombineMaps(primaryMap, readFilesMap)
 	}
+
+	// TODO - switch here for different output types
 
 	// Process retain and remove maps if provided
 	if len(retainMap) > 0 || len(removeMap) > 0 {
