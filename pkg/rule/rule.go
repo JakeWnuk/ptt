@@ -139,7 +139,7 @@ func FormatCharToIteratingRuleOutput(strs ...string) (output string) {
 		if utils.CheckASCIIString(str) {
 			output += str + " "
 		} else {
-			output += utils.ConvertMultiByteCharToRule(str)
+			output += utils.ConvertMultiByteCharToIteratingRule(str)
 		}
 	}
 
@@ -244,6 +244,15 @@ func PrependRules(items map[string]int, operation string) (returnMap map[string]
 	}
 }
 
+// InsertRules transforms input into insert rules by index
+//
+// Args:
+//
+//	items (map[string]int): Items to use in the operation
+//	index (string): Index to insert at
+//
+// Returns:
+// returnMap (map[string]int): Map of items to return
 func InsertRules(items map[string]int, index string) (returnMap map[string]int) {
 	returnMap = make(map[string]int)
 	i, err := strconv.Atoi(index)
@@ -256,6 +265,33 @@ func InsertRules(items map[string]int, index string) (returnMap map[string]int) 
 		insertRule := FormatCharToIteratingRuleOutput(rule)
 		if insertRule != "" {
 			returnMap[insertRule] = value
+		}
+	}
+	return returnMap
+}
+
+// OverwriteRules transforms input into overwrite rules by index
+//
+// Args:
+//
+// items (map[string]int): Items to use in the operation
+// index (string): Index to overwrite at
+//
+// Returns:
+//
+//	returnMap (map[string]int): Map of items to return
+func OverwriteRules(items map[string]int, index string) (returnMap map[string]int) {
+	returnMap = make(map[string]int)
+	i, err := strconv.Atoi(index)
+	if err != nil {
+		fmt.Printf("Error: %s\n", err)
+		os.Exit(1)
+	}
+	for key, value := range items {
+		rule := CharToIteratingRule(key, "o", i)
+		overwriteRule := FormatCharToIteratingRuleOutput(rule)
+		if overwriteRule != "" {
+			returnMap[overwriteRule] = value
 		}
 	}
 	return returnMap

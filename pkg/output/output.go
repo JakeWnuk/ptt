@@ -33,11 +33,12 @@ func TransformationController(input map[string]int, mode string) (output map[str
 	case "prepend", "prepend-remove", "prepend-shift":
 		output = rule.PrependRules(input, mode)
 	case "insert":
+		// TODO make length configurable
 		output = rule.InsertRules(input, "0")
-
-		return output
+	case "overwrite":
+		output = rule.OverwriteRules(input, "0")
 	}
-	return nil
+	return output
 }
 
 // ----------------------------------------------------------------------------
