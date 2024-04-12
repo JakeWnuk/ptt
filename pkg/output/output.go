@@ -2,6 +2,8 @@ package output
 
 import (
 	"fmt"
+	"ppt/pkg/models"
+	"sort"
 )
 
 // PrintArrayToSTDOUT prints an array of items to stdout
@@ -15,47 +17,59 @@ import (
 //
 //	None
 func PrintArrayToSTDOUT(freq map[string]int, verbose bool) {
-	for key, value := range freq {
+	p := make(models.PairList, len(freq))
+	i := 0
+	for k, v := range freq {
+		p[i] = models.Pair{k, v}
+		i++
+	}
+	sort.Sort(sort.Reverse(p))
+	for _, pair := range p {
 		if verbose {
-			fmt.Printf("%s: %d\n", key, value)
+			fmt.Printf("%d %s\n", pair.Value, pair.Key)
 		} else {
-			fmt.Printf("%s\n", key)
+			fmt.Printf("%s\n", pair.Key)
 		}
 	}
 }
 
-// CompareToRetainRemoveFlags compares a string against a list of words to retain and remove
+// RetainRemove compares a string against a list of words to retain and remove
 //
 // Args:
 //
-//	text (string): The text to process
+//	text (map[string]int): The text to process
 //	retainMap (map[string]int): A map of words to retain
 //	removeMap (map[string]int): A map of words to remove
 //
 // Returns:
 //
 //	(string, error): The processed and filtered text, or an error if the text is not valid
-//
-//	TODO: See if a larger object can be passed in to avoid multiple calls to this function
-func CompareToRetainRemoveFlags(text string, retainMap map[string]int, removeMap map[string]int) (string, error) {
-	// If the retain and remove maps are empty, return the text as is
+func RetainRemove(textMap, retainMap, removeMap map[string]int) (map[string]int, error) {
+	result := make(map[string]int)
+
+	// If the retain and remove maps are empty, return the textMap as is
 	if len(retainMap) == 0 && len(removeMap) == 0 {
-		return text, nil
+		return textMap, nil
 	}
 
-	// If the retain map is empty, check the remove map
-	if _, ok := retainMap[text]; ok || len(retainMap) == 0 {
-		// If the remove map is empty, return the text as is
-		if _, ok := removeMap[text]; !ok || len(removeMap) == 0 {
-			return text, nil
+	for k, v := range textMap {
+		// If the key is in the retain map and not in the remove map, add it to the result
+		if _, ok := retainMap[k]; ok || len(retainMap) == 0 {
+			if _, ok := removeMap[k]; !ok || len(removeMap) == 0 {
+				result[k] = v
+			}
 		}
 	}
 
-	// If the text is not in the retain list, return an error
-	return "", fmt.Errorf("text is not in the retain list")
+	// If the result map is empty, return an error
+	if len(result) == 0 {
+		return nil, fmt.Errorf("no keys in the text map are in the retain list")
+	}
+
+	return result, nil
 }
 
-// RemoveUnderMinFrequency removes items from a map that are below a minimum frequency
+// RemoveMinimumFrequency removes items from a map that are below a minimum frequency
 // threshold and returns a new map
 //
 // Args:
@@ -66,7 +80,7 @@ func CompareToRetainRemoveFlags(text string, retainMap map[string]int, removeMap
 // Returns:
 //
 //	(map[string]int): A new map of item frequencies above the minimum threshold
-func RemoveUnderMinFrequency(freq map[string]int, min int) map[string]int {
+func RemoveMinimumFrequency(freq map[string]int, min int) map[string]int {
 	newFreq := make(map[string]int)
 	for key, value := range freq {
 		if value >= min {

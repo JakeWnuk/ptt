@@ -1,8 +1,8 @@
 package utils
 
 import (
+	"bufio"
 	"os"
-	"sort"
 	"strings"
 )
 
@@ -36,26 +36,53 @@ func ReadFilesToMap(filenames []string) map[string]int {
 	return wordMap
 }
 
-// FrequencySortMap sorts a map of items by frequency
-// in descending order
+// LoadStdinToMap reads the contents of stdin and returns a map[string]int
+// where the key is the line and the value is the frequency of the line
+// in the input
 //
 // Args:
 //
-//	freq (map[string]int): A map of item frequencies
+//	None
 //
 // Returns:
 //
-//	[]string: A slice of items sorted by frequency
-func FrequencySortMap(freq map[string]int) []string {
-	items := make([]string, 0, len(freq))
+//	map[string]int: A map of lines from stdin
+//	error: An error if one occurred
+func LoadStdinToMap() (map[string]int, error) {
+	m := make(map[string]int)
+	scanner := bufio.NewScanner(os.Stdin)
 
-	for item := range freq {
-		items = append(items, item)
+	for scanner.Scan() {
+		line := scanner.Text()
+		m[line]++
 	}
 
-	sort.Slice(items, func(i, j int) bool {
-		return freq[items[i]] > freq[items[j]]
-	})
+	if err := scanner.Err(); err != nil {
+		return nil, err
+	}
 
-	return items
+	return m, nil
+}
+
+// CombineMaps combines two maps into a single map combining values for common keys
+// and returning a new map
+//
+// Args:
+// map1 (map[string]int): The first map
+// map2 (map[string]int): The second map
+//
+// Returns:
+// map[string]int: A new map combining the values of the two input maps
+func CombineMaps(map1, map2 map[string]int) map[string]int {
+	result := make(map[string]int)
+
+	for k, v := range map1 {
+		result[k] = v
+	}
+
+	for k, v := range map2 {
+		result[k] += v
+	}
+
+	return result
 }

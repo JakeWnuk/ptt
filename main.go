@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"ppt/pkg/models"
+	"ppt/pkg/output"
 	"ppt/pkg/utils"
 	"sync"
 )
@@ -16,8 +17,11 @@ var mutex = &sync.Mutex{}
 var retain models.FileArgumentFlag
 var remove models.FileArgumentFlag
 var readFiles models.FileArgumentFlag
+var primaryMap map[string]int
+var err error
 
 func main() {
+	// Parse command line arguments
 	flag.Usage = func() {
 		fmt.Fprintf(os.Stderr, "Usage of Password Transformation Tool (ptt) version (%s):\n\n", version)
 		fmt.Fprintf(os.Stderr, "ptt [options] [URLS/FILES] [...]\nAccepts standard input and/or additonal arguments.\n\n")
@@ -25,6 +29,7 @@ func main() {
 		flag.PrintDefaults()
 	}
 
+	// Define command line flags
 	verbose := flag.Bool("v", false, "Show verbose output when possible.")
 	minimum := flag.Int("m", 0, "Minimum numerical frequency to include in output.")
 	flag.Var(&retain, "k", "Only keep items in a file.")
@@ -37,5 +42,39 @@ func main() {
 	removeMap := utils.ReadFilesToMap(remove)
 	readFilesMap := utils.ReadFilesToMap(readFiles)
 
-	fmt.Println(verbose, minimum, retainMap, removeMap, readFilesMap)
+	// Read from stdin if provided
+	stat, _ := os.Stdin.Stat()
+	if (stat.Mode() & os.ModeCharDevice) == 0 {
+		primaryMap, err = utils.LoadStdinToMap()
+		if err != nil {
+			fmt.Println("Error reading from stdin:", err)
+			return
+		}
+	}
+
+	// Combine stdin with any additional files
+	if len(primaryMap) == 0 && len(readFilesMap) == 0 {
+		fmt.Println("No input provided. Exiting.")
+		return
+	} else if len(primaryMap) == 0 {
+		primaryMap = readFilesMap
+	} else if len(readFilesMap) > 0 {
+		primaryMap = utils.CombineMaps(primaryMap, readFilesMap)
+	}
+
+	// Process retain and remove maps if provided
+	if len(retainMap) > 0 || len(removeMap) > 0 {
+		primaryMap, err = output.RetainRemove(primaryMap, retainMap, removeMap)
+		if err != nil {
+			fmt.Println("Error processing retain and remove flags:", err)
+			return
+		}
+	}
+
+	// Remove items under minimum frequency if provided
+	if *minimum > 0 {
+		primaryMap = output.RemoveMinimumFrequency(primaryMap, *minimum)
+	}
+
+	output.PrintArrayToSTDOUT(primaryMap, *verbose)
 }
