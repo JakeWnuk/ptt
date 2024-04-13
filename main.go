@@ -19,6 +19,7 @@ var retain models.FileArgumentFlag
 var remove models.FileArgumentFlag
 var readFiles models.FileArgumentFlag
 var transformationFiles models.FileArgumentFlag
+var transformationTemplates models.FileArgumentFlag
 var primaryMap map[string]int
 var err error
 
@@ -29,7 +30,7 @@ func main() {
 		fmt.Fprintf(os.Stderr, "ptt [options] [...]\nAccepts standard input and/or additonal arguments.\n\n")
 		fmt.Fprintf(os.Stderr, "Options:\n")
 		flag.PrintDefaults()
-		fmt.Fprintf(os.Stderr, "\nThe '-f', '-k', '-r', and '-tf' flags can be used multiple times.\n")
+		fmt.Fprintf(os.Stderr, "\nThe '-f', '-k', '-r', '-tf', and '-tp' flags can be used multiple times.\n")
 		fmt.Fprintf(os.Stderr, "\nTransformation Modes:\n")
 		fmt.Fprintf(os.Stderr, "  -t append\n\tTransforms input into append rules.\n")
 		fmt.Fprintf(os.Stderr, "  -t append-remove\n\tTransforms input into append-remove rules.\n")
@@ -61,13 +62,21 @@ func main() {
 	flag.Var(&remove, "r", "Only keep items not in a file.")
 	flag.Var(&readFiles, "f", "Read additonal files for input.")
 	flag.Var(&transformationFiles, "tf", "Read additonal files for transformations if applicable.")
+	flag.Var(&transformationTemplates, "tp", "Read additonal files for transformation templates if applicable.")
 	flag.Parse()
+
+	// Prevent use of templates with transformations
+	if len(transformationTemplates) > 0 && *transformation != "" {
+		fmt.Println("Error: Cannot use templates with transformations.")
+		return
+	}
 
 	// Parse any retain, remove, or transformation file arguments
 	retainMap := utils.ReadFilesToMap(retain)
 	removeMap := utils.ReadFilesToMap(remove)
 	readFilesMap := utils.ReadFilesToMap(readFiles)
 	transformationFilesMap := utils.ReadFilesToMap(transformationFiles)
+	transformationTemplatesMap := utils.ReadFilesToMap(transformationTemplates)
 
 	// Read from stdin if provided
 	stat, _ := os.Stdin.Stat()
@@ -88,6 +97,8 @@ func main() {
 	} else if len(readFilesMap) > 0 {
 		primaryMap = utils.CombineMaps(primaryMap, readFilesMap)
 	}
+
+	// TODO - Implement transformation templates
 
 	// Apply transformation if provided
 	if *transformation != "" {
