@@ -33,6 +33,7 @@ func main() {
 	verbose := flag.Bool("v", false, "Show verbose output when possible.")
 	minimum := flag.Int("m", 0, "Minimum numerical frequency to include in output.")
 	transformation := flag.String("t", "", "Transformation to apply to input.")
+	startingIndex := flag.Int("i", 0, "Starting index for transformations if applicable.")
 	flag.Var(&retain, "k", "Only keep items in a file.")
 	flag.Var(&remove, "r", "Only keep items not in a file.")
 	flag.Var(&readFiles, "f", "Read additonal files for input.")
@@ -65,7 +66,7 @@ func main() {
 
 	// Apply transformation if provided
 	if *transformation != "" {
-		primaryMap = output.TransformationController(primaryMap, *transformation)
+		primaryMap = output.TransformationController(primaryMap, *transformation, *startingIndex)
 	}
 
 	// Process retain and remove maps if provided

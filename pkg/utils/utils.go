@@ -11,7 +11,7 @@ import (
 )
 
 // ----------------------------------------
-// Loading and processing files function
+// Loading and Processing Functions
 // ----------------------------------------
 
 // ReadFilesToMap reads the contents of the multiple files and returns a map of words

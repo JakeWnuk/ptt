@@ -3,46 +3,56 @@ package output
 
 import (
 	"fmt"
+	"html"
+	"net/url"
+	"ppt/pkg/mask"
 	"ppt/pkg/models"
 	"ppt/pkg/rule"
 	"sort"
 )
 
 // ----------------------------------------------------------------------------
-// Controllers
+// Output Controllers
 // ----------------------------------------------------------------------------
+
 // TransformationController is the main entry point for the CLI
 // application. Operates a switch statement to determine the
 // mode to use.
-//
-// Modes:
-// -
 //
 // Args:
 //
 //	input (map[string]int): A map of input values.
 //	mode (string): The mode to run the CLI in.
+//	startingIndex (int): The starting index for the transformation if applicable
 //
 // Returns:
 //
 //	None
-func TransformationController(input map[string]int, mode string) (output map[string]int) {
+func TransformationController(input map[string]int, mode string, startingIndex int) (output map[string]int) {
+	strIndex := fmt.Sprintf("%d", startingIndex)
 	switch mode {
 	case "append", "append-remove", "append-shift":
 		output = rule.AppendRules(input, mode)
 	case "prepend", "prepend-remove", "prepend-shift":
 		output = rule.PrependRules(input, mode)
 	case "insert":
-		// TODO make length configurable
-		output = rule.InsertRules(input, "0")
+		output = rule.InsertRules(input, strIndex)
 	case "overwrite":
-		output = rule.OverwriteRules(input, "0")
+		output = rule.OverwriteRules(input, strIndex)
+	case "toggle":
+		output = rule.ToggleRules(input, strIndex)
+	case "encode":
+		output = EncodeInputMap(input)
+	case "mask":
+		replacements := mask.ConstructReplacements("ulds")
+		output = mask.MakeMaskedMap(input, replacements)
 	}
+
 	return output
 }
 
 // ----------------------------------------------------------------------------
-// Functions
+// Output Functions
 // ----------------------------------------------------------------------------
 
 // PrintArrayToSTDOUT prints an array of items to stdout
@@ -127,4 +137,95 @@ func RemoveMinimumFrequency(freq map[string]int, min int) map[string]int {
 		}
 	}
 	return newFreq
+}
+
+// ----------------------------------------------------------------------------
+// Encoding Functions
+// ----------------------------------------------------------------------------
+
+// EncodeInputMap will encode a map of strings to URL, HTML, and unicode escaped strings
+// where possible and return a new map of encoded strings
+//
+// Args:
+//
+//	input (map[string]int): A map of input strings
+//
+// Returns:
+//
+//	(map[string]int): A new map of encoded strings
+func EncodeInputMap(input map[string]int) map[string]int {
+	output := make(map[string]int)
+	for k, v := range input {
+		urlEncoded, htmlEncoded, escapeEncoded := EncodeString(k)
+
+		if urlEncoded != "" {
+			output[urlEncoded] = v
+		}
+
+		if htmlEncoded != "" {
+			output[htmlEncoded] = v
+		}
+
+		if escapeEncoded != "" {
+			output[escapeEncoded] = v
+		}
+	}
+	return output
+}
+
+// EncodeString is used to URL and HTML encode a string where possible this
+// will only return the encoded string if it is different from the input string
+//
+// Args:
+//
+//	s (string): Input string
+//
+// Returns:
+//
+//	urlEncoded (string): Input string URL encoded
+//	htmlEncoded (string): Input string HTML encoded
+//	escapedEncoded (string): Input string unicode escaped encoded
+func EncodeString(s string) (string, string, string) {
+	urlEncoded := url.QueryEscape(s)
+	htmlEncoded := html.EscapeString(s)
+	escapedEncoded := ASCIIEscapeUnicode(s)
+
+	if urlEncoded == s {
+		urlEncoded = ""
+	}
+
+	if htmlEncoded == s {
+		htmlEncoded = ""
+	}
+
+	if escapedEncoded == s {
+		escapedEncoded = ""
+	}
+
+	return urlEncoded, htmlEncoded, escapedEncoded
+}
+
+// ASCIIEscapeUnicode will convert a string into an unicode escaped format
+//
+// Args:
+//
+//	str (string): String to escape
+//
+// Returns:
+//
+//	escapedRunes (string): Converted runes in string format
+func ASCIIEscapeUnicode(str string) string {
+	runes := []rune(str)
+	escapedRunes := make([]rune, 0, len(runes))
+
+	for _, r := range runes {
+		if r > 127 {
+			// The rune is non-ASCII
+			escapedRune := []rune(fmt.Sprintf("\\u%04x", r))
+			escapedRunes = append(escapedRunes, escapedRune...)
+		} else {
+			escapedRunes = append(escapedRunes, r)
+		}
+	}
+	return string(escapedRunes)
 }

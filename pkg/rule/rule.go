@@ -296,3 +296,29 @@ func OverwriteRules(items map[string]int, index string) (returnMap map[string]in
 	}
 	return returnMap
 }
+
+// ToggleRules transforms input into  toggle rules starting at an index
+//
+// Args:
+//
+//	items (map[string]int): Items to use in the operation
+//	index (string): Index to start at
+//
+// Returns:
+//
+//	returnMap (map[string]int): Map of items to return
+func ToggleRules(items map[string]int, index string) (returnMap map[string]int) {
+	returnMap = make(map[string]int)
+	i, err := strconv.Atoi(index)
+	if err != nil {
+		fmt.Printf("Error: %s\n", err)
+		os.Exit(1)
+	}
+	for key, value := range items {
+		rule := StringToToggle(key, "T", i)
+		if rule != "" {
+			returnMap[rule] = value
+		}
+	}
+	return returnMap
+}
