@@ -1,3 +1,4 @@
+// Package transform contains logic for transforming input maps
 package transform
 
 import (
@@ -19,23 +20,18 @@ import (
 //
 // Args:
 //
-//      input (map[string]int): A map of input values
-//      mode (string): The mode to run the CLI in
-//      startingIndex (int): The starting index for the transformation if applicable
-//      verbose (bool): If true, the verbose information is printed when available
-//      replacementMask (string): The mask characters to use for masking operations
-//      transformationFilesMap (map[string]int): A map of transformation files to
-//      use for modes like retain-mask
-//      swapTolerance (int): The swap tolerance for substitution operations. This
-//      will allow for flexibility in the number of characters that can be swapped.
-//      For example, a swap tolerance of 1 will allow for one character off to
-//      be considered a match.
+//	input (map[string]int): A map of input values
+//	mode (string): The mode to run the CLI in
+//	startingIndex (int): The starting index for the transformation if applicable
+//	verbose (bool): If true, the verbose information is printed when available
+//	replacementMask (string): The mask characters to use for masking operations
+//	transformationFilesMap (map[string]int): A map of transformation files to
+//	use for modes like retain-mask
 //
 // Returns:
 //
-//      (map[string]int): A map of transformed values
-
-func TransformationController(input map[string]int, mode string, startingIndex int, verbose bool, replacementMask string, transformationFilesMap map[string]int, swapTolerance int) (output map[string]int) {
+//	(map[string]int): A map of transformed values
+func TransformationController(input map[string]int, mode string, startingIndex int, verbose bool, replacementMask string, transformationFilesMap map[string]int) (output map[string]int) {
 	strIndex := fmt.Sprintf("%d", startingIndex)
 	switch mode {
 	case "append", "append-remove", "append-shift":
@@ -77,6 +73,13 @@ func TransformationController(input map[string]int, mode string, startingIndex i
 			os.Exit(1)
 		}
 		output = FuzzyReplaceKeysInMap(input, transformationFilesMap)
+	case "swap", "replace":
+		if len(transformationFilesMap) == 0 {
+			fmt.Println("Swap operations require use of one or more -tf flags to specify one or more files")
+			fmt.Println("This transformation mode requres a ':' separated list of keys to swap")
+			os.Exit(1)
+		}
+		output = ReplaceKeysInMap(input, transformationFilesMap)
 	}
 
 	return output
@@ -102,6 +105,29 @@ func FuzzyReplaceKeysInMap(originalMap map[string]int, replacements map[string]i
 	newMap := make(map[string]int)
 	for key, value := range originalMap {
 		newKeyArray := utils.FuzzyReplaceSubstring(key, replacements)
+		for _, newKey := range newKeyArray {
+			newMap[newKey] = value
+		}
+	}
+	return newMap
+}
+
+// ReplaceKeysInMap takes a map of keys and values and replaces the keys
+// with replacements based on the replacement map. This is useful for
+// exact key swaps.
+//
+// Args:
+//
+//	originalMap (map[string]int): The original map to replace keys in
+//	replacements (map[string]int): The map of replacements to use
+//
+// Returns:
+//
+//	(map[string]int): A new map with the keys replaced
+func ReplaceKeysInMap(originalMap map[string]int, replacements map[string]int) map[string]int {
+	newMap := make(map[string]int)
+	for key, value := range originalMap {
+		newKeyArray := utils.ReplaceSubstring(key, replacements)
 		for _, newKey := range newKeyArray {
 			newMap[newKey] = value
 		}

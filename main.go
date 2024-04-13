@@ -29,15 +29,34 @@ func main() {
 		fmt.Fprintf(os.Stderr, "ptt [options] [...]\nAccepts standard input and/or additonal arguments.\n\n")
 		fmt.Fprintf(os.Stderr, "Options:\n")
 		flag.PrintDefaults()
+		fmt.Fprintf(os.Stderr, "\nThe '-f', '-k', '-r', and '-tf' flags can be used multiple times.\n")
+		fmt.Fprintf(os.Stderr, "\nTransformation Modes:\n")
+		fmt.Fprintf(os.Stderr, "  -t append\n\tTransforms input into append rules.\n")
+		fmt.Fprintf(os.Stderr, "  -t append-remove\n\tTransforms input into append-remove rules.\n")
+		fmt.Fprintf(os.Stderr, "  -t append-shift\n\tTransforms input into append-shift rules.\n")
+		fmt.Fprintf(os.Stderr, "  -t prepend\n\tTransforms input into prepend rules.\n")
+		fmt.Fprintf(os.Stderr, "  -t prepend-remove\n\tTransforms input into prepend-remove rules.\n")
+		fmt.Fprintf(os.Stderr, "  -t prepend-shift\n\tTransforms input into prepend-shift rules.\n")
+		fmt.Fprintf(os.Stderr, "  -t insert -i [index]\n\tTransforms input into insert rules starting at index.\n")
+		fmt.Fprintf(os.Stderr, "  -t remove -i [index]\n\tTransforms input into remove rules starting at index.\n")
+		fmt.Fprintf(os.Stderr, "  -t toggle -i [index]\n\tTransforms input into toggle rules starting at index.\n")
+		fmt.Fprintf(os.Stderr, "  -t encode\n\tTransforms input by  URL, HTML, and Unicode escape encoding.\n")
+		fmt.Fprintf(os.Stderr, "  -t mask -rm [uldsb] -v\n\tTransforms input by masking characters with provided mask.\n")
+		fmt.Fprintf(os.Stderr, "  -t dehex\n\tTransforms input by decoding $HEX[...] formatted strings.\n")
+		fmt.Fprintf(os.Stderr, "  -t hex\n\tTransforms input by encoding strings into $HEX[...] format.\n")
+		fmt.Fprintf(os.Stderr, "  -t remove -rm [uldsb] -v\n\tTransforms input by removing characters with provided mask characters.\n")
+		fmt.Fprintf(os.Stderr, "  -t retain -rm [uldsb] -tf [file]\n\tTransforms input by creating masks that still retain strings from file.\n")
+		fmt.Fprintf(os.Stderr, "  -t match -tf [file]\n\tTransforms input by keeping only strings with matching masks from a mask file.\n")
+		fmt.Fprintf(os.Stderr, "  -t fuzzy-swap -tf [file]\n\tTransforms input by swapping tokens with fuzzy matches from another file.\n")
+		fmt.Fprintf(os.Stderr, "  -t swap -tf [file]\n\tTransforms input by swapping tokens with exact matches from a ':' separate file.\n")
 	}
 
 	// Define command line flags
 	verbose := flag.Bool("v", false, "Show verbose output when possible.")
 	minimum := flag.Int("m", 0, "Minimum numerical frequency to include in output.")
 	transformation := flag.String("t", "", "Transformation to apply to input.")
-	startingIndex := flag.Int("i", 0, "Starting index for transformations if applicable.")
+	startingIndex := flag.Int("i", 0, "Starting index for transformations if applicable. (default 0)")
 	replacementMask := flag.String("rm", "uldsb", "Replacement mask for transformations if applicable.")
-	swapTolerance := flag.Int("st", 0, "Swap tolerance for transformations if applicable.")
 	flag.Var(&retain, "k", "Only keep items in a file.")
 	flag.Var(&remove, "r", "Only keep items not in a file.")
 	flag.Var(&readFiles, "f", "Read additonal files for input.")
@@ -72,7 +91,7 @@ func main() {
 
 	// Apply transformation if provided
 	if *transformation != "" {
-		primaryMap = transform.TransformationController(primaryMap, *transformation, *startingIndex, *verbose, *replacementMask, transformationFilesMap, *swapTolerance)
+		primaryMap = transform.TransformationController(primaryMap, *transformation, *startingIndex, *verbose, *replacementMask, transformationFilesMap)
 	}
 
 	// Process retain and remove maps if provided
@@ -89,5 +108,6 @@ func main() {
 		primaryMap = format.RemoveMinimumFrequency(primaryMap, *minimum)
 	}
 
+	// Print output to stdout
 	format.PrintArrayToSTDOUT(primaryMap, *verbose)
 }

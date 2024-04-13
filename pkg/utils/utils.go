@@ -1,4 +1,4 @@
-// Package utils provides utility functions for the CLI application.
+// Package utils provides utility functions for the application.
 package utils
 
 import (
@@ -263,8 +263,7 @@ func SplitBySeperatorString(s string, sep string) []string {
 // Args:
 //
 //	original (string): The original string
-//	oldSubstr (string): The substring to replace
-//	newSubstr (string): The new substring
+//	replacements (map[string]int): A map of substrings to replace
 //
 // Returns:
 //
@@ -274,6 +273,31 @@ func FuzzyReplaceSubstring(original string, replacements map[string]int) []strin
 	for newSubstr := range replacements {
 		if match, matchedText := CheckIsFuzzyMatch(original, newSubstr); match {
 			newStrings = append(newStrings, strings.Replace(original, matchedText, newSubstr, 1))
+		}
+	}
+	return newStrings
+}
+
+// ReplaceSubstring replaces all instances of a substring in a string with a new
+// substring if the substring is found in the original string. The new substring
+// is determined by the key in the replacements map separated by a colon
+// character.
+//
+// Args:
+//
+//	original (string): The original string
+//	replacements (map[string]int): A map of substrings to replace
+//
+// Returns:
+//
+//	[]string: The original string with all instances of the substring replaced
+func ReplaceSubstring(original string, replacements map[string]int) []string {
+	var newStrings []string
+	for newSubstr := range replacements {
+		// Split the new substring into the old and new strings by the colon character
+		oldStr, newStr := strings.Split(newSubstr, ":")[0], strings.Split(newSubstr, ":")[1]
+		if strings.Contains(original, oldStr) {
+			newStrings = append(newStrings, strings.Replace(original, oldStr, newStr, -1))
 		}
 	}
 	return newStrings
