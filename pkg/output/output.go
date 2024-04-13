@@ -2,6 +2,7 @@
 package output
 
 import (
+	"encoding/hex"
 	"fmt"
 	"html"
 	"net/url"
@@ -9,6 +10,7 @@ import (
 	"ppt/pkg/models"
 	"ppt/pkg/rule"
 	"sort"
+	"strings"
 )
 
 // ----------------------------------------------------------------------------
@@ -21,14 +23,15 @@ import (
 //
 // Args:
 //
-//	input (map[string]int): A map of input values.
-//	mode (string): The mode to run the CLI in.
+//	input (map[string]int): A map of input values
+//	mode (string): The mode to run the CLI in
 //	startingIndex (int): The starting index for the transformation if applicable
+//	verbose (bool): If true, the verbose information is printed when available
 //
 // Returns:
 //
 //	None
-func TransformationController(input map[string]int, mode string, startingIndex int) (output map[string]int) {
+func TransformationController(input map[string]int, mode string, startingIndex int, verbose bool, replacementMask string) (output map[string]int) {
 	strIndex := fmt.Sprintf("%d", startingIndex)
 	switch mode {
 	case "append", "append-remove", "append-shift":
@@ -43,9 +46,13 @@ func TransformationController(input map[string]int, mode string, startingIndex i
 		output = rule.ToggleRules(input, strIndex)
 	case "encode":
 		output = EncodeInputMap(input)
-	case "mask":
-		replacements := mask.ConstructReplacements("ulds")
-		output = mask.MakeMaskedMap(input, replacements)
+	case "mask", "partial-mask":
+		replacements := mask.ConstructReplacements(replacementMask)
+		output = mask.MakeMaskedMap(input, replacements, verbose)
+	case "dehex", "unhex":
+		output = DehexMap(input)
+	case "hex", "rehex":
+		output = HexEncodeMap(input)
 	}
 
 	return output
@@ -228,4 +235,51 @@ func ASCIIEscapeUnicode(str string) string {
 		}
 	}
 	return string(escapedRunes)
+}
+
+// DehexMap will decode a map of hex encoded strings and return a new map of decoded strings
+// where possible
+//
+// Args:
+//
+//	input (map[string]int): A map of hex encoded strings
+//
+// Returns:
+//
+//	(map[string]int): A new map of decoded strings
+func DehexMap(input map[string]int) map[string]int {
+	decodedMap := make(map[string]int)
+
+	for k, v := range input {
+		k = strings.TrimPrefix(k, "$HEX[")
+		k = strings.TrimSuffix(k, "]")
+		decoded, err := hex.DecodeString(k)
+		if err != nil {
+			continue
+		} else {
+			decodedStr := string(decoded)
+			decodedMap[decodedStr] = v
+		}
+	}
+
+	return decodedMap
+}
+
+// HexEncodeMap will encode a map of strings to hex encoded strings
+// where possible and return a new map of encoded strings
+//
+// Args:
+//
+//	input (map[string]int): A map of input strings
+//
+// Returns:
+//
+//	(map[string]int): A new map of encoded strings
+func HexEncodeMap(input map[string]int) map[string]int {
+	output := make(map[string]int)
+	for k, v := range input {
+		encoded := hex.EncodeToString([]byte(k))
+		output["$HEX["+encoded+"]"] = v
+	}
+	return output
 }

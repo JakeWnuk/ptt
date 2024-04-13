@@ -252,3 +252,20 @@ func CheckASCIIString(str string) bool {
 	}
 	return true
 }
+
+// CheckHexString is used to identify plaintext in the $HEX[...] format
+//
+// Args:
+//
+//	s (str): The string to be evaluated
+//
+// Returns:
+//
+//	(bool): Returns true if it matches and false if it did not
+func CheckHexString(s string) bool {
+	var validateInput = regexp.MustCompile(`^\$HEX\[[a-zA-Z0-9]*\]$`).MatchString
+	if validateInput(s) == false {
+		return false
+	}
+	return true
+}

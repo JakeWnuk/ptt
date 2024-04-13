@@ -1,7 +1,11 @@
 // Package mask handles the transformation of a string into a masks
 package mask
 
-import "strings"
+import (
+	"fmt"
+	"ppt/pkg/utils"
+	"strings"
+)
 
 // ConstructReplacements create an array mapping which characters to replace
 //
@@ -62,16 +66,26 @@ func ConstructReplacements(str string) []string {
 //
 //	input (map[string]int): Map to mask
 //	replacements ([]string): Array of characters to replace
+//	verbose (bool): Verbose information if true
 //
 // Returns:
 //
 // maskedMap (map[string]int): Masked map
-func MakeMaskedMap(input map[string]int, replacements []string) map[string]int {
+func MakeMaskedMap(input map[string]int, replacements []string, verbose bool) map[string]int {
 	maskedMap := make(map[string]int)
 	replacer := strings.NewReplacer(replacements...)
 
 	for key, value := range input {
 		newKey := replacer.Replace(key)
+
+		if !utils.CheckASCIIString(newKey) {
+			newKey = ConvertMultiByteMask(newKey)
+		}
+
+		if verbose {
+			newKey = fmt.Sprintf("%s:%d:%d\n", newKey, len(key), TestMaskComplexity(newKey))
+		}
+
 		if oldValue, exists := maskedMap[newKey]; exists {
 			maskedMap[newKey] = oldValue + value
 		} else {
@@ -79,4 +93,52 @@ func MakeMaskedMap(input map[string]int, replacements []string) map[string]int {
 		}
 	}
 	return maskedMap
+}
+
+// ConvertMultiByteMask converts non-ascii characters to a valid format
+//
+// Args:
+//
+//	str (string): Input string
+//
+// Returns:
+//
+//	returnStr (string): Converted string
+func ConvertMultiByteMask(str string) string {
+	returnStr := ""
+	for _, r := range str {
+		if r > 127 {
+			byteArr := []byte(string(r))
+			for j := range byteArr {
+				if j == len(byteArr)-1 {
+					returnStr += fmt.Sprintf("?b")
+				} else {
+					returnStr += fmt.Sprintf("?b")
+				}
+			}
+		} else {
+			returnStr += fmt.Sprintf("%c", r)
+		}
+	}
+	return returnStr
+}
+
+// TestMaskComplexity tests the complexity of an input mask
+//
+// Args:
+//
+//	str (string): Input string to test
+//
+// Returns:
+//
+//	(int): Complexity score as an integer
+func TestMaskComplexity(str string) int {
+	complexity := 0
+	charTypes := []string{"?u", "?l", "?d", "?s", "?b"}
+	for _, charType := range charTypes {
+		if strings.Contains(str, charType) {
+			complexity++
+		}
+	}
+	return complexity
 }

@@ -34,6 +34,7 @@ func main() {
 	minimum := flag.Int("m", 0, "Minimum numerical frequency to include in output.")
 	transformation := flag.String("t", "", "Transformation to apply to input.")
 	startingIndex := flag.Int("i", 0, "Starting index for transformations if applicable.")
+	replacementMask := flag.String("rm", "ulds", "Replacement mask for transformations if applicable. [Default: ulds]")
 	flag.Var(&retain, "k", "Only keep items in a file.")
 	flag.Var(&remove, "r", "Only keep items not in a file.")
 	flag.Var(&readFiles, "f", "Read additonal files for input.")
@@ -66,7 +67,7 @@ func main() {
 
 	// Apply transformation if provided
 	if *transformation != "" {
-		primaryMap = output.TransformationController(primaryMap, *transformation, *startingIndex)
+		primaryMap = output.TransformationController(primaryMap, *transformation, *startingIndex, *verbose, *replacementMask)
 	}
 
 	// Process retain and remove maps if provided
