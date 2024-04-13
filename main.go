@@ -34,7 +34,7 @@ func main() {
 	minimum := flag.Int("m", 0, "Minimum numerical frequency to include in output.")
 	transformation := flag.String("t", "", "Transformation to apply to input.")
 	startingIndex := flag.Int("i", 0, "Starting index for transformations if applicable.")
-	replacementMask := flag.String("rm", "ulds", "Replacement mask for transformations if applicable. [Default: ulds]")
+	replacementMask := flag.String("rm", "uldsb", "Replacement mask for transformations if applicable.")
 	flag.Var(&retain, "k", "Only keep items in a file.")
 	flag.Var(&remove, "r", "Only keep items not in a file.")
 	flag.Var(&readFiles, "f", "Read additonal files for input.")

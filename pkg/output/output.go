@@ -47,12 +47,14 @@ func TransformationController(input map[string]int, mode string, startingIndex i
 	case "encode":
 		output = EncodeInputMap(input)
 	case "mask", "partial-mask":
-		replacements := mask.ConstructReplacements(replacementMask)
-		output = mask.MakeMaskedMap(input, replacements, verbose)
+		output = mask.MakeMaskedMap(input, replacementMask, verbose)
 	case "dehex", "unhex":
 		output = DehexMap(input)
 	case "hex", "rehex":
 		output = HexEncodeMap(input)
+	case "remove", "remove-all", "delete", "delete-all":
+		input = mask.MakeMaskedMap(input, replacementMask, verbose)
+		output = mask.RemoveMaskedCharacters(input)
 	}
 
 	return output
@@ -256,10 +258,9 @@ func DehexMap(input map[string]int) map[string]int {
 		decoded, err := hex.DecodeString(k)
 		if err != nil {
 			continue
-		} else {
-			decodedStr := string(decoded)
-			decodedMap[decodedStr] = v
 		}
+		decodedStr := string(decoded)
+		decodedMap[decodedStr] = v
 	}
 
 	return decodedMap

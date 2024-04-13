@@ -71,14 +71,15 @@ func ConstructReplacements(str string) []string {
 // Returns:
 //
 // maskedMap (map[string]int): Masked map
-func MakeMaskedMap(input map[string]int, replacements []string, verbose bool) map[string]int {
+func MakeMaskedMap(input map[string]int, replacementMask string, verbose bool) map[string]int {
 	maskedMap := make(map[string]int)
+	replacements := ConstructReplacements(replacementMask)
 	replacer := strings.NewReplacer(replacements...)
 
 	for key, value := range input {
 		newKey := replacer.Replace(key)
 
-		if !utils.CheckASCIIString(newKey) {
+		if !utils.CheckASCIIString(newKey) && strings.Contains(replacementMask, "b") {
 			newKey = ConvertMultiByteMask(newKey)
 		}
 
@@ -141,4 +142,34 @@ func TestMaskComplexity(str string) int {
 		}
 	}
 	return complexity
+}
+
+// RemoveMaskedCharacters removes masked characters from the input map
+// and returns a new map
+//
+// Args:
+//
+//	input (map[string]int): Input map
+//
+// Returns:
+//
+//	(map[string]int): Masked map
+func RemoveMaskedCharacters(input map[string]int) map[string]int {
+	maskedMap := make(map[string]int)
+	replacer := strings.NewReplacer("?u", "", "?l", "", "?d", "", "?b", "", "?s", "")
+
+	for key, value := range input {
+		newKey := replacer.Replace(key)
+
+		if !utils.CheckASCIIString(newKey) {
+			newKey = ConvertMultiByteMask(newKey)
+		}
+
+		if oldValue, exists := maskedMap[newKey]; exists {
+			maskedMap[newKey] = oldValue + value
+		} else {
+			maskedMap[newKey] = value
+		}
+	}
+	return maskedMap
 }
