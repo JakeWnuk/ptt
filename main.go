@@ -106,6 +106,9 @@ func main() {
 	// if tp is set, call transformation controller for each template
 	// I need to figure out how to pass the template to the transformation
 	// controller with proper arguments
+	//
+	// Think a new model that can parse the template and pass it to the
+	// controller function
 
 	// Apply transformation if provided
 	if *transformation != "" {
