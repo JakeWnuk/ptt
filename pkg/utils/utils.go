@@ -233,6 +233,28 @@ func ConvertMultiByteCharToIteratingRule(str string) string {
 	return strings.TrimSpace(output)
 }
 
+// SplitBySeperatorString splits a string by a separator string and returns a slice
+// with the separator string included
+//
+// Args:
+//
+//	s (string): The string to split
+//	sep (string): The separator string
+//
+// Returns:
+//
+//	[]string: A slice of strings with the separator string included
+func SplitBySeperatorString(s string, sep string) []string {
+	if !strings.Contains(s, sep) {
+		return []string{s}
+	}
+
+	// Limit to 2 to ensure we only split on the first instance of the separator
+	parts := strings.SplitN(s, sep, 2)
+	parts = append(parts[:1], append([]string{sep}, parts[1:]...)...)
+	return parts
+}
+
 // ----------------------------------------
 // Validation Functions
 // ----------------------------------------

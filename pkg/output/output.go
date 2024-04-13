@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"html"
 	"net/url"
+	"os"
 	"ppt/pkg/mask"
 	"ppt/pkg/models"
 	"ppt/pkg/rule"
@@ -27,11 +28,14 @@ import (
 //	mode (string): The mode to run the CLI in
 //	startingIndex (int): The starting index for the transformation if applicable
 //	verbose (bool): If true, the verbose information is printed when available
+//	replacementMask (string): The mask characters to use for masking operations
+//	transformationFilesMap (map[string]int): A map of transformation files to
+//	use for modes like retain-mask
 //
 // Returns:
 //
-//	None
-func TransformationController(input map[string]int, mode string, startingIndex int, verbose bool, replacementMask string) (output map[string]int) {
+//	(map[string]int): A map of transformed values
+func TransformationController(input map[string]int, mode string, startingIndex int, verbose bool, replacementMask string, transformationFilesMap map[string]int) (output map[string]int) {
 	strIndex := fmt.Sprintf("%d", startingIndex)
 	switch mode {
 	case "append", "append-remove", "append-shift":
@@ -46,7 +50,7 @@ func TransformationController(input map[string]int, mode string, startingIndex i
 		output = rule.ToggleRules(input, strIndex)
 	case "encode":
 		output = EncodeInputMap(input)
-	case "mask", "partial-mask":
+	case "mask", "partial-mask", "partial":
 		output = mask.MakeMaskedMap(input, replacementMask, verbose)
 	case "dehex", "unhex":
 		output = DehexMap(input)
@@ -55,6 +59,12 @@ func TransformationController(input map[string]int, mode string, startingIndex i
 	case "remove", "remove-all", "delete", "delete-all":
 		input = mask.MakeMaskedMap(input, replacementMask, verbose)
 		output = mask.RemoveMaskedCharacters(input)
+	case "retain-mask", "retain":
+		if len(transformationFilesMap) == 0 {
+			fmt.Println("Retain masks require use of one or more -tf flags to specify one or more files")
+			os.Exit(1)
+		}
+		output = mask.MakeRetainMaskedMap(input, replacementMask, transformationFilesMap)
 	}
 
 	return output

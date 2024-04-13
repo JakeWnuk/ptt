@@ -7,6 +7,10 @@ import (
 	"strings"
 )
 
+// ----------------------------------------------------------------------------
+// Mask Generation Functions
+// ----------------------------------------------------------------------------
+
 // ConstructReplacements create an array mapping which characters to replace
 //
 // This function accepts the characters "ulds" in order to generate a map
@@ -95,6 +99,73 @@ func MakeMaskedMap(input map[string]int, replacementMask string, verbose bool) m
 	}
 	return maskedMap
 }
+
+// MakeRetainMaskedMap replaces all characters in the input maps key with mask
+// values in the input map but retains keywords provided in the retain list
+//
+// Args:
+//
+//	input (map[string]int): Map to mask
+//	replacements ([]string): Array of characters to replace
+//	retain (map[string]int): Map of keywords to retain
+//
+// Returns:
+//
+//	maskedMap (map[string]int): Masked retain map
+func MakeRetainMaskedMap(input map[string]int, replacementMask string, retain map[string]int) map[string]int {
+	maskedMap := make(map[string]int)
+	replacements := ConstructReplacements(replacementMask)
+	replacer := strings.NewReplacer(replacements...)
+
+	for key, value := range input {
+		for retainKey := range retain {
+			newKey := ""
+			if strings.Contains(key, retainKey) {
+				parts := utils.SplitBySeperatorString(key, retainKey)
+
+				// if the part is not the key replace it using replacer
+				for _, part := range parts {
+					if part != retainKey {
+						newPart := replacer.Replace(part)
+						if !utils.CheckASCIIString(newPart) && strings.Contains(replacementMask, "b") {
+							newPart = ConvertMultiByteMask(newPart)
+						}
+						newKey += newPart
+					} else {
+						newKey += part
+					}
+				}
+
+			} else {
+				// if the key is not in the string continue
+				continue
+			}
+
+			if oldValue, exists := maskedMap[newKey]; exists {
+				maskedMap[newKey] = oldValue + value
+			} else {
+				maskedMap[newKey] = value
+			}
+		}
+	}
+	return maskedMap
+}
+
+func MakeMaskedString(input string, replacementMask string) string {
+	replacements := ConstructReplacements(replacementMask)
+	replacer := strings.NewReplacer(replacements...)
+	newKey := replacer.Replace(input)
+
+	if !utils.CheckASCIIString(newKey) && strings.Contains(replacementMask, "b") {
+		newKey = ConvertMultiByteMask(newKey)
+	}
+
+	return newKey
+}
+
+// ----------------------------------------------------------------------------
+// Mask Conversion Functions
+// ----------------------------------------------------------------------------
 
 // ConvertMultiByteMask converts non-ascii characters to a valid format
 //

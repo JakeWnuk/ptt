@@ -17,6 +17,7 @@ var mutex = &sync.Mutex{}
 var retain models.FileArgumentFlag
 var remove models.FileArgumentFlag
 var readFiles models.FileArgumentFlag
+var transformationFiles models.FileArgumentFlag
 var primaryMap map[string]int
 var err error
 
@@ -38,12 +39,14 @@ func main() {
 	flag.Var(&retain, "k", "Only keep items in a file.")
 	flag.Var(&remove, "r", "Only keep items not in a file.")
 	flag.Var(&readFiles, "f", "Read additonal files for input.")
+	flag.Var(&transformationFiles, "tf", "Read additonal files for transformations if applicable.")
 	flag.Parse()
 
-	// Parse any retain or remove file arguments
+	// Parse any retain, remove, or transformation file arguments
 	retainMap := utils.ReadFilesToMap(retain)
 	removeMap := utils.ReadFilesToMap(remove)
 	readFilesMap := utils.ReadFilesToMap(readFiles)
+	transformationFilesMap := utils.ReadFilesToMap(transformationFiles)
 
 	// Read from stdin if provided
 	stat, _ := os.Stdin.Stat()
@@ -67,7 +70,7 @@ func main() {
 
 	// Apply transformation if provided
 	if *transformation != "" {
-		primaryMap = output.TransformationController(primaryMap, *transformation, *startingIndex, *verbose, *replacementMask)
+		primaryMap = output.TransformationController(primaryMap, *transformation, *startingIndex, *verbose, *replacementMask, transformationFilesMap)
 	}
 
 	// Process retain and remove maps if provided
