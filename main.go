@@ -5,8 +5,9 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"ppt/pkg/format"
 	"ppt/pkg/models"
-	"ppt/pkg/output"
+	"ppt/pkg/transform"
 	"ppt/pkg/utils"
 	"sync"
 )
@@ -36,6 +37,7 @@ func main() {
 	transformation := flag.String("t", "", "Transformation to apply to input.")
 	startingIndex := flag.Int("i", 0, "Starting index for transformations if applicable.")
 	replacementMask := flag.String("rm", "uldsb", "Replacement mask for transformations if applicable.")
+	swapTolerance := flag.Int("st", 0, "Swap tolerance for transformations if applicable.")
 	flag.Var(&retain, "k", "Only keep items in a file.")
 	flag.Var(&remove, "r", "Only keep items not in a file.")
 	flag.Var(&readFiles, "f", "Read additonal files for input.")
@@ -70,12 +72,12 @@ func main() {
 
 	// Apply transformation if provided
 	if *transformation != "" {
-		primaryMap = output.TransformationController(primaryMap, *transformation, *startingIndex, *verbose, *replacementMask, transformationFilesMap)
+		primaryMap = transform.TransformationController(primaryMap, *transformation, *startingIndex, *verbose, *replacementMask, transformationFilesMap, *swapTolerance)
 	}
 
 	// Process retain and remove maps if provided
 	if len(retainMap) > 0 || len(removeMap) > 0 {
-		primaryMap, err = output.RetainRemove(primaryMap, retainMap, removeMap)
+		primaryMap, err = format.RetainRemove(primaryMap, retainMap, removeMap)
 		if err != nil {
 			fmt.Println("Error processing retain and remove flags:", err)
 			return
@@ -84,8 +86,8 @@ func main() {
 
 	// Remove items under minimum frequency if provided
 	if *minimum > 0 {
-		primaryMap = output.RemoveMinimumFrequency(primaryMap, *minimum)
+		primaryMap = format.RemoveMinimumFrequency(primaryMap, *minimum)
 	}
 
-	output.PrintArrayToSTDOUT(primaryMap, *verbose)
+	format.PrintArrayToSTDOUT(primaryMap, *verbose)
 }

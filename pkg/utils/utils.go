@@ -7,6 +7,7 @@ import (
 	"os"
 	"regexp"
 	"strings"
+	"unicode"
 	"unicode/utf8"
 )
 
@@ -255,6 +256,29 @@ func SplitBySeperatorString(s string, sep string) []string {
 	return parts
 }
 
+// FuzzyReplaceSubstring replaces the first instance of a substring in a string
+// with a new substring if the substring could fit in the original string based
+// on fuzzy matching
+//
+// Args:
+//
+//	original (string): The original string
+//	oldSubstr (string): The substring to replace
+//	newSubstr (string): The new substring
+//
+// Returns:
+//
+//	[]string: The original string with the first instance of the substring replaced
+func FuzzyReplaceSubstring(original string, replacements map[string]int) []string {
+	var newStrings []string
+	for newSubstr := range replacements {
+		if match, matchedText := CheckIsFuzzyMatch(original, newSubstr); match {
+			newStrings = append(newStrings, strings.Replace(original, matchedText, newSubstr, 1))
+		}
+	}
+	return newStrings
+}
+
 // ----------------------------------------
 // Validation Functions
 // ----------------------------------------
@@ -290,4 +314,32 @@ func CheckHexString(s string) bool {
 		return false
 	}
 	return true
+}
+
+// CheckIsFuzzyMatch checks if a substring could fit in the original string and
+// returns the substring if it could fit. Fit is determined by the length of the
+// substring being less than or equal to the length of the original string
+// ignoring non-letter characters based on unicode.IsLetter.
+//
+// Args:
+//
+//	original (string): The original string
+//	substr (string): The substring to check
+//
+// Returns:
+//
+//	bool: True if the substring could fit in the original string, false otherwise
+//	string: The substring if it could fit in the original string
+func CheckIsFuzzyMatch(original string, substr string) (bool, string) {
+	originalRunes := []rune(strings.TrimFunc(original, func(r rune) bool {
+		return !unicode.IsLetter(r)
+	}))
+
+	substrRunes := []rune(substr)
+
+	if len(originalRunes) >= len(substrRunes) {
+		return true, string(originalRunes)
+	}
+
+	return false, ""
 }
