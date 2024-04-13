@@ -65,6 +65,12 @@ func TransformationController(input map[string]int, mode string, startingIndex i
 			os.Exit(1)
 		}
 		output = mask.MakeRetainMaskedMap(input, replacementMask, transformationFilesMap)
+	case "match-mask", "match":
+		if len(transformationFilesMap) == 0 {
+			fmt.Println("Match masks require use of one or more -tf flags to specify one or more files")
+			os.Exit(1)
+		}
+		output = mask.MakeMatchedMaskedMap(input, replacementMask, transformationFilesMap)
 	}
 
 	return output

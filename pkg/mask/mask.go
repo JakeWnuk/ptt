@@ -106,7 +106,7 @@ func MakeMaskedMap(input map[string]int, replacementMask string, verbose bool) m
 // Args:
 //
 //	input (map[string]int): Map to mask
-//	replacements ([]string): Array of characters to replace
+//	replacementMask (string): Mask characters to apply
 //	retain (map[string]int): Map of keywords to retain
 //
 // Returns:
@@ -151,6 +151,17 @@ func MakeRetainMaskedMap(input map[string]int, replacementMask string, retain ma
 	return maskedMap
 }
 
+// MakeMaskedString replaces all characters in the input string with the mask
+// values in the mask string
+//
+// Args:
+//
+//	input (string): Input string
+//	replacementMask (string): Mask characters to apply
+//
+// Returns:
+//
+//	(string): Masked string
 func MakeMaskedString(input string, replacementMask string) string {
 	replacements := ConstructReplacements(replacementMask)
 	replacer := strings.NewReplacer(replacements...)
@@ -240,6 +251,45 @@ func RemoveMaskedCharacters(input map[string]int) map[string]int {
 			maskedMap[newKey] = oldValue + value
 		} else {
 			maskedMap[newKey] = value
+		}
+	}
+	return maskedMap
+}
+
+// ----------------------------------------------------------------------------
+// Mask Utility Functions
+// ----------------------------------------------------------------------------
+
+// MakeMatchedMaskedMap returns a map from the input map where the keys matched
+// the keys in the mask map after applying the mask to the input map. The
+// original keys and values are retained.
+//
+// Args:
+//
+//	input (map[string]int): Input map
+//	replacementMask (string): Mask characters to apply
+//	maskMap (map[string]int): Mask map
+//
+// Returns:
+// (map[string]int): Matched masked map
+func MakeMatchedMaskedMap(input map[string]int, replacementMask string, maskMap map[string]int) map[string]int {
+	maskedMap := make(map[string]int)
+	replacements := ConstructReplacements(replacementMask)
+	replacer := strings.NewReplacer(replacements...)
+
+	for key, value := range input {
+		newKey := replacer.Replace(key)
+
+		if !utils.CheckASCIIString(newKey) && strings.Contains(replacementMask, "b") {
+			newKey = ConvertMultiByteMask(newKey)
+		}
+
+		if _, exists := maskMap[newKey]; exists {
+			if oldValue, exists := maskedMap[newKey]; exists {
+				maskedMap[newKey] = oldValue + value
+			} else {
+				maskedMap[newKey] = value
+			}
 		}
 	}
 	return maskedMap
