@@ -121,7 +121,7 @@ func MakeRetainMaskedMap(input map[string]int, replacementMask string, retain ma
 		for retainKey := range retain {
 			newKey := ""
 			if strings.Contains(key, retainKey) {
-				parts := utils.SplitBySeperatorString(key, retainKey)
+				parts := utils.SplitBySeparatorString(key, retainKey)
 
 				// if the part is not the key replace it using replacer
 				for _, part := range parts {

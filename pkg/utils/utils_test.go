@@ -15,11 +15,22 @@ import (
 //
 // ** Transformation Functions **
 // - ReverseString()
+// - ConvertMultiByteCharToRule()
+// - IncrementIteratingRuleCall()
+// - ConvertMultiByteCharToIteratingRule()
+// - SplitBySeparatorString()
+// - ReplaceSubstring()
+//
+// ** Validation Functions **
+// - CheckASCIIString()
+// - CheckHexString()
+// - CheckAreMapsEqual()
 //
 // ----------------------------------------------------------------------------
 // Functions without Unit Tests
 // ----------------------------------------------------------------------------
-// -
+// - FuzzyReplaceSubstring() (Transformation Functions)
+// - CheckIsFuzzyMatch() (Validation Functions)
 
 // Unit Test for ReadFilesToMap()
 func TestReadFilesToMap(t *testing.T) {
@@ -174,6 +185,281 @@ func TestReverseString(t *testing.T) {
 		given := ReverseString(input)
 		if given != output {
 			t.Errorf("ReverseString(%v) = %v; want %v", input, given, output)
+		}
+	}
+}
+
+// Unit Test for ConvertMultiByteCharToRule()
+func TestConvertMultiByteCharToRule(t *testing.T) {
+
+	// Define a test case struct
+	type TestCase struct {
+		Input  string
+		Output string
+	}
+
+	type TestCases []TestCase
+
+	// Define test cases
+	testCases := TestCases{
+		{"$l $o $v $e", "$l $o $v $e"},
+		{"^e ^v ^o ^l", "^e ^v ^o ^l"},
+		{"$a $爱", "$a $\\xE7 $\\x88 $\\xB1"},
+		{"^b ^愛", "^b ^\\x9B ^\\x84 ^\\xE6"},
+	}
+
+	// Run test cases
+	for _, testCase := range testCases {
+		input := testCase.Input
+		output := testCase.Output
+
+		given := ConvertMultiByteCharToRule(input)
+		if given != output {
+			t.Errorf("ConvertMultiByteCharToRule(%v) = %v; want %v", input, given, output)
+		}
+	}
+}
+
+// Unit Test for IncrementIteratingRuleCall()
+func TestIncrementIteratingRuleCall(t *testing.T) {
+
+	// Define a test case struct
+	type TestCase struct {
+		Input  string
+		Output string
+	}
+
+	type TestCases []TestCase
+
+	// Define test cases
+	testCases := TestCases{
+		{"i0", "i1"},
+		{"i1", "i2"},
+		{"i2", "i3"},
+		{"i3", "i4"},
+		{"iA", "iB"},
+		{"iB", "iC"},
+		{"iC", "iD"},
+	}
+
+	// Run test cases
+	for _, testCase := range testCases {
+		input := testCase.Input
+		output := testCase.Output
+
+		given := IncrementIteratingRuleCall(input)
+		if given != output {
+			t.Errorf("IncrementIteratingRuleCall(%v) = %v; want %v", input, given, output)
+		}
+	}
+}
+
+// Unit Test for ConvertMultiByteCharToIteratingRule()
+func TestConvertMultiByteCharToIteratingRule(t *testing.T) {
+
+	// Define a test case struct
+	type TestCase struct {
+		Input  string
+		Output string
+	}
+
+	type TestCases []TestCase
+
+	// Define test cases
+	testCases := TestCases{
+		{"i0l i1o i2v i3e", "i0l i1o i2v i3e"},
+		{"i0a i1爱", "i0a i1\\xE7 i2\\x88 i3\\xB1"},
+		{"i1a i2愛", "i1a i2\\xE6 i3\\x84 i4\\x9B"},
+	}
+
+	// Run test cases
+	for _, testCase := range testCases {
+		input := testCase.Input
+		output := testCase.Output
+
+		given := ConvertMultiByteCharToIteratingRule(input)
+		if given != output {
+			t.Errorf("ConvertMultiByteCharToIteratingRule(%v) = %v; want %v", input, given, output)
+		}
+	}
+}
+
+// Unit Test for SplitBySeparatorString()
+func TestSplitBySeparatorString(t *testing.T) {
+
+	// Define a test case struct
+	type TestCase struct {
+		Input1 string
+		Input2 string
+		Output []string
+	}
+
+	type TestCases []TestCase
+
+	// Define test cases
+	testCases := TestCases{
+		{"I love you", "love", []string{"I ", "love", " you"}},
+		{"I <3 you", "<3", []string{"I ", "<3", " you"}},
+		{"I 爱 you", "爱", []string{"I ", "爱", " you"}},
+		{"13Teststreet31p", "street", []string{"13Test", "street", "31p"}},
+		{"123131asdasd", "131", []string{"123", "131", "asdasd"}},
+		{"12313zxczxc", "13", []string{"123", "13", "zxczxc"}},
+	}
+
+	// Run test cases
+	for _, testCase := range testCases {
+		input1 := testCase.Input1
+		input2 := testCase.Input2
+		output := testCase.Output
+
+		given := SplitBySeparatorString(input1, input2)
+		if given[0] != output[0] || given[1] != output[1] || given[2] != output[2] {
+			t.Errorf("SplitBySeparatorString(%v, %v) = %v; want %v", input1, input2, given, output)
+		}
+	}
+}
+
+// Unit Test for ReplaceSubstring()
+func TestReplaceSubstring(t *testing.T) {
+
+	// Define a test case struct
+	type TestCase struct {
+		Input        string
+		Replacements map[string]int
+		Output       []string
+	}
+
+	type TestCases []TestCase
+
+	// Define test cases
+	testCases := TestCases{
+		{"I love you", map[string]int{"love:miss": 1}, []string{"I miss you"}},
+		{"I <3 you", map[string]int{"<3:heart": 1}, []string{"I heart you"}},
+		{"I 爱 you", map[string]int{"爱:love": 1}, []string{"I love you"}},
+		{"I love you", map[string]int{"love:miss": 1, "love:爱": 1}, []string{"I miss you", "I 爱 you"}},
+		{"13Teststreet31p", map[string]int{"street:road": 1}, []string{"13Testroad31p"}},
+		{"123131asdasd", map[string]int{"131:313": 1}, []string{"123313asdasd"}},
+		{"12313zxczxc", map[string]int{"13:31": 1}, []string{"12331zxczxc"}},
+	}
+
+	// Run test cases
+	for _, testCase := range testCases {
+		input := testCase.Input
+		replacements := testCase.Replacements
+		output := testCase.Output
+
+		given := ReplaceSubstring(input, replacements)
+		if given[0] != output[0] {
+			t.Errorf("ReplaceSubstring(%v, %v) = %v; want %v", input, replacements, given, output)
+		}
+	}
+}
+
+// Unit Test for CheckASCIIString()
+func TestCheckASCIIString(t *testing.T) {
+
+	// Define a test case struct
+	type TestCase struct {
+		Input  string
+		Output bool
+	}
+
+	type TestCases []TestCase
+
+	// Define test cases
+	testCases := TestCases{
+		{"I love you", true},
+		{"I <3 you", true},
+		{"I 爱 you", false},
+		{"13Teststreet31p", true},
+		{"123131asdasd", true},
+		{"12313zxczxc", true},
+	}
+
+	// Run test cases
+	for _, testCase := range testCases {
+		input := testCase.Input
+		output := testCase.Output
+
+		given := CheckASCIIString(input)
+		if given != output {
+			t.Errorf("CheckASCIIString(%v) = %v; want %v", input, given, output)
+		}
+	}
+}
+
+// Unit Test for CheckHexString()
+func TestCheckHexString(t *testing.T) {
+
+	// Define a test case struct
+	type TestCase struct {
+		Input  string
+		Output bool
+	}
+
+	type TestCases []TestCase
+
+	// Define test cases
+	testCases := TestCases{
+		{"I love you", false},
+		{"I 爱 you", false},
+		{"$HEX[6c6f7665]", true},
+		{"$HEX[3c33]", true},
+		{"$HEX[e723]", true},
+		{"$HEX[616d6f72]", true},
+		{"$HEX[616d6f7572]", true},
+		{"$HEX[e6b581]", true},
+	}
+
+	// Run test cases
+	for _, testCase := range testCases {
+		input := testCase.Input
+		output := testCase.Output
+
+		given := CheckHexString(input)
+		if given != output {
+			t.Errorf("CheckHexString(%v) = %v; want %v", input, given, output)
+		}
+	}
+}
+
+// Unit Test for CheckAreMapsEqual()
+func TestCheckAreMapsEqual(t *testing.T) {
+
+	// Define a test case struct
+	type TestCase struct {
+		Input1 map[string]int
+		Input2 map[string]int
+		Output bool
+	}
+
+	type TestCases []TestCase
+
+	// Define test cases
+	testCases := TestCases{
+		{map[string]int{"love1": 1, "love2": 1, "love3": 1}, map[string]int{"love1": 1, "love2": 1, "love3": 1}, true},
+		{map[string]int{"<31": 1, "<32": 1, "<33": 1}, map[string]int{"<31": 1, "<32": 1, "<33": 1}, true},
+		{map[string]int{"爱1": 1, "爱2": 1, "爱3": 1}, map[string]int{"爱1": 1, "爱2": 1, "爱3": 1}, true},
+		{map[string]int{"amor1": 1, "amor2": 1, "amor3": 1}, map[string]int{"amor1": 1, "amor2": 1, "amor3": 1}, true},
+		{map[string]int{"amour1": 1, "amour2": 1, "amour3": 1}, map[string]int{"amour1": 1, "amour2": 1, "amour3": 1}, true},
+		{map[string]int{"愛1": 1, "愛2": 1, "愛3": 1}, map[string]int{"愛1": 1, "愛2": 1, "愛3": 1}, true},
+		{map[string]int{"love1": 1, "love2": 1, "love3": 1}, map[string]int{"love1": 1, "love2": 1, "love3": 2}, false},
+		{map[string]int{"<31": 1, "<32": 1, "<33": 1}, map[string]int{"<31": 1, "<32": 1, "<33": 2}, false},
+		{map[string]int{"爱1": 1, "爱2": 1, "爱3": 1}, map[string]int{"爱1": 1, "爱2": 1, "爱3": 2}, false},
+		{map[string]int{"amor1": 1, "amor2": 1, "amor3": 1}, map[string]int{"amor1": 1, "amor2": 1, "amor3": 2}, false},
+		{map[string]int{"amour1": 1, "amour2": 1, "amour3": 1}, map[string]int{"amour1": 1, "amour2": 1, "amour3": 2}, false},
+		{map[string]int{"愛1": 1, "愛2": 1, "愛3": 1}, map[string]int{"愛1": 1, "愛2": 1, "愛3": 2}, false},
+	}
+
+	// Run test cases
+	for _, testCase := range testCases {
+		input1 := testCase.Input1
+		input2 := testCase.Input2
+		output := testCase.Output
+
+		given := CheckAreMapsEqual(input1, input2)
+		if given != output {
+			t.Errorf("CheckAreMapsEqual(%v, %v) = %v; want %v", input1, input2, given, output)
 		}
 	}
 }
