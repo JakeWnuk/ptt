@@ -10,8 +10,8 @@ Accepts standard input and/or additonal arguments.
 Options:
   -f value
         Read additonal files for input.
-  -i int
-        Starting index for transformations if applicable. (default 0)
+  -i value
+        Starting index for transformations if applicable. Accepts ranges separated by '-'. (default 0)
   -k value
         Only keep items in a file.
   -m int
@@ -81,3 +81,8 @@ TODO
 ```
 git clone https://github.com/JakeWnuk/ptt && cd ptt && go build ./main.go && mv ./main ~/go/bin/ptt
 ```
+
+## Docker:
+```
+TODO
+``` 

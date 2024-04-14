@@ -23,6 +23,7 @@ import (
 //	input (map[string]int): A map of input values
 //	mode (string): The mode to run the CLI in
 //	startingIndex (int): The starting index for the transformation if applicable
+//	endIndex (int): The ending index for the transformation if applicable
 //	verbose (bool): If true, the verbose information is printed when available
 //	replacementMask (string): The mask characters to use for masking operations
 //	transformationFilesMap (map[string]int): A map of transformation files to
@@ -31,19 +32,24 @@ import (
 // Returns:
 //
 //	(map[string]int): A map of transformed values
-func TransformationController(input map[string]int, mode string, startingIndex int, verbose bool, replacementMask string, transformationFilesMap map[string]int) (output map[string]int) {
-	strIndex := fmt.Sprintf("%d", startingIndex)
+func TransformationController(input map[string]int, mode string, startingIndex int, endingIndex int, verbose bool, replacementMask string, transformationFilesMap map[string]int) (output map[string]int) {
 	switch mode {
 	case "append", "append-remove", "append-shift":
 		output = rule.AppendRules(input, mode)
 	case "prepend", "prepend-remove", "prepend-shift":
 		output = rule.PrependRules(input, mode)
 	case "insert":
-		output = rule.InsertRules(input, strIndex)
+		strIndex := fmt.Sprintf("%d", startingIndex)
+		endIndex := fmt.Sprintf("%d", endingIndex)
+		output = rule.InsertRules(input, strIndex, endIndex)
 	case "overwrite":
-		output = rule.OverwriteRules(input, strIndex)
+		strIndex := fmt.Sprintf("%d", startingIndex)
+		endIndex := fmt.Sprintf("%d", endingIndex)
+		output = rule.OverwriteRules(input, strIndex, endIndex)
 	case "toggle":
-		output = rule.ToggleRules(input, strIndex)
+		strIndex := fmt.Sprintf("%d", startingIndex)
+		endIndex := fmt.Sprintf("%d", endingIndex)
+		output = rule.ToggleRules(input, strIndex, endIndex)
 	case "encode":
 		output = format.EncodeInputMap(input)
 	case "mask", "partial-mask", "partial":

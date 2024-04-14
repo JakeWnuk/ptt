@@ -20,6 +20,7 @@ var remove models.FileArgumentFlag
 var readFiles models.FileArgumentFlag
 var transformationFiles models.FileArgumentFlag
 var transformationTemplates models.FileArgumentFlag
+var intRange models.IntRange
 var primaryMap map[string]int
 var err error
 
@@ -30,7 +31,7 @@ func main() {
 		fmt.Fprintf(os.Stderr, "ptt [options] [...]\nAccepts standard input and/or additonal arguments.\n\n")
 		fmt.Fprintf(os.Stderr, "Options:\n")
 		flag.PrintDefaults()
-		fmt.Fprintf(os.Stderr, "\nThe '-f', '-k', '-r', '-tf', and '-tp' flags can be used multiple times.\n")
+		fmt.Fprintf(os.Stderr, "\nThe '-f', '-k', '-r', and '-tf' flags can be used multiple times.\n")
 		fmt.Fprintf(os.Stderr, "\nTransformation Modes:\n")
 		fmt.Fprintf(os.Stderr, "  -t append\n\tTransforms input into append rules.\n")
 		fmt.Fprintf(os.Stderr, "  -t append-remove\n\tTransforms input into append-remove rules.\n")
@@ -56,12 +57,12 @@ func main() {
 	verbose := flag.Bool("v", false, "Show verbose output when possible.")
 	minimum := flag.Int("m", 0, "Minimum numerical frequency to include in output.")
 	transformation := flag.String("t", "", "Transformation to apply to input.")
-	startingIndex := flag.Int("i", 0, "Starting index for transformations if applicable. (default 0)")
 	replacementMask := flag.String("rm", "uldsb", "Replacement mask for transformations if applicable.")
 	flag.Var(&retain, "k", "Only keep items in a file.")
 	flag.Var(&remove, "r", "Only keep items not in a file.")
 	flag.Var(&readFiles, "f", "Read additonal files for input.")
 	flag.Var(&transformationFiles, "tf", "Read additonal files for transformations if applicable.")
+	flag.Var(&intRange, "i", "Starting index for transformations if applicable. Accepts ranges separated by '-'. (default 0)")
 	flag.Parse()
 
 	// Prevent use of templates with transformations
@@ -98,7 +99,7 @@ func main() {
 
 	// Apply transformation if provided
 	if *transformation != "" {
-		primaryMap = transform.TransformationController(primaryMap, *transformation, *startingIndex, *verbose, *replacementMask, transformationFilesMap)
+		primaryMap = transform.TransformationController(primaryMap, *transformation, intRange.Start, intRange.End, *verbose, *replacementMask, transformationFilesMap)
 	}
 
 	// Process retain and remove maps if provided
