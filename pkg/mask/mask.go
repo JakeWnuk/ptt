@@ -286,9 +286,9 @@ func MakeMatchedMaskedMap(input map[string]int, replacementMask string, maskMap 
 
 		if _, exists := maskMap[newKey]; exists {
 			if oldValue, exists := maskedMap[newKey]; exists {
-				maskedMap[newKey] = oldValue + value
+				maskedMap[key] = oldValue + value
 			} else {
-				maskedMap[newKey] = value
+				maskedMap[key] = value
 			}
 		}
 	}
