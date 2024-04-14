@@ -1,4 +1,4 @@
-// Package format contains functions for printing and formatting output to the console
+// Package format contains functions for printing and formatting output
 package format
 
 import (
@@ -52,8 +52,9 @@ func PrintArrayToSTDOUT(freq map[string]int, verbose bool) {
 //
 // Returns:
 //
-//	(string, error): The processed and filtered text, or an error if the text is not valid
-func RetainRemove(textMap, retainMap, removeMap map[string]int) (map[string]int, error) {
+//	(map[string]int): A new map of words that have been retained and removed
+//	(error): An error if the text map is empty
+func RetainRemove(textMap map[string]int, retainMap map[string]int, removeMap map[string]int) (map[string]int, error) {
 	result := make(map[string]int)
 
 	// If the retain and remove maps are empty, return the textMap as is

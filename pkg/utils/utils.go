@@ -299,6 +299,9 @@ func ReplaceSubstring(original string, replacements map[string]int) []string {
 	var newStrings []string
 	for newSubstr := range replacements {
 		// Split the new substring into the old and new strings by the colon character
+		if !strings.Contains(newSubstr, ":") {
+			continue
+		}
 		oldStr, newStr := strings.Split(newSubstr, ":")[0], strings.Split(newSubstr, ":")[1]
 		if strings.Contains(original, oldStr) {
 			newStrings = append(newStrings, strings.Replace(original, oldStr, newStr, -1))

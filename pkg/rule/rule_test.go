@@ -22,6 +22,11 @@ import (
 // - InsertRules()
 // - OverwriteRules()
 // - ToggleRules()
+//
+// ----------------------------------------------------------------------------
+// Functions without Unit Tests
+// ----------------------------------------------------------------------------
+// -
 
 // Unit Test for LenToRule()
 func TestLenToRule(t *testing.T) {
