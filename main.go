@@ -40,9 +40,9 @@ func main() {
 		fmt.Fprintf(os.Stderr, "  -t prepend-remove\n\tTransforms input into prepend-remove rules.\n")
 		fmt.Fprintf(os.Stderr, "  -t prepend-shift\n\tTransforms input into prepend-shift rules.\n")
 		fmt.Fprintf(os.Stderr, "  -t insert -i [index]\n\tTransforms input into insert rules starting at index.\n")
-		fmt.Fprintf(os.Stderr, "  -t remove -i [index]\n\tTransforms input into remove rules starting at index.\n")
+		fmt.Fprintf(os.Stderr, "  -t overwrite -i [index]\n\tTransforms input into overwrite rules starting at index.\n")
 		fmt.Fprintf(os.Stderr, "  -t toggle -i [index]\n\tTransforms input into toggle rules starting at index.\n")
-		fmt.Fprintf(os.Stderr, "  -t encode\n\tTransforms input by  URL, HTML, and Unicode escape encoding.\n")
+		fmt.Fprintf(os.Stderr, "  -t encode\n\tTransforms input by URL, HTML, and Unicode escape encoding.\n")
 		fmt.Fprintf(os.Stderr, "  -t mask -rm [uldsb] -v\n\tTransforms input by masking characters with provided mask.\n")
 		fmt.Fprintf(os.Stderr, "  -t dehex\n\tTransforms input by decoding $HEX[...] formatted strings.\n")
 		fmt.Fprintf(os.Stderr, "  -t hex\n\tTransforms input by encoding strings into $HEX[...] format.\n")
@@ -50,7 +50,7 @@ func main() {
 		fmt.Fprintf(os.Stderr, "  -t retain -rm [uldsb] -tf [file]\n\tTransforms input by creating masks that still retain strings from file.\n")
 		fmt.Fprintf(os.Stderr, "  -t match -tf [file]\n\tTransforms input by keeping only strings with matching masks from a mask file.\n")
 		fmt.Fprintf(os.Stderr, "  -t fuzzy-swap -tf [file]\n\tTransforms input by swapping tokens with fuzzy matches from another file.\n")
-		fmt.Fprintf(os.Stderr, "  -t swap -tf [file]\n\tTransforms input by swapping tokens with exact matches from a ':' separate file.\n")
+		fmt.Fprintf(os.Stderr, "  -t swap -tf [file]\n\tTransforms input by swapping tokens with exact matches from a ':' separated file.\n")
 	}
 
 	// Define command line flags

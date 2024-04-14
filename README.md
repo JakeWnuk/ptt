@@ -1,4 +1,4 @@
- `ptt` or Password Transformation Tool is a multi-tool for working with text for password cracking. It can be used to transform text in a variety of ways for password cracking such as:
+ `ptt` or Password Transformation Tool is a multi-tool for working with text for password cracking. It can be used to transform text in a variety of ways for password cracking.
 
 ```
 $ ptt -h
@@ -43,12 +43,12 @@ Transformation Modes:
         Transforms input into prepend-shift rules.
   -t insert -i [index]
         Transforms input into insert rules starting at index.
-  -t remove -i [index]
-        Transforms input into remove rules starting at index.
+  -t overwrite -i [index]
+        Transforms input into overwrite rules starting at index.
   -t toggle -i [index]
         Transforms input into toggle rules starting at index.
   -t encode
-        Transforms input by  URL, HTML, and Unicode escape encoding.
+        Transforms input by URL, HTML, and Unicode escape encoding.
   -t mask -rm [uldsb] -v
         Transforms input by masking characters with provided mask.
   -t dehex
@@ -64,7 +64,7 @@ Transformation Modes:
   -t fuzzy-swap -tf [file]
         Transforms input by swapping tokens with fuzzy matches from another file.
   -t swap -tf [file]
-        Transforms input by swapping tokens with exact matches from a ':' separate file.
+        Transforms input by swapping tokens with exact matches from a ':' separated file.
 ```
 
 ## Getting Started:
@@ -72,17 +72,31 @@ Transformation Modes:
 >[!NOTE]
 > This tool is still in development and considered early access. Please report any issues, bugs, or feature requests to the GitHub repository.
 
-### Install from Go
+Documentation on usage and examples can be found in the `/docs` directory or on the repository here: [link]()
+
+## Install:
+### Source:
+Fast method with Go installed:
 ```
 TODO
 ```
-
-### Install from Source
+Slow method with Go installed:
 ```
-git clone https://github.com/JakeWnuk/ptt && cd ptt && go build ./main.go && mv ./main ~/go/bin/ptt
+git clone https://github.com/JakeWnuk/ptt && cd ptt && go build ./main.go && mv ./ptt ~/go/bin/ptt && cd ..
 ```
 
-## Docker:
+### Docker:
+Pull the latest image from Docker Hub:
 ```
 TODO
 ``` 
+Build the Docker image from the Dockerfile:
+```
+TODO
+```
+
+### Binary:
+Download the latest release from the GitHub repository:
+```
+TODO
+```
