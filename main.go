@@ -62,8 +62,6 @@ func main() {
 	flag.Var(&remove, "r", "Only keep items not in a file.")
 	flag.Var(&readFiles, "f", "Read additonal files for input.")
 	flag.Var(&transformationFiles, "tf", "Read additonal files for transformations if applicable.")
-	// TODO - this may need to be a file path or a another loaded object
-	flag.Var(&transformationTemplates, "tp", "Read additonal files for transformation templates if applicable.")
 	flag.Parse()
 
 	// Prevent use of templates with transformations
@@ -77,8 +75,6 @@ func main() {
 	removeMap := utils.ReadFilesToMap(remove)
 	readFilesMap := utils.ReadFilesToMap(readFiles)
 	transformationFilesMap := utils.ReadFilesToMap(transformationFiles)
-	// TODO - this should be a file path or a another loaded object
-	transformationTemplatesMap := utils.ReadFilesToMap(transformationTemplates)
 
 	// Read from stdin if provided
 	stat, _ := os.Stdin.Stat()
@@ -99,16 +95,6 @@ func main() {
 	} else if len(readFilesMap) > 0 {
 		primaryMap = utils.CombineMaps(primaryMap, readFilesMap)
 	}
-
-	// TODO - Implement transformation templates
-	// conditional switch on t or tp
-	// if t is set, use below
-	// if tp is set, call transformation controller for each template
-	// I need to figure out how to pass the template to the transformation
-	// controller with proper arguments
-	//
-	// Think a new model that can parse the template and pass it to the
-	// controller function
 
 	// Apply transformation if provided
 	if *transformation != "" {
