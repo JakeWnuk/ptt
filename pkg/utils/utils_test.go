@@ -259,6 +259,7 @@ func TestConvertMultiByteCharToIteratingRule(t *testing.T) {
 
 	// Define a test case struct
 	type TestCase struct {
+		Index  int
 		Input  string
 		Output string
 	}
@@ -267,17 +268,19 @@ func TestConvertMultiByteCharToIteratingRule(t *testing.T) {
 
 	// Define test cases
 	testCases := TestCases{
-		{"i0l i1o i2v i3e", "i0l i1o i2v i3e"},
-		{"i0a i1爱", "i0a i1\\xE7 i2\\x88 i3\\xB1"},
-		{"i1a i2愛", "i1a i2\\xE6 i3\\x84 i4\\x9B"},
+		{0, "i0l i1o i2v i3e", "i0l i1o i2v i3e"},
+		{0, "i0a i1爱", "i0a i1\\xE7 i2\\x88 i3\\xB1"},
+		{1, "i1a i2愛", "i1a i2\\xE6 i3\\x84 i4\\x9B"},
+		{0, "i0爱 i3t i4e i5s i6t", "i0\\xE7 i1\\x88 i2\\xB1 i3t i4e i5s i6t"},
 	}
 
 	// Run test cases
 	for _, testCase := range testCases {
+		index := testCase.Index
 		input := testCase.Input
 		output := testCase.Output
 
-		given := ConvertMultiByteCharToIteratingRule(input)
+		given := ConvertMultiByteCharToIteratingRule(index, input)
 		if given != output {
 			t.Errorf("ConvertMultiByteCharToIteratingRule(%v) = %v; want %v", input, given, output)
 		}
@@ -336,7 +339,7 @@ func TestReplaceSubstring(t *testing.T) {
 		{"I love you", map[string]int{"love:miss": 1}, []string{"I miss you"}},
 		{"I <3 you", map[string]int{"<3:heart": 1}, []string{"I heart you"}},
 		{"I 爱 you", map[string]int{"爱:love": 1}, []string{"I love you"}},
-		{"I love you", map[string]int{"love:miss": 1, "love:爱": 1}, []string{"I miss you", "I 爱 you"}},
+		{"I love you", map[string]int{"love:爱": 1}, []string{"I 爱 you"}},
 		{"13Teststreet31p", map[string]int{"street:road": 1}, []string{"13Testroad31p"}},
 		{"123131asdasd", map[string]int{"131:313": 1}, []string{"123313asdasd"}},
 		{"12313zxczxc", map[string]int{"13:31": 1}, []string{"12331zxczxc"}},

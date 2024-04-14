@@ -193,14 +193,15 @@ func IncrementIteratingRuleCall(s string) string {
 //
 // Args:
 //
+//	index (int): Index to start the iteration
 //	str (string): Input string to transform
 //
 // Returns:
 //
 //	returnStr (string): Converted string
-func ConvertMultiByteCharToIteratingRule(str string) string {
+func ConvertMultiByteCharToIteratingRule(index int, str string) string {
 	output := ""
-	lastIterationSeen := ""
+	lastIterationSeen := fmt.Sprintf("%s%d", string([]rune(str)[0]), index)
 
 	re := regexp.MustCompile(`[io][\dA-Z]`)
 
@@ -211,14 +212,18 @@ func ConvertMultiByteCharToIteratingRule(str string) string {
 				bytes := []byte(string(c))
 				firstByteOut := true
 				// Convert each byte to its hexadecimal representation
-				for _, b := range bytes {
+				for i, b := range bytes {
 					if firstByteOut {
 						output += fmt.Sprintf("\\x%X ", b)
 						firstByteOut = false
 						continue
 					}
 					lastIterationSeen = IncrementIteratingRuleCall(lastIterationSeen)
-					output += fmt.Sprintf("%s\\x%X ", lastIterationSeen, b)
+					if i == len(bytes)-1 {
+						output += fmt.Sprintf("%s\\x%X", lastIterationSeen, b)
+					} else {
+						output += fmt.Sprintf("%s\\x%X ", lastIterationSeen, b)
+					}
 				}
 			} else {
 				output += string(c)

@@ -12,7 +12,7 @@ import (
 )
 
 // ----------------------------------------------------------------------------
-// Transformation functions
+// Transformation Functions
 // ----------------------------------------------------------------------------
 
 // LenToRule converts a string to a rule by its length
@@ -67,7 +67,7 @@ func CharToIteratingRule(str string, rule string, index int) string {
 	return strings.TrimSpace(result.String())
 }
 
-// StringToToggle converts a string to toggle rules by looking for upper chars
+// StringToToggleRule converts a string to toggle rules by looking for upper chars
 //
 // Args:
 //
@@ -78,7 +78,7 @@ func CharToIteratingRule(str string, rule string, index int) string {
 // Returns:
 //
 //	(string): Transformed string
-func StringToToggle(str string, rule string, index int) string {
+func StringToToggleRule(str string, rule string, index int) string {
 	var result strings.Builder
 	for i, r := range str {
 		if unicode.IsUpper(r) {
@@ -93,7 +93,7 @@ func StringToToggle(str string, rule string, index int) string {
 }
 
 // ----------------------------------------------------------------------------
-// Output functions
+// Output Functions
 // ----------------------------------------------------------------------------
 
 // FormatCharToRuleOutput handles formatting of rule output
@@ -128,18 +128,19 @@ func FormatCharToRuleOutput(strs ...string) (output string) {
 //
 // Args:
 //
+//	index (int): Index to start at
 //	strs (...string): Input strings to print
 //
 // Returns:
 //
 //	output (string): Formatted output
-func FormatCharToIteratingRuleOutput(strs ...string) (output string) {
+func FormatCharToIteratingRuleOutput(index int, strs ...string) (output string) {
 	output = ""
 	for _, str := range strs {
 		if utils.CheckASCIIString(str) {
 			output += str + " "
 		} else {
-			output += utils.ConvertMultiByteCharToIteratingRule(str)
+			output += utils.ConvertMultiByteCharToIteratingRule(index, str)
 		}
 	}
 
@@ -214,8 +215,8 @@ func PrependRules(items map[string]int, operation string) (returnMap map[string]
 	case "prepend-remove":
 		for key, value := range items {
 			rule := CharToRule(utils.ReverseString(key), "^")
-			remove := LenToRule(key, "]")
-			prependRemoveRule := FormatCharToRuleOutput(rule, remove)
+			remove := LenToRule(key, "[")
+			prependRemoveRule := FormatCharToRuleOutput(remove, rule)
 			if prependRemoveRule != "" {
 				returnMap[prependRemoveRule] = value
 			}
@@ -226,7 +227,7 @@ func PrependRules(items map[string]int, operation string) (returnMap map[string]
 		for key, value := range items {
 			rule := CharToRule(utils.ReverseString(key), "^")
 			shift := LenToRule(key, "{")
-			prependShiftRule := FormatCharToRuleOutput(rule, shift)
+			prependShiftRule := FormatCharToRuleOutput(shift, rule)
 			if prependShiftRule != "" {
 				returnMap[prependShiftRule] = value
 			}
@@ -271,7 +272,7 @@ func InsertRules(items map[string]int, index string, end string) (returnMap map[
 	for i < e+1 {
 		for key, value := range items {
 			rule := CharToIteratingRule(key, "i", i)
-			insertRule := FormatCharToIteratingRuleOutput(rule)
+			insertRule := FormatCharToIteratingRuleOutput(i, rule)
 			if insertRule != "" {
 				returnMap[insertRule] = value
 			}
@@ -309,7 +310,7 @@ func OverwriteRules(items map[string]int, index string, end string) (returnMap m
 	for i < e+1 {
 		for key, value := range items {
 			rule := CharToIteratingRule(key, "o", i)
-			overwriteRule := FormatCharToIteratingRuleOutput(rule)
+			overwriteRule := FormatCharToIteratingRuleOutput(i, rule)
 			if overwriteRule != "" {
 				returnMap[overwriteRule] = value
 			}
@@ -346,8 +347,8 @@ func ToggleRules(items map[string]int, index string, end string) (returnMap map[
 
 	for i < e+1 {
 		for key, value := range items {
-			rule := StringToToggle(key, "T", i)
-			toggleRule := FormatCharToIteratingRuleOutput(rule)
+			rule := StringToToggleRule(key, "T", i)
+			toggleRule := FormatCharToIteratingRuleOutput(i, rule)
 			if toggleRule != "" {
 				returnMap[toggleRule] = value
 			}
