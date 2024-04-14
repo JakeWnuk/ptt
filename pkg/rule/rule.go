@@ -11,9 +11,9 @@ import (
 	"unicode"
 )
 
-// ----------------------------------------
+// ----------------------------------------------------------------------------
 // Transformation functions
-// ----------------------------------------
+// ----------------------------------------------------------------------------
 
 // LenToRule converts a string to a rule by its length
 //
@@ -92,9 +92,9 @@ func StringToToggle(str string, rule string, index int) string {
 	return strings.TrimSpace(result.String())
 }
 
-// ----------------------------------------
+// ----------------------------------------------------------------------------
 // Output functions
-// ----------------------------------------
+// ----------------------------------------------------------------------------
 
 // FormatCharToRuleOutput handles formatting of rule output
 // for CharToRule functions

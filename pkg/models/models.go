@@ -3,6 +3,7 @@ package models
 
 import (
 	"fmt"
+	"os"
 	"strings"
 )
 
@@ -74,5 +75,70 @@ func (i *IntRange) Set(value string) error {
 	} else if len(parts) == 2 {
 		fmt.Sscanf(value, "%d-%d", &i.Start, &i.End)
 	}
+	return nil
+}
+
+// ----------------------------------------------------------------------------
+// Unit Test Models
+// ----------------------------------------------------------------------------
+// These models are used to define the test cases that are used to test the
+// functions in the application. The intention is to provide a way to define
+// the test cases in a structured way.
+
+// FileSystem is an interface that is used to read files from the file system
+// This is used to allow the application to read files from the real file system
+// or from a mock file system for testing
+type FileSystem interface {
+	ReadFile(filename string) ([]byte, error)
+}
+
+// MockFileSystem is used to read files from the mock file system
+type MockFileSystem struct {
+	Files map[string][]byte
+}
+
+// Implements the ReadFile method of the FileSystem interface for the MockFileSystem
+func (m *MockFileSystem) ReadFile(filename string) ([]byte, error) {
+	if data, ok := m.Files[filename]; ok {
+		return data, nil
+	}
+	return nil, fmt.Errorf("file not found: %s", filename)
+}
+
+// RealFileSystem is used to read files from the real file system
+type RealFileSystem struct{}
+
+// ReadFile is used to read a file from the real file system
+func (r *RealFileSystem) ReadFile(filename string) ([]byte, error) {
+	return os.ReadFile(filename)
+}
+
+// Scanner is an interface that is used to read lines from a file
+type Scanner interface {
+	Scan() bool
+	Text() string
+	Err() error
+}
+
+// MockScanner is used to read lines from a mock file for testing
+type MockScanner struct {
+	Lines []string
+	Index int
+}
+
+// Implements the Scan, Text, and Err methods of the Scanner interface for the MockScanner
+func (m *MockScanner) Scan() bool {
+	return m.Index < len(m.Lines)
+}
+
+// Implements the Text method of the Scanner interface for the MockScanner
+func (m *MockScanner) Text() string {
+	line := m.Lines[m.Index]
+	m.Index++
+	return line
+}
+
+// Implements the Err method of the Scanner interface for the MockScanner
+func (m *MockScanner) Err() error {
 	return nil
 }

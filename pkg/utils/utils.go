@@ -2,34 +2,34 @@
 package utils
 
 import (
-	"bufio"
 	"fmt"
-	"os"
+	"ptt/pkg/models"
 	"regexp"
 	"strings"
 	"unicode"
 	"unicode/utf8"
 )
 
-// ----------------------------------------
+// ----------------------------------------------------------------------------
 // Loading and Processing Functions
-// ----------------------------------------
+// ----------------------------------------------------------------------------
 
 // ReadFilesToMap reads the contents of the multiple files and returns a map of words
 //
 // Args:
 //
+//	fs (FileSystem): The filesystem to read the files from (used for testing)
 //	filenames ([]string): The names of the files to read
 //
 // Returns:
 //
 //	(map[string]int): A map of words from the files
-func ReadFilesToMap(filenames []string) map[string]int {
+func ReadFilesToMap(fs models.FileSystem, filenames []string) map[string]int {
 	wordMap := make(map[string]int)
 
 	// Read the contents of the files and add the words to the map
 	for _, filename := range filenames {
-		data, err := os.ReadFile(filename)
+		data, err := fs.ReadFile(filename)
 		if err != nil {
 			panic(err)
 		}
@@ -51,15 +51,14 @@ func ReadFilesToMap(filenames []string) map[string]int {
 //
 // Args:
 //
-//	None
+//	scanner (models.Scanner): The scanner to read from stdin
 //
 // Returns:
 //
 //	map[string]int: A map of lines from stdin
 //	error: An error if one occurred
-func LoadStdinToMap() (map[string]int, error) {
+func LoadStdinToMap(scanner models.Scanner) (map[string]int, error) {
 	m := make(map[string]int)
-	scanner := bufio.NewScanner(os.Stdin)
 
 	for scanner.Scan() {
 		line := scanner.Text()
@@ -96,9 +95,9 @@ func CombineMaps(map1, map2 map[string]int) map[string]int {
 	return result
 }
 
-// ----------------------------------------
+// ----------------------------------------------------------------------------
 // Transformation Functions
-// ----------------------------------------
+// ----------------------------------------------------------------------------
 
 // ReverseString will return a string in reverse
 //
@@ -303,9 +302,9 @@ func ReplaceSubstring(original string, replacements map[string]int) []string {
 	return newStrings
 }
 
-// ----------------------------------------
+// ----------------------------------------------------------------------------
 // Validation Functions
-// ----------------------------------------
+// ----------------------------------------------------------------------------
 
 // CheckASCIIString checks to see if a string only contains ascii characters
 //
@@ -366,4 +365,28 @@ func CheckIsFuzzyMatch(original string, substr string) (bool, string) {
 	}
 
 	return false, ""
+}
+
+// CheckAreMapsEqual checks if two maps are equal by comparing the length of the maps
+// and the values of the keys in the maps. If the maps are equal, the function returns
+// true, otherwise it returns false.
+//
+// Args:
+//
+//	a (map[string]int): The first map to compare
+//	b (map[string]int): The second map to compare
+//
+// Returns:
+//
+//	bool: True if the maps are equal, false otherwise
+func CheckAreMapsEqual(a, b map[string]int) bool {
+	if len(a) != len(b) {
+		return false
+	}
+	for k, v := range a {
+		if w, ok := b[k]; !ok || v != w {
+			return false
+		}
+	}
+	return true
 }

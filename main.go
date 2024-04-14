@@ -2,6 +2,7 @@
 package main
 
 import (
+	"bufio"
 	"flag"
 	"fmt"
 	"os"
@@ -72,15 +73,16 @@ func main() {
 	}
 
 	// Parse any retain, remove, or transformation file arguments
-	retainMap := utils.ReadFilesToMap(retain)
-	removeMap := utils.ReadFilesToMap(remove)
-	readFilesMap := utils.ReadFilesToMap(readFiles)
-	transformationFilesMap := utils.ReadFilesToMap(transformationFiles)
+	fs := &models.RealFileSystem{}
+	retainMap := utils.ReadFilesToMap(fs, retain)
+	removeMap := utils.ReadFilesToMap(fs, remove)
+	readFilesMap := utils.ReadFilesToMap(fs, readFiles)
+	transformationFilesMap := utils.ReadFilesToMap(fs, transformationFiles)
 
 	// Read from stdin if provided
 	stat, _ := os.Stdin.Stat()
 	if (stat.Mode() & os.ModeCharDevice) == 0 {
-		primaryMap, err = utils.LoadStdinToMap()
+		primaryMap, err = utils.LoadStdinToMap(bufio.NewScanner(os.Stdin))
 		if err != nil {
 			fmt.Println("Error reading from stdin:", err)
 			return
