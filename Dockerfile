@@ -3,6 +3,7 @@ RUN mkdir src/app
 WORKDIR /src/app
 ADD ./main.go .
 ADD ./go.mod .
+ADD ./go.sum .
 ADD ./pkg ./pkg
 RUN go build .
 

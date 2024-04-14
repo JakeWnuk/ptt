@@ -1,4 +1,12 @@
- `ptt` or Password Transformation Tool is a multi-tool for working with text for password cracking. It can be used to transform text in a variety of ways for password cracking.
+ `ptt` or Password Transformation Tool is a multi-tool for working with files, URLs, and standard input for password cracking.
+
+## Features:
+- Transform input strings with various modes.
+- Creates `Hashcat` rules and masks from input strings.
+- Transforms input strings with a variety of functions for password cracking.
+- Accepts input from standard input, files, and URLs.
+- Works with multiple files and URLs for input and transformations.
+- All transformations support multibyte characters.
 
 ```
 $ ptt -h
@@ -9,7 +17,7 @@ Accepts standard input and/or additonal arguments.
 
 Options:
   -f value
-        Read additonal files for input.
+        Read additional files for input.
   -i value
         Starting index for transformations if applicable. Accepts ranges separated by '-'. (default 0)
   -k value
@@ -24,9 +32,11 @@ Options:
         Transformation to apply to input.
   -tf value
         Read additonal files for transformations if applicable.
+  -u value
+        Read additional URLs for input.
   -v    Show verbose output when possible.
 
-The '-f', '-k', '-r', and '-tf' flags can be used multiple times.
+The '-f', '-k', '-r', '-tf', and '-u' flags can be used multiple times.
 
 Transformation Modes:
   -t append
@@ -72,9 +82,10 @@ Transformation Modes:
 >[!NOTE]
 > This tool is still in development and considered early access. Please report any issues, bugs, or feature requests to the GitHub repository.
 
-Documentation on usage and examples can be found in the `/docs` directory or on the repository here: [link]()
+Documentation on usage and examples can be found in the `/docs` directory or on the repository here: [link](https://github.com/JakeWnuk/ptt/docs)
 
 ## Install:
+
 ### Source:
 Fast method with Go installed:
 ```
@@ -82,17 +93,17 @@ TODO
 ```
 Slow method with Go installed:
 ```
-git clone https://github.com/JakeWnuk/ptt && cd ptt && go build ./main.go && mv ./ptt ~/go/bin/ptt && cd ..
+git clone https://github.com/JakeWnuk/ptt && cd ptt && go build ./main.go && mv ./ptt ~/go/bin/ptt && ptt -h
 ```
 
 ### Docker:
 Pull the latest image from Docker Hub:
 ```
-TODO
+docker run -it -v ${PWD}:/data jwnuk/ptt -h
 ``` 
 Build the Docker image from the Dockerfile:
 ```
-TODO
+git clone https://github.com/JakeWnuk/ptt && cd ptt && docker build -t ptt . && docker run -it -v ${PWD}:/data ptt -h
 ```
 
 ### Binary:

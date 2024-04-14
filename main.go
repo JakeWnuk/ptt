@@ -19,8 +19,8 @@ var mutex = &sync.Mutex{}
 var retain models.FileArgumentFlag
 var remove models.FileArgumentFlag
 var readFiles models.FileArgumentFlag
+var readURLs models.FileArgumentFlag
 var transformationFiles models.FileArgumentFlag
-var transformationTemplates models.FileArgumentFlag
 var intRange models.IntRange
 var primaryMap map[string]int
 var err error
@@ -32,7 +32,7 @@ func main() {
 		fmt.Fprintf(os.Stderr, "ptt [options] [...]\nAccepts standard input and/or additonal arguments.\n\n")
 		fmt.Fprintf(os.Stderr, "Options:\n")
 		flag.PrintDefaults()
-		fmt.Fprintf(os.Stderr, "\nThe '-f', '-k', '-r', and '-tf' flags can be used multiple times.\n")
+		fmt.Fprintf(os.Stderr, "\nThe '-f', '-k', '-r', '-tf', and '-u' flags can be used multiple times.\n")
 		fmt.Fprintf(os.Stderr, "\nTransformation Modes:\n")
 		fmt.Fprintf(os.Stderr, "  -t append\n\tTransforms input into append rules.\n")
 		fmt.Fprintf(os.Stderr, "  -t append-remove\n\tTransforms input into append-remove rules.\n")
@@ -61,16 +61,11 @@ func main() {
 	replacementMask := flag.String("rm", "uldsb", "Replacement mask for transformations if applicable.")
 	flag.Var(&retain, "k", "Only keep items in a file.")
 	flag.Var(&remove, "r", "Only keep items not in a file.")
-	flag.Var(&readFiles, "f", "Read additonal files for input.")
+	flag.Var(&readFiles, "f", "Read additional files for input.")
 	flag.Var(&transformationFiles, "tf", "Read additonal files for transformations if applicable.")
 	flag.Var(&intRange, "i", "Starting index for transformations if applicable. Accepts ranges separated by '-'. (default 0)")
+	flag.Var(&readURLs, "u", "Read additional URLs for input.")
 	flag.Parse()
-
-	// Prevent use of templates with transformations
-	if len(transformationTemplates) > 0 && *transformation != "" {
-		fmt.Println("Error: Cannot use templates with transformations.")
-		return
-	}
 
 	// Parse any retain, remove, or transformation file arguments
 	fs := &models.RealFileSystem{}
@@ -78,6 +73,11 @@ func main() {
 	removeMap := utils.ReadFilesToMap(fs, remove)
 	readFilesMap := utils.ReadFilesToMap(fs, readFiles)
 	transformationFilesMap := utils.ReadFilesToMap(fs, transformationFiles)
+	readURLsMap, err := utils.ReadURLsToMap(readURLs)
+	if err != nil {
+		fmt.Println("Error reading URLs:", err)
+		return
+	}
 
 	// Read from stdin if provided
 	stat, _ := os.Stdin.Stat()
@@ -90,13 +90,13 @@ func main() {
 	}
 
 	// Combine stdin with any additional files
-	if len(primaryMap) == 0 && len(readFilesMap) == 0 {
+	if len(primaryMap) == 0 && len(readFilesMap) == 0 && len(readURLsMap) == 0 {
 		fmt.Println("No input provided. Exiting.")
 		return
 	} else if len(primaryMap) == 0 {
-		primaryMap = readFilesMap
-	} else if len(readFilesMap) > 0 {
-		primaryMap = utils.CombineMaps(primaryMap, readFilesMap)
+		primaryMap = utils.CombineMaps(readFilesMap, readURLsMap)
+	} else {
+		primaryMap = utils.CombineMaps(primaryMap, readFilesMap, readURLsMap)
 	}
 
 	// Apply transformation if provided

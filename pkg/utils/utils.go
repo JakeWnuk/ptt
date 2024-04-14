@@ -3,11 +3,17 @@ package utils
 
 import (
 	"fmt"
+	"io"
+	"net/http"
 	"ptt/pkg/models"
 	"regexp"
 	"strings"
+	"sync"
+	"time"
 	"unicode"
 	"unicode/utf8"
+
+	"golang.org/x/net/html"
 )
 
 // ----------------------------------------------------------------------------
@@ -72,27 +78,160 @@ func LoadStdinToMap(scanner models.Scanner) (map[string]int, error) {
 	return m, nil
 }
 
-// CombineMaps combines two maps into a single map combining values for common keys
+// ReadURLsToMap reads the contents of the multiple URLs and returns a map of words
+// from the URLs
+//
+// Args:
+//
+//	urls ([]string): The URLs to read
+//
+// Returns:
+//
+//	map[string]int: A map of words from the URLs
+//	error: An error if one occurred
+func ReadURLsToMap(urls []string) (map[string]int, error) {
+	wordMap := make(map[string]int)
+	var wg sync.WaitGroup
+
+	ch := make(chan string)
+
+	go func() {
+		for word := range ch {
+			wordMap[word]++
+		}
+	}()
+
+	for _, url := range urls {
+		wg.Add(1)
+		go ProcessURL(url, ch, &wg)
+	}
+
+	wg.Wait()
+	close(ch)
+
+	delete(wordMap, "")
+
+	return wordMap, nil
+}
+
+// CombineMaps combines any number of maps into a single map combining values for common keys
 // and returning a new map
 //
 // Args:
-// map1 (map[string]int): The first map
-// map2 (map[string]int): The second map
+// maps ([]map[string]int): The maps to combine
 //
 // Returns:
-// map[string]int: A new map combining the values of the two input maps
-func CombineMaps(map1, map2 map[string]int) map[string]int {
+// map[string]int: A new map combining the values of the input maps
+func CombineMaps(maps ...map[string]int) map[string]int {
 	result := make(map[string]int)
 
-	for k, v := range map1 {
-		result[k] = v
-	}
-
-	for k, v := range map2 {
-		result[k] += v
+	for _, m := range maps {
+		for k, v := range m {
+			result[k] += v
+		}
 	}
 
 	return result
+}
+
+// ProcessURL reads the contents of a URL and sends each sentence to the channel
+//
+// Args:
+//
+//	url (string): The URL to read
+//	ch (chan<- string): The channel to send the sentences to
+//	wg (*sync.WaitGroup): The WaitGroup to signal when done
+//
+// Returns:
+//
+//	None
+func ProcessURL(url string, ch chan<- string, wg *sync.WaitGroup) {
+	const maxRetries = 4
+	defer wg.Done()
+
+	var err error
+	var resp *http.Response
+	for attempts := 0; attempts <= maxRetries; attempts++ {
+
+		resp, err = http.Get(url)
+		if err != nil {
+			continue
+		}
+		defer resp.Body.Close()
+
+		if resp.StatusCode != http.StatusOK {
+			time.Sleep(time.Second)
+			continue
+		}
+
+		break
+	}
+
+	// Read Body
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		panic(err)
+	}
+	text := string(body)
+	text = html.UnescapeString(text)
+	var lines []string
+
+	// Check the Content-Type of the response
+	contentType := resp.Header.Get("Content-Type")
+	if strings.Contains(contentType, "text/html") {
+		// Parse the HTML
+		doc, err := html.Parse(strings.NewReader(text))
+		if err != nil {
+			panic(err)
+		}
+
+		// Traverse the HTML tree and extract the text
+		var f func(*html.Node)
+		f = func(n *html.Node) {
+			if n.Type == html.TextNode {
+				lines = append(lines, n.Data)
+			}
+			for c := n.FirstChild; c != nil; c = c.NextSibling {
+				f(c)
+			}
+		}
+		f(doc)
+	} else {
+		sentences := strings.Split(text, "\n")
+		for _, line := range sentences {
+			lines = append(lines, line)
+		}
+	}
+
+	// Iterate over the lines and split them
+	for _, line := range lines {
+		textMatch, _ := regexp.MatchString(`[^a-zA-Z0-9.,;:!?'"\- ]`, line)
+		if strings.Contains(contentType, "text/html") {
+			if textMatch {
+				continue
+			}
+		} else {
+			if !textMatch {
+				continue
+			}
+		}
+
+		sentences := strings.Split(line, ".")
+		for _, sentence := range sentences {
+			sentence = strings.TrimSpace(sentence)
+
+			phrases := strings.Split(sentence, ",")
+			for _, phrase := range phrases {
+				if phrase != "" {
+					ch <- phrase
+				}
+			}
+
+			if sentence != "" {
+				ch <- sentence
+			}
+		}
+	}
 }
 
 // ----------------------------------------------------------------------------

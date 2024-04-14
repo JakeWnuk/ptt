@@ -29,6 +29,8 @@ import (
 // ----------------------------------------------------------------------------
 // Functions without Unit Tests
 // ----------------------------------------------------------------------------
+// - ReadURLsToMap() (Loading and Processing Functions)
+// - ProcessURL() (Loading and Processing Functions)
 // - FuzzyReplaceSubstring() (Transformation Functions)
 // - CheckIsFuzzyMatch() (Validation Functions)
 
