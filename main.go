@@ -5,10 +5,10 @@ import (
 	"flag"
 	"fmt"
 	"os"
-	"ppt/pkg/format"
-	"ppt/pkg/models"
-	"ppt/pkg/transform"
-	"ppt/pkg/utils"
+	"ptt/pkg/format"
+	"ptt/pkg/models"
+	"ptt/pkg/transform"
+	"ptt/pkg/utils"
 	"sync"
 )
 

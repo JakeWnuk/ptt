@@ -5,7 +5,7 @@ package rule
 import (
 	"fmt"
 	"os"
-	"ppt/pkg/utils"
+	"ptt/pkg/utils"
 	"strconv"
 	"strings"
 	"unicode"

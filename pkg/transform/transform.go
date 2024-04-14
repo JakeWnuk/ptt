@@ -4,10 +4,10 @@ package transform
 import (
 	"fmt"
 	"os"
-	"ppt/pkg/format"
-	"ppt/pkg/mask"
-	"ppt/pkg/rule"
-	"ppt/pkg/utils"
+	"ptt/pkg/format"
+	"ptt/pkg/mask"
+	"ptt/pkg/rule"
+	"ptt/pkg/utils"
 )
 
 // ----------------------------------------------------------------------------

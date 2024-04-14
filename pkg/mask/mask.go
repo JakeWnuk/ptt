@@ -3,7 +3,7 @@ package mask
 
 import (
 	"fmt"
-	"ppt/pkg/utils"
+	"ptt/pkg/utils"
 	"strings"
 )
 
