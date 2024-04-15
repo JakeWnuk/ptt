@@ -62,7 +62,7 @@ func main() {
 	flag.Var(&retain, "k", "Only keep items in a file.")
 	flag.Var(&remove, "r", "Only keep items not in a file.")
 	flag.Var(&readFiles, "f", "Read additional files for input.")
-	flag.Var(&transformationFiles, "tf", "Read additonal files for transformations if applicable.")
+	flag.Var(&transformationFiles, "tf", "Read additional files for transformations if applicable.")
 	flag.Var(&intRange, "i", "Starting index for transformations if applicable. Accepts ranges separated by '-'. (default 0)")
 	flag.Var(&readURLs, "u", "Read additional URLs for input.")
 	flag.Parse()

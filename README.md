@@ -31,7 +31,7 @@ Options:
   -t string
         Transformation to apply to input.
   -tf value
-        Read additonal files for transformations if applicable.
+        Read additional files for transformations if applicable.
   -u value
         Read additional URLs for input.
   -v    Show verbose output when possible.
