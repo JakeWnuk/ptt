@@ -99,7 +99,7 @@ git clone https://github.com/JakeWnuk/ptt && cd ptt && go build ./main.go && mv 
 ### Docker:
 Pull the latest image from Docker Hub:
 ```
-docker run -it -v ${PWD}:/data jwnuk/ptt@latest
+docker run -it -v ${PWD}:/data jwnuk/ptt
 ``` 
 Build the Docker image from the Dockerfile:
 ```
