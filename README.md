@@ -93,17 +93,17 @@ TODO
 ```
 Slow method with Go installed:
 ```
-git clone https://github.com/JakeWnuk/ptt && cd ptt && go build ./main.go && mv ./ptt ~/go/bin/ptt && ptt -h
+git clone https://github.com/JakeWnuk/ptt && cd ptt && go build ./main.go && mv ./ptt ~/go/bin/ptt && ptt
 ```
 
 ### Docker:
 Pull the latest image from Docker Hub:
 ```
-docker run -it -v ${PWD}:/data jwnuk/ptt -h
+docker run -it -v ${PWD}:/data jwnuk/ptt@latest
 ``` 
 Build the Docker image from the Dockerfile:
 ```
-git clone https://github.com/JakeWnuk/ptt && cd ptt && docker build -t ptt . && docker run -it -v ${PWD}:/data ptt -h
+git clone https://github.com/JakeWnuk/ptt && cd ptt && docker build -t ptt . && docker run -it -v ${PWD}:/data ptt
 ```
 
 ### Binary:
