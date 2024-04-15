@@ -32,7 +32,7 @@ func main() {
 		fmt.Fprintf(os.Stderr, "ptt [options] [...]\nAccepts standard input and/or additonal arguments.\n\n")
 		fmt.Fprintf(os.Stderr, "Options:\n")
 		flag.PrintDefaults()
-		fmt.Fprintf(os.Stderr, "\nThe '-f', '-k', '-r', '-tf', and '-u' flags can be used multiple times.\n")
+		fmt.Fprintf(os.Stderr, "\nThe -f, -k, -r, -tf, and -u flags can be used multiple times.\n")
 		fmt.Fprintf(os.Stderr, "\nTransformation Modes:\n")
 		fmt.Fprintf(os.Stderr, "  -t append\n\tTransforms input into append rules.\n")
 		fmt.Fprintf(os.Stderr, "  -t append-remove\n\tTransforms input into append-remove rules.\n")
@@ -52,6 +52,7 @@ func main() {
 		fmt.Fprintf(os.Stderr, "  -t match -tf [file]\n\tTransforms input by keeping only strings with matching masks from a mask file.\n")
 		fmt.Fprintf(os.Stderr, "  -t fuzzy-swap -tf [file]\n\tTransforms input by swapping tokens with fuzzy matches from another file.\n")
 		fmt.Fprintf(os.Stderr, "  -t swap -tf [file]\n\tTransforms input by swapping tokens with exact matches from a ':' separated file.\n")
+		fmt.Fprintf(os.Stderr, "  -t pop -rm [uldsb]\n\tTransforms input by generating tokens exluding characters not part of the mask.\n")
 	}
 
 	// Define command line flags

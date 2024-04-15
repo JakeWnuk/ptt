@@ -4,12 +4,10 @@
 - Transform input strings with various modes.
 - Creates `Hashcat` rules and masks from input strings.
 - Transforms input strings with a variety of functions for password cracking.
-- Accepts input from standard input, files, and URLs.
-- Works with multiple files and URLs for input and transformations.
+- Accepts input from multiple sources including; standard input, files, and URLs.
 - All transformations support multibyte characters.
 
 ```
-$ ptt -h
 Usage of Password Transformation Tool (ptt) version (0.0.0):
 
 ptt [options] [...]
@@ -36,7 +34,7 @@ Options:
         Read additional URLs for input.
   -v    Show verbose output when possible.
 
-The '-f', '-k', '-r', '-tf', and '-u' flags can be used multiple times.
+The -f, -k, -r, -tf, and -u flags can be used multiple times.
 
 Transformation Modes:
   -t append
@@ -75,6 +73,8 @@ Transformation Modes:
         Transforms input by swapping tokens with fuzzy matches from another file.
   -t swap -tf [file]
         Transforms input by swapping tokens with exact matches from a ':' separated file.
+  -t pop -rm [uldsb]
+        Transforms input by generating tokens exluding characters not part of the mask.
 ```
 
 ## Getting Started:

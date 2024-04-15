@@ -22,6 +22,7 @@ import (
 //
 // ** Mask Utility Functions **
 // - MakeMatchedMaskedMap()
+// - BoundarySplitPopMap()
 //
 // ----------------------------------------------------------------------------
 // Functions without Unit Tests
@@ -253,6 +254,34 @@ func TestMakeMatchedMaskedMap(t *testing.T) {
 	for _, test := range tests {
 		output := MakeMatchedMaskedMap(test.input, test.replacements, test.masks)
 		if utils.CheckAreMapsEqual(output, test.output) == false {
+			t.Errorf("Test failed: %v inputted, %v expected, %v returned", test.input, test.output, output)
+		}
+	}
+}
+
+// Unit Test for BoundarySplitPopMap()
+func TestBoundarySplitPopMap(t *testing.T) {
+
+	// Define a test case struct
+	type testCase struct {
+		input        map[string]int
+		replacements string
+		output       map[string]int
+	}
+
+	type testCases []testCase
+
+	// Define test cases
+	tests := testCases{
+		{map[string]int{"abc123": 1, "ABC": 2, "ABCabc123!!!": 3}, "luds", map[string]int{"!!!": 1, "ABC": 2, "abc": 2, "123": 2}},
+		{map[string]int{"123ABC": 1, "123456ABC": 2, "1Z2X39": 3}, "d", map[string]int{"1": 1, "123": 1, "123456": 1, "2": 1, "39": 1}},
+		{map[string]int{"12🙂test": 1, "😀test": 2, "test😁": 3}, "b", map[string]int{"🙂": 1, "😀": 1, "😁": 1}},
+	}
+
+	// Run test cases
+	for _, test := range tests {
+		output := BoundarySplitPopMap(test.input, test.replacements)
+		if !utils.CheckAreMapsEqual(output, test.output) {
 			t.Errorf("Test failed: %v inputted, %v expected, %v returned", test.input, test.output, output)
 		}
 	}
