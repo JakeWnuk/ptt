@@ -82,7 +82,7 @@ Transformation Modes:
 >[!NOTE]
 > This tool is still in development and considered early access. Please report any issues, bugs, or feature requests to the GitHub repository.
 
-Documentation on usage and examples can be found in the `/docs` directory or on the repository here: [link](https://github.com/JakeWnuk/ptt/docs)
+Documentation on usage and examples can be found in the `/docs` directory or on the repository here: [link](https://github.com/JakeWnuk/ptt/tree/main/docs)
 
 ## Install:
 
