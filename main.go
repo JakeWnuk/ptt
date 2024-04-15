@@ -91,7 +91,7 @@ func main() {
 
 	// Combine stdin with any additional files
 	if len(primaryMap) == 0 && len(readFilesMap) == 0 && len(readURLsMap) == 0 {
-		fmt.Println("No input provided. Exiting.")
+		flag.Usage()
 		return
 	} else if len(primaryMap) == 0 {
 		primaryMap = utils.CombineMaps(readFilesMap, readURLsMap)
