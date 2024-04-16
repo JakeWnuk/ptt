@@ -34,61 +34,61 @@ import (
 //	(map[string]int): A map of transformed values
 func TransformationController(input map[string]int, mode string, startingIndex int, endingIndex int, verbose bool, replacementMask string, transformationFilesMap map[string]int) (output map[string]int) {
 	switch mode {
-	case "append", "append-remove", "append-shift":
+	case "append", "append-remove", "append-shift", "a":
 		output = rule.AppendRules(input, mode)
-	case "prepend", "prepend-remove", "prepend-shift":
+	case "prepend", "prepend-remove", "prepend-shift", "ar":
 		output = rule.PrependRules(input, mode)
-	case "insert":
+	case "insert", "i":
 		strIndex := fmt.Sprintf("%d", startingIndex)
 		endIndex := fmt.Sprintf("%d", endingIndex)
 		output = rule.InsertRules(input, strIndex, endIndex)
-	case "overwrite":
+	case "overwrite", "o":
 		strIndex := fmt.Sprintf("%d", startingIndex)
 		endIndex := fmt.Sprintf("%d", endingIndex)
 		output = rule.OverwriteRules(input, strIndex, endIndex)
-	case "toggle":
+	case "toggle", "t":
 		strIndex := fmt.Sprintf("%d", startingIndex)
 		endIndex := fmt.Sprintf("%d", endingIndex)
 		output = rule.ToggleRules(input, strIndex, endIndex)
-	case "encode":
+	case "encode", "e":
 		output = format.EncodeInputMap(input)
-	case "decode":
+	case "decode", "de":
 		output = format.DecodeInputMap(input)
-	case "mask", "partial-mask", "partial":
+	case "mask", "partial-mask", "partial", "m":
 		output = mask.MakeMaskedMap(input, replacementMask, verbose)
-	case "dehex", "unhex":
+	case "dehex", "unhex", "dh":
 		output = format.DehexMap(input)
 	case "hex", "rehex":
 		output = format.HexEncodeMap(input)
-	case "remove", "remove-all", "delete", "delete-all":
+	case "remove", "remove-all", "delete", "delete-all", "rm":
 		input = mask.MakeMaskedMap(input, replacementMask, verbose)
 		output = mask.RemoveMaskedCharacters(input)
-	case "retain-mask", "retain":
+	case "retain-mask", "retain", "r":
 		if len(transformationFilesMap) == 0 {
 			fmt.Println("Retain masks require use of one or more -tf flags to specify one or more files")
 			os.Exit(1)
 		}
 		output = mask.MakeRetainMaskedMap(input, replacementMask, transformationFilesMap)
-	case "match-mask", "match":
+	case "match-mask", "match", "mt":
 		if len(transformationFilesMap) == 0 {
 			fmt.Println("Match masks require use of one or more -tf flags to specify one or more files")
 			os.Exit(1)
 		}
 		output = mask.MakeMatchedMaskedMap(input, replacementMask, transformationFilesMap)
-	case "fuzzy-swap", "fuzzy-replace", "fuzzy", "fuzz", "mutate":
+	case "fuzzy-swap", "fuzzy-replace", "fuzzy", "fuzz", "mutate", "fs":
 		if len(transformationFilesMap) == 0 {
 			fmt.Println("Swap operations require use of one or more -tf flags to specify one or more files")
 			os.Exit(1)
 		}
 		output = FuzzyReplaceKeysInMap(input, transformationFilesMap)
-	case "swap", "replace":
+	case "swap", "replace", "s":
 		if len(transformationFilesMap) == 0 {
 			fmt.Println("Swap operations require use of one or more -tf flags to specify one or more files")
 			fmt.Println("This transformation mode requres a ':' separated list of keys to swap")
 			os.Exit(1)
 		}
 		output = ReplaceKeysInMap(input, transformationFilesMap)
-	case "pop", "split", "boundary-split", "boundary-pop", "pop-split", "split-pop":
+	case "pop", "split", "boundary-split", "boundary-pop", "pop-split", "split-pop", "po":
 		output = mask.BoundarySplitPopMap(input, replacementMask)
 	default:
 		output = input

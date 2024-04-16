@@ -51,40 +51,40 @@ Transformation Modes:
         Transforms input into append-remove rules.
   -t append-shift
         Transforms input into append-shift rules.
+  -t decode
+        Transforms input by URL, HTML, and Unicode escape decoding.
+  -t dehex
+        Transforms input by decoding $HEX[...] formatted strings.
+  -t encode
+        Transforms input by URL, HTML, and Unicode escape encoding.
+  -t fuzzy-swap -tf [file]
+        Transforms input by swapping tokens with fuzzy matches from another file.
+  -t hex
+        Transforms input by encoding strings into $HEX[...] format.
+  -t insert -i [index]
+        Transforms input into insert rules starting at index.
+  -t mask -rm [uldsb] -v
+        Transforms input by masking characters with provided mask.
+  -t match -tf [file]
+        Transforms input by keeping only strings with matching masks from a mask file.
+  -t overwrite -i [index]
+        Transforms input into overwrite rules starting at index.
+  -t pop -rm [uldsb]
+        Transforms input by generating tokens from popping strings at character boundaries.
   -t prepend
         Transforms input into prepend rules.
   -t prepend-remove
         Transforms input into prepend-remove rules.
   -t prepend-shift
         Transforms input into prepend-shift rules.
-  -t insert -i [index]
-        Transforms input into insert rules starting at index.
-  -t overwrite -i [index]
-        Transforms input into overwrite rules starting at index.
-  -t toggle -i [index]
-        Transforms input into toggle rules starting at index.
-  -t encode
-        Transforms input by URL, HTML, and Unicode escape encoding.
-  -t decode
-        Transforms input by URL, HTML, and Unicode escape decoding.
-  -t dehex
-        Transforms input by decoding $HEX[...] formatted strings.
-  -t hex
-        Transforms input by encoding strings into $HEX[...] format.
-  -t mask -rm [uldsb] -v
-        Transforms input by masking characters with provided mask.
   -t remove -rm [uldsb] -v
         Transforms input by removing characters with provided mask characters.
   -t retain -rm [uldsb] -tf [file]
         Transforms input by creating masks that still retain strings from file.
-  -t match -tf [file]
-        Transforms input by keeping only strings with matching masks from a mask file.
-  -t fuzzy-swap -tf [file]
-        Transforms input by swapping tokens with fuzzy matches from another file.
   -t swap -tf [file]
         Transforms input by swapping tokens with exact matches from a ':' separated file.
-  -t pop -rm [uldsb]
-        Transforms input by generating tokens excluding characters not part of the mask.
+  -t toggle -i [index]
+        Transforms input into toggle rules starting at index.
 ```
 
 ## Getting Started:
@@ -94,9 +94,9 @@ Transformation Modes:
 
 Documentation on usage and examples can be found in the `/docs` directory or on the repository here: [link](https://github.com/JakeWnuk/ptt/tree/main/docs)
 
-## Install:
+### Install:
 
-### Source:
+#### Source:
 Fast method with Go installed:
 ```
 TODO
@@ -106,7 +106,7 @@ Slow method with Go installed:
 git clone https://github.com/JakeWnuk/ptt && cd ptt && go build ./main.go && mv ./main ~/go/bin/ptt && ptt
 ```
 
-### Docker:
+#### Docker:
 Pull the latest image from Docker Hub:
 ```
 docker run -it -v ${PWD}:/data jwnuk/ptt
@@ -116,7 +116,7 @@ Build the Docker image from the Dockerfile:
 git clone https://github.com/JakeWnuk/ptt && cd ptt && docker build -t ptt . && docker run -it -v ${PWD}:/data ptt
 ```
 
-### Binary:
+#### Binary:
 Download the latest release from the GitHub repository:
 ```
 TODO
