@@ -24,6 +24,8 @@ Options:
         Keeps output equal to or within a range of lengths. Accepts ranges separated by '-'. (default 0)
   -m int
         Minimum numerical frequency to include in output.
+  -n int
+        Maximum number of items to display in verbose statistics output. (default 25)
   -r value
         Only keep items not in a file.
   -rm string
@@ -35,8 +37,6 @@ Options:
   -u value
         Read additional URLs for input.
   -v    Show verbose output when possible.
-  -vs int
-        Maximum number of items to display in verbose statistics output. (default 25)
   -vv
         Show statistics output when possible.
   -vvv

@@ -61,7 +61,7 @@ func main() {
 	verbose2 := flag.Bool("vv", false, "Show statistics output when possible.")
 	verbose3 := flag.Bool("vvv", false, "Show verbose statistics output when possible.")
 	minimum := flag.Int("m", 0, "Minimum numerical frequency to include in output.")
-	verboseStatsMax := flag.Int("vs", 25, "Maximum number of items to display in verbose statistics output.")
+	verboseStatsMax := flag.Int("n", 25, "Maximum number of items to display in verbose statistics output.")
 	transformation := flag.String("t", "", "Transformation to apply to input.")
 	replacementMask := flag.String("rm", "uldsb", "Replacement mask for transformations if applicable.")
 	flag.Var(&retain, "k", "Only keep items in a file.")
