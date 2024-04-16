@@ -10,6 +10,7 @@ import (
 	"ptt/pkg/models"
 	"ptt/pkg/transform"
 	"ptt/pkg/utils"
+	"sort"
 	"sync"
 )
 
@@ -34,26 +35,41 @@ func main() {
 		fmt.Fprintf(os.Stderr, "Options:\n")
 		flag.PrintDefaults()
 		fmt.Fprintf(os.Stderr, "\nThe -f, -k, -r, -tf, and -u flags can be used multiple times.\n")
-		fmt.Fprintf(os.Stderr, "\nTransformation Modes:\n")
-		fmt.Fprintf(os.Stderr, "  -t append\n\tTransforms input into append rules.\n")
-		fmt.Fprintf(os.Stderr, "  -t append-remove\n\tTransforms input into append-remove rules.\n")
-		fmt.Fprintf(os.Stderr, "  -t append-shift\n\tTransforms input into append-shift rules.\n")
-		fmt.Fprintf(os.Stderr, "  -t prepend\n\tTransforms input into prepend rules.\n")
-		fmt.Fprintf(os.Stderr, "  -t prepend-remove\n\tTransforms input into prepend-remove rules.\n")
-		fmt.Fprintf(os.Stderr, "  -t prepend-shift\n\tTransforms input into prepend-shift rules.\n")
-		fmt.Fprintf(os.Stderr, "  -t insert -i [index]\n\tTransforms input into insert rules starting at index.\n")
-		fmt.Fprintf(os.Stderr, "  -t overwrite -i [index]\n\tTransforms input into overwrite rules starting at index.\n")
-		fmt.Fprintf(os.Stderr, "  -t toggle -i [index]\n\tTransforms input into toggle rules starting at index.\n")
-		fmt.Fprintf(os.Stderr, "  -t encode\n\tTransforms input by URL, HTML, and Unicode escape encoding.\n")
-		fmt.Fprintf(os.Stderr, "  -t mask -rm [uldsb] -v\n\tTransforms input by masking characters with provided mask.\n")
-		fmt.Fprintf(os.Stderr, "  -t dehex\n\tTransforms input by decoding $HEX[...] formatted strings.\n")
-		fmt.Fprintf(os.Stderr, "  -t hex\n\tTransforms input by encoding strings into $HEX[...] format.\n")
-		fmt.Fprintf(os.Stderr, "  -t remove -rm [uldsb] -v\n\tTransforms input by removing characters with provided mask characters.\n")
-		fmt.Fprintf(os.Stderr, "  -t retain -rm [uldsb] -tf [file]\n\tTransforms input by creating masks that still retain strings from file.\n")
-		fmt.Fprintf(os.Stderr, "  -t match -tf [file]\n\tTransforms input by keeping only strings with matching masks from a mask file.\n")
-		fmt.Fprintf(os.Stderr, "  -t fuzzy-swap -tf [file]\n\tTransforms input by swapping tokens with fuzzy matches from another file.\n")
-		fmt.Fprintf(os.Stderr, "  -t swap -tf [file]\n\tTransforms input by swapping tokens with exact matches from a ':' separated file.\n")
-		fmt.Fprintf(os.Stderr, "  -t pop -rm [uldsb]\n\tTransforms input by generating tokens excluding characters not part of the mask.\n")
+		fmt.Fprintln(os.Stderr, "\nTransformation Modes:")
+		modes := map[string]string{
+			"append":                        "Transforms input into append rules.",
+			"append-remove":                 "Transforms input into append-remove rules.",
+			"append-shift":                  "Transforms input into append-shift rules.",
+			"prepend":                       "Transforms input into prepend rules.",
+			"prepend-remove":                "Transforms input into prepend-remove rules.",
+			"prepend-shift":                 "Transforms input into prepend-shift rules.",
+			"insert -i [index]":             "Transforms input into insert rules starting at index.",
+			"overwrite -i [index]":          "Transforms input into overwrite rules starting at index.",
+			"toggle -i [index]":             "Transforms input into toggle rules starting at index.",
+			"encode":                        "Transforms input by URL, HTML, and Unicode escape encoding.",
+			"decode":                        "Transforms input by URL, HTML, and Unicode escape decoding.",
+			"hex":                           "Transforms input by encoding strings into $HEX[...] format.",
+			"dehex":                         "Transforms input by decoding $HEX[...] formatted strings.",
+			"mask -rm [uldsb] -v":           "Transforms input by masking characters with provided mask.",
+			"remove -rm [uldsb] -v":         "Transforms input by removing characters with provided mask characters.",
+			"retain -rm [uldsb] -tf [file]": "Transforms input by creating masks that still retain strings from file.",
+			"pop -rm [uldsb]":               "Transforms input by generating tokens from popping strings at character boundaries.",
+			"match -tf [file]":              "Transforms input by keeping only strings with matching masks from a mask file.",
+			"fuzzy-swap -tf [file]":         "Transforms input by swapping tokens with fuzzy matches from another file.",
+			"swap -tf [file]":               "Transforms input by swapping tokens with exact matches from a ':' separated file.",
+		}
+
+		// Sort and print transformation modes
+		keys := make([]string, 0, len(modes))
+		for k := range modes {
+			keys = append(keys, k)
+		}
+		sort.Strings(keys)
+
+		for _, k := range keys {
+			fmt.Fprintf(os.Stderr, "  -t %s\n\t%s\n", k, modes[k])
+		}
+
 	}
 
 	// Define command line flags
@@ -61,7 +77,7 @@ func main() {
 	verbose2 := flag.Bool("vv", false, "Show statistics output when possible.")
 	verbose3 := flag.Bool("vvv", false, "Show verbose statistics output when possible.")
 	minimum := flag.Int("m", 0, "Minimum numerical frequency to include in output.")
-	verboseStatsMax := flag.Int("vs", 25, "Maximum number of items to display in verbose statistics output.")
+	verboseStatsMax := flag.Int("n", 25, "Maximum number of items to display in verbose statistics output.")
 	transformation := flag.String("t", "", "Transformation to apply to input.")
 	replacementMask := flag.String("rm", "uldsb", "Replacement mask for transformations if applicable.")
 	flag.Var(&retain, "k", "Only keep items in a file.")

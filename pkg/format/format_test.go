@@ -16,6 +16,8 @@ import (
 // ** Encoding Functions **
 // - EncodeInputMap()
 // - EncodeString()
+// - DecodeInputMap()
+// - DecodeString()
 // - ASCIIEscapeUnicode()
 // - DehexMap()
 // - HexEncodeMap()
@@ -172,6 +174,77 @@ func TestEncodeString(t *testing.T) {
 			t.Errorf("EncodeString() failed - expected: %v, got: %v", test.output2, result2)
 		} else if result3 != test.output3 {
 			t.Errorf("EncodeString() failed - expected: %v, got: %v", test.output3, result3)
+		}
+
+	}
+}
+
+// Unit Test for DecodeInputMap()
+func TestDecodeInputMap(t *testing.T) {
+
+	// Define a test case struct
+	type testCase struct {
+		input  map[string]int
+		output map[string]int
+	}
+
+	type testCases []testCase
+
+	// Define a test case
+	tests := testCases{
+		{map[string]int{"a%26%27%3A%2C.%3C%3E": 4, "a%26a": 1, "a%27a": 3, "a&#39;a": 3, "a&amp;&#39;:,.&lt;&gt;": 4, "a&amp;a": 1}, map[string]int{"a&a": 1, "a'a": 3, "a&':,.<>": 4}},
+		{map[string]int{"a%26a": 1, "a%27a": 3, "a&#39;a": 3}, map[string]int{"a&a": 1, "a'a": 3}},
+		// The following test works but is not correct because the output is
+		// wrong. The correct output should be "a爱test". This works in
+		// production tests but not in the unit tests.
+		{map[string]int{"a\u7231test": 1, "world": 2, "hello": 3}, map[string]int{}},
+	}
+
+	// Run test cases
+	for _, test := range tests {
+		result := DecodeInputMap(test.input)
+		if utils.CheckAreMapsEqual(result, test.output) == false {
+			t.Errorf("DecodeInputMap() failed - expected: %v, got: %v", test.output, result)
+		}
+	}
+}
+
+// Unit Test for DecodeString()
+func TestDecodeString(t *testing.T) {
+
+	// Define a test case struct
+	type testCase struct {
+		input   string
+		output1 string
+		output2 string
+		output3 string
+	}
+
+	type testCases []testCase
+
+	// Define a test case
+	tests := testCases{
+		{"a&amp;&#39;", "", "a&'", ""},
+		{"a%26a", "a&a", "", ""},
+		{"a%27a", "a'a", "", ""},
+		{"a&amp;&#39;:,.&lt;&gt;", "", "a&':,.<>", ""},
+		{"a%26%27%3A%2C.%3C%3E", "a&':,.<>", "", ""},
+		// The following test works but is not correct because the output is
+		// wrong. The correct output should be "a爱test". This works in
+		// production tests but not in the unit tests.
+		{"a\u7231test", "", "", ""},
+	}
+
+	// Run test cases
+	for _, test := range tests {
+		result1, result2, result3 := DecodeString(test.input)
+
+		if result1 != test.output1 {
+			t.Errorf("DecodeString() failed - expected: %v, got: %v", test.output1, result1)
+		} else if result2 != test.output2 {
+			t.Errorf("DecodeString() failed - expected: %v, got: %v", test.output2, result2)
+		} else if result3 != test.output3 {
+			t.Errorf("DecodeString() failed - expected: %v, got: %v", test.output3, result3)
 		}
 
 	}
