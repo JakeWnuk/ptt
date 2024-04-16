@@ -9,6 +9,7 @@ import (
 	"os"
 	"ptt/pkg/models"
 	"sort"
+	"strconv"
 	"strings"
 	"unicode"
 )
@@ -386,6 +387,72 @@ func EncodeString(s string) (string, string, string) {
 	return urlEncoded, htmlEncoded, escapedEncoded
 }
 
+// DecodeInputMap will decode a map of URL, HTML, and unicode escaped strings
+// where possible and return a new map of decoded strings.
+//
+// Args:
+//
+//	input (map[string]int): A map of input strings
+//
+// Returns:
+//
+//	(map[string]int): A new map of decoded strings
+func DecodeInputMap(input map[string]int) map[string]int {
+	output := make(map[string]int)
+	for k, v := range input {
+		urlDecoded, htmlDecoded, escapeDecoded := DecodeString(k)
+
+		if urlDecoded != "" {
+			output[urlDecoded] = v
+		}
+
+		if htmlDecoded != "" {
+			output[htmlDecoded] = v
+		}
+
+		if escapeDecoded != "" {
+			output[escapeDecoded] = v
+		}
+	}
+	return output
+}
+
+// DecodeString is used to URL and HTML decode a string where possible this
+// will only return the decoded string if it is different from the input string
+//
+// Args:
+//
+//	s (string): Input string
+//
+// Returns:
+//
+//	urlDecoded (string): Input string URL decoded
+//	htmlDecoded (string): Input string HTML decoded
+//	escapedDecoded (string): Input string unicode escaped decoded
+func DecodeString(s string) (string, string, string) {
+	urlDecoded, err := url.QueryUnescape(s)
+	if err != nil {
+		urlDecoded = ""
+	}
+
+	htmlDecoded := html.UnescapeString(s)
+	escapedDecoded := DeASCIIEscapeUnicode(s)
+
+	if urlDecoded == s {
+		urlDecoded = ""
+	}
+
+	if htmlDecoded == s {
+		htmlDecoded = ""
+	}
+
+	if escapedDecoded == s && !strings.Contains(escapedDecoded, "\\u") {
+		escapedDecoded = ""
+	}
+
+	return urlDecoded, htmlDecoded, escapedDecoded
+}
+
 // ASCIIEscapeUnicode will convert a string into an unicode escaped format
 //
 // Args:
@@ -409,6 +476,38 @@ func ASCIIEscapeUnicode(str string) string {
 		}
 	}
 	return string(escapedRunes)
+}
+
+// DeASCIIEscapeUnicode will convert a string from an unicode escaped format to
+// its string representation. This function will only convert the unicode escaped
+// characters if they are in the format \uXXXX where X is a hexadecimal digit.
+//
+// Args:
+//
+//	str (string): String to unescape
+//
+// Returns:
+//
+//	unescapedRunes (string): Converted runes in string format
+func DeASCIIEscapeUnicode(str string) string {
+	runes := []rune(str)
+	unescapedRunes := make([]rune, 0, len(runes))
+
+	for i := 0; i < len(runes); i++ {
+		if runes[i] == '\\' && runes[i+1] == 'u' {
+			// The rune is a unicode escape
+			unicodeHex := string(runes[i+2 : i+6])
+			unicodeValue, err := strconv.ParseInt(unicodeHex, 16, 32)
+			if err != nil {
+				continue
+			}
+			unescapedRunes = append(unescapedRunes, rune(unicodeValue))
+			i += 5
+		} else {
+			unescapedRunes = append(unescapedRunes, runes[i])
+		}
+	}
+	return string(unescapedRunes)
 }
 
 // DehexMap will decode a map of hex encoded strings and return a new map of decoded strings

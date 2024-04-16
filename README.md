@@ -65,12 +65,14 @@ Transformation Modes:
         Transforms input into toggle rules starting at index.
   -t encode
         Transforms input by URL, HTML, and Unicode escape encoding.
-  -t mask -rm [uldsb] -v
-        Transforms input by masking characters with provided mask.
+  -t decode
+        Transforms input by URL, HTML, and Unicode escape decoding.
   -t dehex
         Transforms input by decoding $HEX[...] formatted strings.
   -t hex
         Transforms input by encoding strings into $HEX[...] format.
+  -t mask -rm [uldsb] -v
+        Transforms input by masking characters with provided mask.
   -t remove -rm [uldsb] -v
         Transforms input by removing characters with provided mask characters.
   -t retain -rm [uldsb] -tf [file]

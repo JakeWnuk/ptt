@@ -52,6 +52,8 @@ func TransformationController(input map[string]int, mode string, startingIndex i
 		output = rule.ToggleRules(input, strIndex, endIndex)
 	case "encode":
 		output = format.EncodeInputMap(input)
+	case "decode":
+		output = format.DecodeInputMap(input)
 	case "mask", "partial-mask", "partial":
 		output = mask.MakeMaskedMap(input, replacementMask, verbose)
 	case "dehex", "unhex":
