@@ -152,7 +152,6 @@ keywords above:
 - `ptt -k keep.txt`: Keep only items in a file.
 - `ptt -r remove.txt`: Keep only items not in a file.
 - `ptt -k keep.txt -r remove.txt`: Keep only items in a file and not in another.
-- `ptt -k keep.txt -r remove.txt -f keep2.txt -f remove2.txt`: Keep only items in two files and not in two others.
 - `ppt -l 8`: Keep only items equal to a length.
 - `ppt -l 8-12`: Keep only items within a range of lengths.
 - `ptt -m 10`: Keep only items with a minimum frequency.
