@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"ptt/pkg/utils"
 	"strings"
+	"unicode"
 )
 
 // ----------------------------------------------------------------------------
@@ -293,4 +294,55 @@ func MakeMatchedMaskedMap(input map[string]int, replacementMask string, maskMap 
 		}
 	}
 	return maskedMap
+}
+
+// BoundarySplitPopMap splits the index of the input map into tokens based on
+// the provided mask string provided and returns a new map with the tokens
+// as keys and the values as the values
+//
+// Args:
+//
+//	input (map[string]int): Input map
+//	replacementMask (string): Mask characters to apply
+//
+// Returns:
+//
+//	(map[string]int): Boundary split map
+func BoundarySplitPopMap(input map[string]int, replacementMask string) map[string]int {
+	result := make(map[string]int)
+	for s, _ := range input {
+		token := ""
+		var lastRuneType rune
+		var runeType rune
+		for _, r := range s {
+			switch {
+			case unicode.IsLower(r):
+				runeType = 'l'
+			case unicode.IsUpper(r):
+				runeType = 'u'
+			case unicode.IsDigit(r):
+				runeType = 'd'
+			// !\"#$%&\\()*+,-./:;<=>?@[\\]^_`{|}~'
+			case strings.ContainsRune("!\"#$%&\\()*+,-./:;<=>?@[\\]^_`{|}~'", r):
+				runeType = 's'
+			default:
+				runeType = 'b'
+			}
+
+			if (lastRuneType != 0 && lastRuneType != runeType) || !strings.ContainsRune(replacementMask, runeType) {
+				if token != "" {
+					result[token]++
+					token = ""
+				}
+			}
+			if strings.ContainsRune(replacementMask, runeType) {
+				token += string(r)
+			}
+			lastRuneType = runeType
+		}
+		if token != "" {
+			result[token]++
+		}
+	}
+	return result
 }

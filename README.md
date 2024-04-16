@@ -4,12 +4,10 @@
 - Transform input strings with various modes.
 - Creates `Hashcat` rules and masks from input strings.
 - Transforms input strings with a variety of functions for password cracking.
-- Accepts input from standard input, files, and URLs.
-- Works with multiple files and URLs for input and transformations.
+- Accepts input from multiple sources including; standard input, files, and URLs.
 - All transformations support multibyte characters.
 
 ```
-$ ptt -h
 Usage of Password Transformation Tool (ptt) version (0.0.0):
 
 ptt [options] [...]
@@ -22,6 +20,8 @@ Options:
         Starting index for transformations if applicable. Accepts ranges separated by '-'. (default 0)
   -k value
         Only keep items in a file.
+  -l value
+        Keeps output equal to or within a range of lengths. Accepts ranges separated by '-'. (default 0)
   -m int
         Minimum numerical frequency to include in output.
   -r value
@@ -35,8 +35,14 @@ Options:
   -u value
         Read additional URLs for input.
   -v    Show verbose output when possible.
+  -vs int
+        Maximum number of items to display in verbose statistics output. (default 25)
+  -vv
+        Show statistics output when possible.
+  -vvv
+        Show verbose statistics output when possible.
 
-The '-f', '-k', '-r', '-tf', and '-u' flags can be used multiple times.
+The -f, -k, -r, -tf, and -u flags can be used multiple times.
 
 Transformation Modes:
   -t append
@@ -75,6 +81,8 @@ Transformation Modes:
         Transforms input by swapping tokens with fuzzy matches from another file.
   -t swap -tf [file]
         Transforms input by swapping tokens with exact matches from a ':' separated file.
+  -t pop -rm [uldsb]
+        Transforms input by generating tokens excluding characters not part of the mask.
 ```
 
 ## Getting Started:
@@ -82,7 +90,7 @@ Transformation Modes:
 >[!NOTE]
 > This tool is still in development and considered early access. Please report any issues, bugs, or feature requests to the GitHub repository.
 
-Documentation on usage and examples can be found in the `/docs` directory or on the repository here: [link](https://github.com/JakeWnuk/ptt/docs)
+Documentation on usage and examples can be found in the `/docs` directory or on the repository here: [link](https://github.com/JakeWnuk/ptt/tree/main/docs)
 
 ## Install:
 
@@ -93,7 +101,7 @@ TODO
 ```
 Slow method with Go installed:
 ```
-git clone https://github.com/JakeWnuk/ptt && cd ptt && go build ./main.go && mv ./ptt ~/go/bin/ptt && ptt
+git clone https://github.com/JakeWnuk/ptt && cd ptt && go build ./main.go && mv ./main ~/go/bin/ptt && ptt
 ```
 
 ### Docker:

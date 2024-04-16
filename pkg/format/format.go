@@ -6,9 +6,11 @@ import (
 	"fmt"
 	"html"
 	"net/url"
+	"os"
 	"ptt/pkg/models"
 	"sort"
 	"strings"
+	"unicode"
 )
 
 // ----------------------------------------------------------------------------
@@ -40,6 +42,195 @@ func PrintArrayToSTDOUT(freq map[string]int, verbose bool) {
 			fmt.Printf("%s\n", pair.Key)
 		}
 	}
+}
+
+// PrintStatsToSTDOUT prints statistics about the frequency map to stdout
+// including several statistics about the frequency map. If verbose is true,
+// additional information is printed and increased number of items are
+// printed. Items are printed in graph format with a # for each unit of item.
+//
+// Args:
+//
+//	freq (map[string]int): A map of item frequencies
+//	verbose (bool): If true, additional information is printed
+//	max (int): The maximum number of items to print
+//
+// Returns:
+//
+//	None
+func PrintStatsToSTDOUT(freq map[string]int, verbose bool, max int) {
+
+	// Set the count and max values
+	count := 0
+	if !verbose {
+		max = 10
+	}
+
+	// Sort by frequency
+	p := make(models.PairList, len(freq))
+	normalizedP := make(models.PairList, len(freq))
+	i := 0
+	for k, v := range freq {
+		p[i] = models.Pair{k, v}
+		normalizedP[i] = models.Pair{k, v}
+		i++
+	}
+	sort.Sort(sort.Reverse(p))
+	sort.Sort(sort.Reverse(normalizedP))
+
+	// Get the largest frequency value by getting the first item
+	largest := p[0].Value
+
+	// Print the statistics
+	if verbose {
+		fmt.Fprintf(os.Stderr, "Starting statistics generation. Please wait...\n")
+		fmt.Println(fmt.Sprintf("Verbose Statistics: max=%d", max))
+		fmt.Println("--------------------------------------------------")
+		fmt.Println(CreateVerboseStats(freq))
+		fmt.Println("--------------------------------------------------")
+	}
+
+	// Use the largest frequency value to normalize the graph
+	for index, value := range normalizedP {
+		normalizedValue := value.Value * 50 / largest
+		normalizedP[index].Value = normalizedValue
+	}
+
+	// Print the top items
+	for index, value := range p {
+		if value.Value == 1 && index == 0 {
+			fmt.Println("No items with a frequency greater than 1!")
+			break
+		}
+
+		if value.Value == 1 {
+			continue
+		}
+
+		if count < max {
+			fmt.Printf("%s [%d]%s\n", value.Key, value.Value, strings.Repeat("=", normalizedP[index].Value))
+			count++
+		} else {
+			count = 0
+			break
+		}
+	}
+}
+
+// CreateVerboseStats creates a string of verbose statistics about the frequency map
+// including several statistics about the frequency map.
+//
+// Args:
+//
+//	freq (map[string]int): A map of item frequencies
+//
+// Returns:
+//
+//	string: A string of verbose statistics
+func CreateVerboseStats(freq map[string]int) string {
+	var stats string
+	// Sort by frequency
+	p := make(models.PairList, len(freq))
+	i := 0
+	for k, v := range freq {
+		p[i] = models.Pair{k, v}
+		i++
+	}
+	sort.Sort(sort.Reverse(p))
+
+	// Pull stats
+	totalChars := 0
+	totalWords := 0
+	categoryCounts := make(map[string]int)
+	for k := range freq {
+		totalChars += len(k)
+		totalWords += len(strings.Fields(k))
+		categories := StatClassifyToken(k)
+		for _, category := range categories {
+			categoryCounts[category]++
+		}
+	}
+	stats += "General Stats:\n"
+	stats += fmt.Sprintf("Total Unique items: %d\n", len(p))
+	stats += fmt.Sprintf("Total Characters: %d\n", totalChars)
+	stats += fmt.Sprintf("Total Words: %d\n", totalWords)
+	stats += fmt.Sprintf("Average Characters Per Item: %d\n", totalChars/len(freq))
+	stats += fmt.Sprintf("Average Words Per Item: %d\n", totalWords/len(freq))
+	stats += fmt.Sprintf("Largest frequency: %d\n", p[0].Value)
+	stats += fmt.Sprintf("Smallest frequency: %d\n", p[len(p)-1].Value)
+	stats += fmt.Sprintf("Mean frequency: %d\n", p[len(p)/2].Value)
+	stats += fmt.Sprintf("Median frequency: %d\n", p[len(p)/2].Value)
+	stats += fmt.Sprintf("Mode frequency: %d", p[0].Value)
+
+	stats += "\n\nCategory Counts:\n"
+	for category, count := range categoryCounts {
+		stats += fmt.Sprintf("%s: %d\n", category, count)
+	}
+
+	return stats
+}
+
+// StatClassifyToken classifies a token into a set of categories
+// based on the token's content
+//
+// Args:
+//
+//	s (string): The token to classify
+//
+// Returns:
+//
+//	[]string: A list of categories that the token belongs to
+func StatClassifyToken(s string) []string {
+	var categories []string
+
+	isAlpha := func(c rune) bool { return unicode.IsLetter(c) }
+	isDigit := func(c rune) bool { return unicode.IsDigit(c) }
+	isSpecial := func(c rune) bool { return !unicode.IsLetter(c) && !unicode.IsDigit(c) && !unicode.IsSpace(c) }
+
+	if strings.IndexFunc(s, isAlpha) >= 0 {
+		categories = append(categories, "alphabetical")
+	}
+
+	if strings.IndexFunc(s, isDigit) >= 0 {
+		categories = append(categories, "numeric")
+	}
+
+	if strings.IndexFunc(s, isAlpha) >= 0 && strings.IndexFunc(s, isDigit) >= 0 {
+		categories = append(categories, "alphanumeric")
+	}
+
+	if strings.IndexFunc(s, isSpecial) >= 0 && (strings.IndexFunc(s, isAlpha) >= 0 || strings.IndexFunc(s, isDigit) >= 0) {
+		categories = append(categories, "alphanumeric with special")
+	}
+
+	if strings.Contains(s, " ") {
+		categories = append(categories, "phrase")
+	}
+
+	digitCount := 0
+	for _, c := range s {
+		if isDigit(c) {
+			digitCount++
+		}
+	}
+	if digitCount > len(s)*2/3 {
+		categories = append(categories, "high numeric ratio")
+	}
+
+	if strings.IndexFunc(s, unicode.IsUpper) >= 0 && strings.IndexFunc(s, unicode.IsLower) >= 0 && strings.IndexFunc(s, isDigit) >= 0 && strings.IndexFunc(s, isSpecial) >= 0 {
+		categories = append(categories, "complex")
+	} else {
+		categories = append(categories, "non-complex")
+	}
+
+	for _, c := range s {
+		if c > 127 {
+			categories = append(categories, "non-ASCII")
+			break
+		}
+	}
+
+	return categories
 }
 
 // RetainRemove compares a string against a list of words to retain and remove
@@ -95,6 +286,35 @@ func RemoveMinimumFrequency(freq map[string]int, min int) map[string]int {
 	for key, value := range freq {
 		if value >= min {
 			newFreq[key] = value
+		}
+	}
+	return newFreq
+}
+
+// RemoveLengthRange removes items from a map that are outside of a length
+// range or not equal to the start of the end if no end is provided. The length
+// of the range is inclusive.
+//
+// Args:
+//
+//	freq (map[string]int): A map of item frequencies
+//	start (int): The start of the length range
+//	end (int): The end of the length range
+//
+// Returns:
+//
+//	(map[string]int): A new map of item frequencies within the length range
+func RemoveLengthRange(freq map[string]int, start int, end int) map[string]int {
+	newFreq := make(map[string]int)
+	for key, value := range freq {
+		if end == 0 {
+			if len(key) == start {
+				newFreq[key] = value
+			}
+		} else {
+			if len(key) >= start && len(key) <= end {
+				newFreq[key] = value
+			}
 		}
 	}
 	return newFreq

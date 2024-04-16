@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"os"
 	"ptt/pkg/models"
 	"regexp"
 	"strings"
@@ -155,6 +156,7 @@ func ProcessURL(url string, ch chan<- string, wg *sync.WaitGroup) {
 
 		resp, err = http.Get(url)
 		if err != nil {
+			fmt.Fprintf(os.Stderr, "Error fetching URL %s\n", url)
 			continue
 		}
 		defer resp.Body.Close()
