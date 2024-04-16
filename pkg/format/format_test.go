@@ -11,6 +11,7 @@ import (
 // ** Output Functions **
 // - RetainRemove()
 // - RemoveMinimumFrequency()
+// - RemoveLengthRange()
 //
 // ** Encoding Functions **
 // - EncodeInputMap()
@@ -23,6 +24,8 @@ import (
 // Functions without Unit Tests
 // ----------------------------------------------------------------------------
 // - PrintArraytoSTDOUT (Output Functions)
+// - PrintStatsToSTDOUT (Output Functions)
+// - CreateVerboseStats (Output Functions)
 
 // Unit Test for RetainRemove()
 func TestRetainRemove(t *testing.T) {
@@ -79,6 +82,37 @@ func TestRemoveMinimumFrequency(t *testing.T) {
 		result := RemoveMinimumFrequency(test.input, test.min)
 		if utils.CheckAreMapsEqual(result, test.output) == false {
 			t.Errorf("RemoveMinimumFrequency() failed - expected: %v, got: %v", test.output, result)
+		}
+	}
+}
+
+// Unit Test for RemoveLengthRange()
+func TestRemoveLengthRange(t *testing.T) {
+
+	// Define a test case struct
+	type testCase struct {
+		input  map[string]int
+		min    int
+		max    int
+		output map[string]int
+	}
+
+	type testCases []testCase
+
+	// Define a test case
+	tests := testCases{
+		{map[string]int{"a": 1, "bc": 2, "cde": 3, "defg": 4}, 1, 5, map[string]int{"a": 1, "bc": 2, "cde": 3, "defg": 4}},
+		{map[string]int{"a": 1, "bc": 2, "cde": 3, "defg": 4}, 1, 4, map[string]int{"a": 1, "bc": 2, "cde": 3, "defg": 4}},
+		{map[string]int{"a": 1, "bc": 2, "cde": 3, "defg": 4}, 1, 3, map[string]int{"a": 1, "bc": 2, "cde": 3}},
+		{map[string]int{"a": 1, "bc": 2, "cde": 3, "defg": 4}, 1, 2, map[string]int{"a": 1, "bc": 2}},
+		{map[string]int{"a": 1, "bc": 2, "cde": 3, "defg": 4}, 1, 1, map[string]int{"a": 1}},
+	}
+
+	// Run test cases
+	for _, test := range tests {
+		result := RemoveLengthRange(test.input, test.min, test.max)
+		if utils.CheckAreMapsEqual(result, test.output) == false {
+			t.Errorf("RemoveLengthRange() failed - expected: %v, got: %v", test.output, result)
 		}
 	}
 }

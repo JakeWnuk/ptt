@@ -22,6 +22,7 @@ var readFiles models.FileArgumentFlag
 var readURLs models.FileArgumentFlag
 var transformationFiles models.FileArgumentFlag
 var intRange models.IntRange
+var lenRange models.IntRange
 var primaryMap map[string]int
 var err error
 
@@ -52,12 +53,15 @@ func main() {
 		fmt.Fprintf(os.Stderr, "  -t match -tf [file]\n\tTransforms input by keeping only strings with matching masks from a mask file.\n")
 		fmt.Fprintf(os.Stderr, "  -t fuzzy-swap -tf [file]\n\tTransforms input by swapping tokens with fuzzy matches from another file.\n")
 		fmt.Fprintf(os.Stderr, "  -t swap -tf [file]\n\tTransforms input by swapping tokens with exact matches from a ':' separated file.\n")
-		fmt.Fprintf(os.Stderr, "  -t pop -rm [uldsb]\n\tTransforms input by generating tokens exluding characters not part of the mask.\n")
+		fmt.Fprintf(os.Stderr, "  -t pop -rm [uldsb]\n\tTransforms input by generating tokens excluding characters not part of the mask.\n")
 	}
 
 	// Define command line flags
 	verbose := flag.Bool("v", false, "Show verbose output when possible.")
+	verbose2 := flag.Bool("vv", false, "Show statistics output when possible.")
+	verbose3 := flag.Bool("vvv", false, "Show verbose statistics output when possible.")
 	minimum := flag.Int("m", 0, "Minimum numerical frequency to include in output.")
+	verboseStatsMax := flag.Int("vs", 25, "Maximum number of items to display in verbose statistics output.")
 	transformation := flag.String("t", "", "Transformation to apply to input.")
 	replacementMask := flag.String("rm", "uldsb", "Replacement mask for transformations if applicable.")
 	flag.Var(&retain, "k", "Only keep items in a file.")
@@ -65,6 +69,7 @@ func main() {
 	flag.Var(&readFiles, "f", "Read additional files for input.")
 	flag.Var(&transformationFiles, "tf", "Read additional files for transformations if applicable.")
 	flag.Var(&intRange, "i", "Starting index for transformations if applicable. Accepts ranges separated by '-'. (default 0)")
+	flag.Var(&lenRange, "l", "Keeps output equal to or within a range of lengths. Accepts ranges separated by '-'. (default 0)")
 	flag.Var(&readURLs, "u", "Read additional URLs for input.")
 	flag.Parse()
 
@@ -119,6 +124,17 @@ func main() {
 		primaryMap = format.RemoveMinimumFrequency(primaryMap, *minimum)
 	}
 
+	// Remove items outside of length range if provided
+	if lenRange.Start > 0 || lenRange.End > 0 {
+		primaryMap = format.RemoveLengthRange(primaryMap, lenRange.Start, lenRange.End)
+	}
+
 	// Print output to stdout
-	format.PrintArrayToSTDOUT(primaryMap, *verbose)
+	if *verbose3 {
+		format.PrintStatsToSTDOUT(primaryMap, *verbose3, *verboseStatsMax)
+	} else if *verbose2 {
+		format.PrintStatsToSTDOUT(primaryMap, *verbose3, *verboseStatsMax)
+	} else {
+		format.PrintArrayToSTDOUT(primaryMap, *verbose)
+	}
 }

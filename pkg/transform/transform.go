@@ -88,6 +88,8 @@ func TransformationController(input map[string]int, mode string, startingIndex i
 		output = ReplaceKeysInMap(input, transformationFilesMap)
 	case "pop", "split", "boundary-split", "boundary-pop", "pop-split", "split-pop":
 		output = mask.BoundarySplitPopMap(input, replacementMask)
+	default:
+		output = input
 	}
 
 	return output

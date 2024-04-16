@@ -20,6 +20,8 @@ Options:
         Starting index for transformations if applicable. Accepts ranges separated by '-'. (default 0)
   -k value
         Only keep items in a file.
+  -l value
+        Keeps output equal to or within a range of lengths. Accepts ranges separated by '-'. (default 0)
   -m int
         Minimum numerical frequency to include in output.
   -r value
@@ -33,6 +35,12 @@ Options:
   -u value
         Read additional URLs for input.
   -v    Show verbose output when possible.
+  -vs int
+        Maximum number of items to display in verbose statistics output. (default 25)
+  -vv
+        Show statistics output when possible.
+  -vvv
+        Show verbose statistics output when possible.
 
 The -f, -k, -r, -tf, and -u flags can be used multiple times.
 
@@ -74,7 +82,7 @@ Transformation Modes:
   -t swap -tf [file]
         Transforms input by swapping tokens with exact matches from a ':' separated file.
   -t pop -rm [uldsb]
-        Transforms input by generating tokens exluding characters not part of the mask.
+        Transforms input by generating tokens excluding characters not part of the mask.
 ```
 
 ## Getting Started:
