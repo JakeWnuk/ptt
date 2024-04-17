@@ -63,8 +63,7 @@ func PrintArrayToSTDOUT(freq map[string]int, verbose bool) {
 //	None
 func PrintStatsToSTDOUT(freq map[string]int, verbose bool, max int) {
 
-	// Set the count and max values
-	count := 0
+	// Set the max value
 	if !verbose {
 		max = 10
 	}
@@ -81,8 +80,9 @@ func PrintStatsToSTDOUT(freq map[string]int, verbose bool, max int) {
 	sort.Sort(sort.Reverse(p))
 	sort.Sort(sort.Reverse(normalizedP))
 
-	// Get the largest frequency value by getting the first item
-	largest := p[0].Value
+	if max > len(p) {
+		max = len(p)
+	}
 
 	// Print the statistics
 	if verbose {
@@ -94,25 +94,28 @@ func PrintStatsToSTDOUT(freq map[string]int, verbose bool, max int) {
 	}
 
 	// Use the largest frequency value to normalize the graph
+	largest := p[0].Value
 	for index, value := range normalizedP {
 		normalizedValue := value.Value * 50 / largest
 		normalizedP[index].Value = normalizedValue
 	}
 
+	// Use the longest key to normalize padding for the graph
+	longest := 0
+	for _, value := range p[0:max] {
+		if len(value.Key) > longest {
+			longest = len(value.Key)
+		}
+	}
+
 	// Print the top items
-	for index, value := range p {
+	for index, value := range p[0:max] {
 		if value.Value == 1 && index == 0 {
 			fmt.Println("No items with a frequency greater than 1!")
 			break
 		}
-
-		if count < max {
-			fmt.Printf("%s [%d]%s\n", value.Key, value.Value, strings.Repeat("=", normalizedP[index].Value))
-			count++
-		} else {
-			count = 0
-			break
-		}
+		padding := longest - len(value.Key)
+		fmt.Printf("%s%s [%d]%s\n", value.Key, strings.Repeat(" ", padding), value.Value, strings.Repeat("=", normalizedP[index].Value))
 	}
 }
 
