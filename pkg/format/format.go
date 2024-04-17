@@ -3,10 +3,12 @@ package format
 
 import (
 	"encoding/hex"
+	"encoding/json"
 	"fmt"
 	"html"
 	"net/url"
 	"os"
+	"path/filepath"
 	"ptt/pkg/models"
 	"sort"
 	"strconv"
@@ -61,8 +63,7 @@ func PrintArrayToSTDOUT(freq map[string]int, verbose bool) {
 //	None
 func PrintStatsToSTDOUT(freq map[string]int, verbose bool, max int) {
 
-	// Set the count and max values
-	count := 0
+	// Set the max value
 	if !verbose {
 		max = 10
 	}
@@ -79,8 +80,9 @@ func PrintStatsToSTDOUT(freq map[string]int, verbose bool, max int) {
 	sort.Sort(sort.Reverse(p))
 	sort.Sort(sort.Reverse(normalizedP))
 
-	// Get the largest frequency value by getting the first item
-	largest := p[0].Value
+	if max > len(p) {
+		max = len(p)
+	}
 
 	// Print the statistics
 	if verbose {
@@ -92,29 +94,28 @@ func PrintStatsToSTDOUT(freq map[string]int, verbose bool, max int) {
 	}
 
 	// Use the largest frequency value to normalize the graph
+	largest := p[0].Value
 	for index, value := range normalizedP {
 		normalizedValue := value.Value * 50 / largest
 		normalizedP[index].Value = normalizedValue
 	}
 
+	// Use the longest key to normalize padding for the graph
+	longest := 0
+	for _, value := range p[0:max] {
+		if len(value.Key) > longest {
+			longest = len(value.Key)
+		}
+	}
+
 	// Print the top items
-	for index, value := range p {
+	for index, value := range p[0:max] {
 		if value.Value == 1 && index == 0 {
 			fmt.Println("No items with a frequency greater than 1!")
 			break
 		}
-
-		if value.Value == 1 {
-			continue
-		}
-
-		if count < max {
-			fmt.Printf("%s [%d]%s\n", value.Key, value.Value, strings.Repeat("=", normalizedP[index].Value))
-			count++
-		} else {
-			count = 0
-			break
-		}
+		padding := longest - len(value.Key)
+		fmt.Printf("%s%s [%d]%s\n", value.Key, strings.Repeat(" ", padding), value.Value, strings.Repeat("=", normalizedP[index].Value))
 	}
 }
 
@@ -142,16 +143,19 @@ func CreateVerboseStats(freq map[string]int) string {
 	// Pull stats
 	totalChars := 0
 	totalWords := 0
+	totalItems := 0
 	categoryCounts := make(map[string]int)
-	for k := range freq {
+	for k, v := range freq {
 		totalChars += len(k)
 		totalWords += len(strings.Fields(k))
 		categories := StatClassifyToken(k)
+		totalItems += v
 		for _, category := range categories {
 			categoryCounts[category]++
 		}
 	}
 	stats += "General Stats:\n"
+	stats += fmt.Sprintf("Total Items: %d\n", totalItems)
 	stats += fmt.Sprintf("Total Unique items: %d\n", len(p))
 	stats += fmt.Sprintf("Total Characters: %d\n", totalChars)
 	stats += fmt.Sprintf("Total Words: %d\n", totalWords)
@@ -232,6 +236,39 @@ func StatClassifyToken(s string) []string {
 	}
 
 	return categories
+}
+
+// SaveArrayToJSON saves an array of items to a JSON file at the specified path
+// with a generated filename. The filename is generated with the format "ptt-<timestamp>.json"
+// where the timestamp is the current time in RFC3339 format.
+//
+// Args:
+//
+//	path (string): The path to save the JSON file
+//	items (map[string]int): A map of item frequencies
+//
+// Returns:
+//
+//	error: An error if the file cannot be saved
+func SaveArrayToJSON(path string, freq map[string]int) error {
+	jsonData, err := json.Marshal(freq)
+	if err != nil {
+		return fmt.Errorf("failed to marshal JSON data: %s", err)
+	}
+
+	// Check if the directory exists
+	dir := filepath.Dir(path)
+	if _, err := os.Stat(dir); os.IsNotExist(err) {
+		return fmt.Errorf("directory does not exist: %s", dir)
+	}
+
+	// Save the JSON object to a file
+	err = os.WriteFile(path, jsonData, 0644)
+	if err != nil {
+		return fmt.Errorf("failed to write JSON data to file: %s", err)
+	}
+
+	return nil
 }
 
 // RetainRemove compares a string against a list of words to retain and remove

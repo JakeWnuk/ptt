@@ -26,6 +26,8 @@ Options:
         Minimum numerical frequency to include in output.
   -n int
         Maximum number of items to display in verbose statistics output. (default 25)
+  -o string
+        Output to JSON file in addition to stdout.
   -r value
         Only keep items not in a file.
   -rm string
@@ -81,6 +83,8 @@ Transformation Modes:
         Transforms input by removing characters with provided mask characters.
   -t retain -rm [uldsb] -tf [file]
         Transforms input by creating masks that still retain strings from file.
+  -t shuf -tf [file]
+        Transforms input by shuffling tokens from a partial mask file and a input file.
   -t swap -tf [file]
         Transforms input by swapping tokens with exact matches from a ':' separated file.
   -t toggle -i [index]

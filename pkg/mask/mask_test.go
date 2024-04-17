@@ -23,6 +23,7 @@ import (
 // ** Mask Utility Functions **
 // - MakeMatchedMaskedMap()
 // - BoundarySplitPopMap()
+// - ShuffleMap()
 //
 // ----------------------------------------------------------------------------
 // Functions without Unit Tests
@@ -281,6 +282,33 @@ func TestBoundarySplitPopMap(t *testing.T) {
 	// Run test cases
 	for _, test := range tests {
 		output := BoundarySplitPopMap(test.input, test.replacements)
+		if !utils.CheckAreMapsEqual(output, test.output) {
+			t.Errorf("Test failed: %v inputted, %v expected, %v returned", test.input, test.output, output)
+		}
+	}
+}
+
+// Unit Test for ShuffleMap()
+func TestShuffleMap(t *testing.T) {
+
+	// Define a test case struct
+	type testCase struct {
+		input        map[string]int
+		replacements string
+		swaps        map[string]int
+		output       map[string]int
+	}
+
+	type testCases []testCase
+
+	// Define test cases
+	tests := testCases{
+		{map[string]int{"abc?d?d?d": 1, "?u?u?u456": 2, "ABC?l?l?l123!!!": 3}, "luds", map[string]int{"DEF": 1, "321": 1, "zxc": 1}, map[string]int{"ABCzxc123!!!": 3, "DEF456": 2, "abc321": 1}},
+	}
+
+	// Run test cases
+	for _, test := range tests {
+		output := ShuffleMap(test.input, test.replacements, test.swaps)
 		if !utils.CheckAreMapsEqual(output, test.output) {
 			t.Errorf("Test failed: %v inputted, %v expected, %v returned", test.input, test.output, output)
 		}

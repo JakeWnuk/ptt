@@ -4,6 +4,7 @@ package mask
 import (
 	"fmt"
 	"ptt/pkg/utils"
+	"regexp"
 	"strings"
 	"unicode"
 )
@@ -89,7 +90,7 @@ func MakeMaskedMap(input map[string]int, replacementMask string, verbose bool) m
 		}
 
 		if verbose {
-			newKey = fmt.Sprintf("%s:%d:%d\n", newKey, len(key), TestMaskComplexity(newKey))
+			newKey = fmt.Sprintf("%s:%d:%d", newKey, len(key), TestMaskComplexity(newKey))
 		}
 
 		if oldValue, exists := maskedMap[newKey]; exists {
@@ -310,7 +311,7 @@ func MakeMatchedMaskedMap(input map[string]int, replacementMask string, maskMap 
 //	(map[string]int): Boundary split map
 func BoundarySplitPopMap(input map[string]int, replacementMask string) map[string]int {
 	result := make(map[string]int)
-	for s, _ := range input {
+	for s := range input {
 		token := ""
 		var lastRuneType rune
 		var runeType rune
@@ -345,4 +346,49 @@ func BoundarySplitPopMap(input map[string]int, replacementMask string) map[strin
 		}
 	}
 	return result
+}
+
+// ShuffleMap shuffles the input map keys and replaces partially the masked
+// parts of the keys with matching mask keys from the input map. This function
+// resembles 'token-swapping' where the mask value is used to swap key words
+// into another.
+//
+// Args:
+//
+//	input (map[string]int): Input map
+//	replacementMask (string): Mask characters to apply
+//	swapMap (map[string]int): Items to swap with
+//
+// Returns:
+// (map[string]int): Shuffled map with swapped keys
+func ShuffleMap(input map[string]int, replacementMask string, swapMap map[string]int) map[string]int {
+	shuffleMap := make(map[string]int)
+	re := regexp.MustCompile(`^(\?u|\?l|\?d|\?s|\?b)*$`)
+	reParser := regexp.MustCompile("(\\?[luds])")
+
+	for key, value := range input {
+		newKey := ""
+		// Make a new key with the masked parts
+		chars := reParser.FindAllString(key, -1)
+		match := strings.Join(chars, "")
+
+		if re.MatchString(match) {
+			newKey = match
+		}
+
+		// Check if the new key is in the swap map
+		for swapKey := range swapMap {
+			if MakeMaskedString(swapKey, replacementMask) == newKey {
+				shufKey := strings.Replace(key, newKey, swapKey, 1)
+
+				if oldValue, exists := shuffleMap[shufKey]; exists {
+					shuffleMap[shufKey] = oldValue + value
+				} else {
+					shuffleMap[shufKey] = value
+				}
+			}
+
+		}
+	}
+	return shuffleMap
 }

@@ -76,6 +76,7 @@ their collective values combined. The rest of the flags can only be used once.
 - `-l`: Keeps output equal to or within a range of lengths. Accepts ranges separated by '-'. (default 0)
 - `-m`: Minimum numerical frequency to include in output.
 - `-n`: Maximum number of items to display in verbose statistics output. (default 25)
+- `-o`: Output to JSON file in addition to stdout.
 - `-r`: Only keep items not in a file.
 - `-rm`: Replacement mask for transformations if applicable. (default "uldsb")
 - `-t`: Transformation to apply to input.
@@ -107,6 +108,7 @@ The following transformations can be used with the `-t` flag:
 - `fuzzy-swap`: Transforms input by swapping tokens with fuzzy matches from another
 - `swap`: Transforms input by swapping tokens with exact matches from a ':' separated file.
 - `pop`: Transforms input by generating tokens from popping strings at character boundaries.
+- `shuf`: Transforms input by shuffling tokens from a partial mask file and a input file.
 
 The modes also have aliases that can be used with the `-t` flag instead of the
 keywords above:
@@ -236,31 +238,31 @@ phrase: 11
 non-ASCII: 566
 
 --------------------------------------------------
-1234 [29529]==================================================
-2007 [24459]=========================================
-2006 [22002]=====================================
-love [21516]====================================
-2008 [20022]=================================
-ever [17694]=============================
-1994 [14514]========================
-life [14496]========================
-2005 [14300]========================
-1992 [14159]=======================
-1993 [14070]=======================
+1234  [29529]==================================================
+2007  [24459]=========================================
+2006  [22002]=====================================
+love  [21516]====================================
+2008  [20022]=================================
+ever  [17694]=============================
+1994  [14514]========================
+life  [14496]========================
+2005  [14300]========================
+1992  [14159]=======================
+1993  [14070]=======================
 12345 [13545]======================
-1991 [13038]======================
-1995 [12932]=====================
-1990 [12336]====================
-1989 [11355]===================
-1987 [10903]==================
-1996 [9929]================
-2000 [9801]================
-1988 [9718]================
-2009 [9257]===============
-2004 [9091]===============
+1991  [13038]======================
+1995  [12932]=====================
+1990  [12336]====================
+1989  [11355]===================
+1987  [10903]==================
+1996  [9929]================
+2000  [9801]================
+1988  [9718]================
+2009  [9257]===============
+2004  [9091]===============
 yahoo [8953]===============
-1986 [8860]===============
-1985 [8513]==============
+1986  [8860]===============
+1985  [8513]==============
 ```
 
 ### Contributing
