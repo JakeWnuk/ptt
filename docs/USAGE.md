@@ -132,6 +132,7 @@ keywords above:
 - `fuzzy-swap`: `fs`, `fuzzy`, `fuzzy-replace`, `fuzz`, `mutate`
 - `swap`: `s`, `replace`
 - `pop`: `po`, `split`, `boundary-split`, `boundary-pop`, `pop-split`, `split-pop`
+- `shuf`: `sh`, `shuffle`, `mask-swap`, `token-swap`
 
 ### Examples
 
@@ -163,6 +164,7 @@ keywords above:
 - `ptt -vv`: Show statistics output.
 - `ptt -vvv`: Show verbose statistics output.
 - `ptt -n 50`: Show verbose statistics output with a maximum of 50 items.
+- `ptt -o [FILE]`: Show output and save JSON output to a file.
 - These options are available for all transformations.
 
 #### Real Examples:
