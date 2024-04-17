@@ -4,6 +4,7 @@ package mask
 import (
 	"fmt"
 	"ptt/pkg/utils"
+	"regexp"
 	"strings"
 	"unicode"
 )
@@ -345,4 +346,55 @@ func BoundarySplitPopMap(input map[string]int, replacementMask string) map[strin
 		}
 	}
 	return result
+}
+
+// ShuffleMap shuffles the input map keys and replaces partially the masked
+// parts of the keys with matching mask keys from the input map. This function
+// resembles 'token-swapping' where the mask value is used to swap key words
+// into another.
+//
+// Args:
+//
+//	input (map[string]int): Input map
+//	replacementMask (string): Mask characters to apply
+//	swapMap (map[string]int): Items to swap with
+//
+// Returns:
+// (map[string]int): Shuffled map with swapped keys
+func ShuffleMap(input map[string]int, replacementMask string, swapMap map[string]int) map[string]int {
+	shuffleMap := make(map[string]int)
+	re := regexp.MustCompile(`^(\?u|\?l|\?d|\?s|\?b)*$`)
+
+	for key, value := range input {
+		newKey := ""
+		// Make a new key with the masked parts
+		parts := utils.SplitBySeparatorString(key, "?")
+
+		if len(parts) < 2 {
+			continue
+		}
+
+		parts[0] = parts[0] + "?"
+		parts[2] = "?" + parts[2]
+		for _, part := range parts {
+			if re.MatchString(part) {
+				newKey = part
+			}
+		}
+
+		// Check if the new key is in the swap map
+		for swapKey := range swapMap {
+			if MakeMaskedString(swapKey, replacementMask) == newKey {
+				shufKey := strings.Replace(key, newKey, swapKey, 1)
+
+				if oldValue, exists := shuffleMap[shufKey]; exists {
+					shuffleMap[shufKey] = oldValue + value
+				} else {
+					shuffleMap[shufKey] = value
+				}
+			}
+
+		}
+	}
+	return shuffleMap
 }
