@@ -89,7 +89,7 @@ func MakeMaskedMap(input map[string]int, replacementMask string, verbose bool) m
 		}
 
 		if verbose {
-			newKey = fmt.Sprintf("%s:%d:%d\n", newKey, len(key), TestMaskComplexity(newKey))
+			newKey = fmt.Sprintf("%s:%d:%d", newKey, len(key), TestMaskComplexity(newKey))
 		}
 
 		if oldValue, exists := maskedMap[newKey]; exists {
