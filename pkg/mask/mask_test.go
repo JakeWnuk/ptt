@@ -303,7 +303,7 @@ func TestShuffleMap(t *testing.T) {
 
 	// Define test cases
 	tests := testCases{
-		//{map[string]int{"abc?d?d?d": 1, "?u?u?u456": 2, "ABC?l?l?l123!!!": 3}, "luds", map[string]int{"DEF": 1, "321": 1, "zxc456???": 1}, map[string]int{"123": 1, "ABC": 2, "abc": 2}},
+		{map[string]int{"abc?d?d?d": 1, "?u?u?u456": 2, "ABC?l?l?l123!!!": 3}, "luds", map[string]int{"DEF": 1, "321": 1, "zxc": 1}, map[string]int{"ABCzxc123!!!": 3, "DEF456": 2, "abc321": 1}},
 	}
 
 	// Run test cases

@@ -311,7 +311,7 @@ func MakeMatchedMaskedMap(input map[string]int, replacementMask string, maskMap 
 //	(map[string]int): Boundary split map
 func BoundarySplitPopMap(input map[string]int, replacementMask string) map[string]int {
 	result := make(map[string]int)
-	for s, _ := range input {
+	for s := range input {
 		token := ""
 		var lastRuneType rune
 		var runeType rune
@@ -364,22 +364,16 @@ func BoundarySplitPopMap(input map[string]int, replacementMask string) map[strin
 func ShuffleMap(input map[string]int, replacementMask string, swapMap map[string]int) map[string]int {
 	shuffleMap := make(map[string]int)
 	re := regexp.MustCompile(`^(\?u|\?l|\?d|\?s|\?b)*$`)
+	reParser := regexp.MustCompile("(\\?[luds])")
 
 	for key, value := range input {
 		newKey := ""
 		// Make a new key with the masked parts
-		parts := utils.SplitBySeparatorString(key, "?")
+		chars := reParser.FindAllString(key, -1)
+		match := strings.Join(chars, "")
 
-		if len(parts) < 2 {
-			continue
-		}
-
-		parts[0] = parts[0] + "?"
-		parts[2] = "?" + parts[2]
-		for _, part := range parts {
-			if re.MatchString(part) {
-				newKey = part
-			}
+		if re.MatchString(match) {
+			newKey = match
 		}
 
 		// Check if the new key is in the swap map
