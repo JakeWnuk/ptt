@@ -80,6 +80,7 @@ func main() {
 	verboseStatsMax := flag.Int("n", 25, "Maximum number of items to display in verbose statistics output.")
 	transformation := flag.String("t", "", "Transformation to apply to input.")
 	replacementMask := flag.String("rm", "uldsb", "Replacement mask for transformations if applicable.")
+	jsonOutput := flag.String("o", "", "Output to JSON file in addition to stdout.")
 	flag.Var(&retain, "k", "Only keep items in a file.")
 	flag.Var(&remove, "r", "Only keep items not in a file.")
 	flag.Var(&readFiles, "f", "Read additional files for input.")
@@ -152,5 +153,14 @@ func main() {
 		format.PrintStatsToSTDOUT(primaryMap, *verbose3, *verboseStatsMax)
 	} else {
 		format.PrintArrayToSTDOUT(primaryMap, *verbose)
+	}
+
+	// Save output to JSON if provided
+	if *jsonOutput != "" {
+		err = format.SaveArrayToJSON(*jsonOutput, primaryMap)
+		if err != nil {
+			fmt.Println("Error saving output to JSON:", err)
+			return
+		}
 	}
 }

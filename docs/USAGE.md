@@ -76,6 +76,7 @@ their collective values combined. The rest of the flags can only be used once.
 - `-l`: Keeps output equal to or within a range of lengths. Accepts ranges separated by '-'. (default 0)
 - `-m`: Minimum numerical frequency to include in output.
 - `-n`: Maximum number of items to display in verbose statistics output. (default 25)
+- `-o`: Output to JSON file in addition to stdout.
 - `-r`: Only keep items not in a file.
 - `-rm`: Replacement mask for transformations if applicable. (default "uldsb")
 - `-t`: Transformation to apply to input.

@@ -3,10 +3,12 @@ package format
 
 import (
 	"encoding/hex"
+	"encoding/json"
 	"fmt"
 	"html"
 	"net/url"
 	"os"
+	"path/filepath"
 	"ptt/pkg/models"
 	"sort"
 	"strconv"
@@ -104,10 +106,6 @@ func PrintStatsToSTDOUT(freq map[string]int, verbose bool, max int) {
 			break
 		}
 
-		if value.Value == 1 {
-			continue
-		}
-
 		if count < max {
 			fmt.Printf("%s [%d]%s\n", value.Key, value.Value, strings.Repeat("=", normalizedP[index].Value))
 			count++
@@ -142,16 +140,19 @@ func CreateVerboseStats(freq map[string]int) string {
 	// Pull stats
 	totalChars := 0
 	totalWords := 0
+	totalItems := 0
 	categoryCounts := make(map[string]int)
-	for k := range freq {
+	for k, v := range freq {
 		totalChars += len(k)
 		totalWords += len(strings.Fields(k))
 		categories := StatClassifyToken(k)
+		totalItems += v
 		for _, category := range categories {
 			categoryCounts[category]++
 		}
 	}
 	stats += "General Stats:\n"
+	stats += fmt.Sprintf("Total Items: %d\n", totalItems)
 	stats += fmt.Sprintf("Total Unique items: %d\n", len(p))
 	stats += fmt.Sprintf("Total Characters: %d\n", totalChars)
 	stats += fmt.Sprintf("Total Words: %d\n", totalWords)
@@ -232,6 +233,39 @@ func StatClassifyToken(s string) []string {
 	}
 
 	return categories
+}
+
+// SaveArrayToJSON saves an array of items to a JSON file at the specified path
+// with a generated filename. The filename is generated with the format "ptt-<timestamp>.json"
+// where the timestamp is the current time in RFC3339 format.
+//
+// Args:
+//
+//	path (string): The path to save the JSON file
+//	items (map[string]int): A map of item frequencies
+//
+// Returns:
+//
+//	error: An error if the file cannot be saved
+func SaveArrayToJSON(path string, freq map[string]int) error {
+	jsonData, err := json.Marshal(freq)
+	if err != nil {
+		return fmt.Errorf("failed to marshal JSON data: %s", err)
+	}
+
+	// Check if the directory exists
+	dir := filepath.Dir(path)
+	if _, err := os.Stat(dir); os.IsNotExist(err) {
+		return fmt.Errorf("directory does not exist: %s", dir)
+	}
+
+	// Save the JSON object to a file
+	err = os.WriteFile(path, jsonData, 0644)
+	if err != nil {
+		return fmt.Errorf("failed to write JSON data to file: %s", err)
+	}
+
+	return nil
 }
 
 // RetainRemove compares a string against a list of words to retain and remove

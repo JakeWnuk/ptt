@@ -28,6 +28,8 @@ import (
 // - PrintArraytoSTDOUT (Output Functions)
 // - PrintStatsToSTDOUT (Output Functions)
 // - CreateVerboseStats (Output Functions)
+// - SaveArrayToJSON (Output Functions)
+//
 
 // Unit Test for RetainRemove()
 func TestRetainRemove(t *testing.T) {

@@ -26,6 +26,8 @@ Options:
         Minimum numerical frequency to include in output.
   -n int
         Maximum number of items to display in verbose statistics output. (default 25)
+  -o string
+        Output to JSON file in addition to stdout.
   -r value
         Only keep items not in a file.
   -rm string
