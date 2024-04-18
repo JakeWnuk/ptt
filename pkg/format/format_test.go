@@ -25,11 +25,42 @@ import (
 // ----------------------------------------------------------------------------
 // Functions without Unit Tests
 // ----------------------------------------------------------------------------
-// - PrintArraytoSTDOUT (Output Functions)
-// - PrintStatsToSTDOUT (Output Functions)
-// - CreateVerboseStats (Output Functions)
-// - SaveArrayToJSON (Output Functions)
+// - StatClassifyToken() (Output Functions)
+// - PrintArraytoSTDOUT() (Output Functions)
+// - PrintStatsToSTDOUT() (Output Functions)
+// - CreateVerboseStats() (Output Functions)
+// - SaveArrayToJSON() (Output Functions)
 //
+
+// Unit Test for StatClassifyToken()
+func TestStatClassifyToken(t *testing.T) {
+
+	// Define a test case struct
+	type testCase struct {
+		input  string
+		output []string
+	}
+
+	type testCases []testCase
+
+	// Define a test case
+	tests := testCases{
+		{"abc", []string{"alphabetical", "non-complex", "all-lowercase", "short-non-complex"}},
+		{"abc123", []string{"alphanumeric", "non-complex", "all-lowercase", "short-non-complex", "hex-string"}},
+		{"abc123ABC", []string{"alphanumeric", "non-complex", "contains-uppercase", "short-non-complex"}},
+		{"abc123ABC!@#", []string{"alphanumeric-with-special", "complex", "contains-uppercase", "long-complex"}},
+		{"$HEX[6c6f7665]", []string{"$HEX[...]-format", "complex", "long-complex", "alphanumeric-with-special", "contains-uppercase"}},
+	}
+
+	// Run test cases
+	for _, test := range tests {
+		result := StatClassifyToken(test.input)
+		if utils.CheckAreArraysEqual(result, test.output) == false {
+			t.Errorf("StatClassifyToken() failed - expected: %v, got: %v", test.output, result)
+
+		}
+	}
+}
 
 // Unit Test for RetainRemove()
 func TestRetainRemove(t *testing.T) {

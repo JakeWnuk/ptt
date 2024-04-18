@@ -8,6 +8,7 @@ import (
 	"os"
 	"ptt/pkg/models"
 	"regexp"
+	"sort"
 	"strings"
 	"sync"
 	"time"
@@ -534,6 +535,30 @@ func CheckAreMapsEqual(a, b map[string]int) bool {
 	}
 	for k, v := range a {
 		if w, ok := b[k]; !ok || v != w {
+			return false
+		}
+	}
+	return true
+}
+
+// CheckAreArraysEqual checks if two arrays are equal by comparing the length of the arrays
+// and the values of the elements in the arrays. If the arrays are equal, the function returns
+// true, otherwise it returns false.
+//
+// Args:
+// a ([]string): The first array to compare
+// b ([]string): The second array to compare
+//
+// Returns:
+// bool: True if the arrays are equal, false otherwise
+func CheckAreArraysEqual(a, b []string) bool {
+	if len(a) != len(b) {
+		return false
+	}
+	sort.Strings(a)
+	sort.Strings(b)
+	for i, v := range a {
+		if v != b[i] {
 			return false
 		}
 	}
