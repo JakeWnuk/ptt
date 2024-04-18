@@ -57,7 +57,7 @@ func main() {
 			"match -tf [file]":              "Transforms input by keeping only strings with matching masks from a mask file.",
 			"fuzzy-swap -tf [file]":         "Transforms input by swapping tokens with fuzzy matches from another file.",
 			"swap -tf [file]":               "Transforms input by swapping tokens with exact matches from a ':' separated file.",
-			"shuf -tf [file]":               "Transforms input by shuffling tokens from a partial mask file and a input file.",
+			"shuffle -tf [file]":            "Transforms input by shuffling tokens from a partial mask file and a input file.",
 		}
 
 		// Sort and print transformation modes

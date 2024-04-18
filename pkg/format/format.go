@@ -176,7 +176,8 @@ func CreateVerboseStats(freq map[string]int) string {
 }
 
 // StatClassifyToken classifies a token into a set of categories
-// based on the token's content
+// based on the token's content. "Short" and "long" are relative
+// to ten characters currently.
 //
 // Args:
 //
@@ -193,23 +194,28 @@ func StatClassifyToken(s string) []string {
 	isSpecial := func(c rune) bool { return !unicode.IsLetter(c) && !unicode.IsDigit(c) && !unicode.IsSpace(c) }
 
 	if strings.IndexFunc(s, isAlpha) >= 0 {
-		categories = append(categories, "alphabetical")
+		if strings.IndexFunc(s, isSpecial) >= 0 && (strings.IndexFunc(s, isAlpha) >= 0 || strings.IndexFunc(s, isDigit) >= 0) {
+			categories = append(categories, "alphanumeric-with-special")
+		} else if strings.IndexFunc(s, isAlpha) >= 0 && strings.IndexFunc(s, isDigit) >= 0 && strings.IndexFunc(s, isSpecial) == -1 {
+			categories = append(categories, "alphanumeric")
+		} else if strings.IndexFunc(s, isAlpha) >= 0 && strings.IndexFunc(s, isSpecial) >= 0 && strings.IndexFunc(s, isDigit) == -1 {
+			categories = append(categories, "alphabetical-with-special")
+		} else {
+			categories = append(categories, "alphabetical")
+		}
 	}
 
-	if strings.IndexFunc(s, isDigit) >= 0 {
-		categories = append(categories, "numeric")
+	if strings.IndexFunc(s, isDigit) >= 0 && strings.IndexFunc(s, isAlpha) == -1 {
+		if strings.IndexFunc(s, isDigit) >= 0 && strings.IndexFunc(s, isSpecial) >= 0 {
+			categories = append(categories, "numeric-with-special")
+		} else {
+			categories = append(categories, "numeric")
+		}
 	}
 
-	if strings.IndexFunc(s, isAlpha) >= 0 && strings.IndexFunc(s, isDigit) >= 0 {
-		categories = append(categories, "alphanumeric")
-	}
-
-	if strings.IndexFunc(s, isSpecial) >= 0 && (strings.IndexFunc(s, isAlpha) >= 0 || strings.IndexFunc(s, isDigit) >= 0) {
-		categories = append(categories, "alphanumeric with special")
-	}
-
-	if strings.Contains(s, " ") {
+	if strings.Count(s, " ") >= 2 && strings.IndexFunc(s, isAlpha) >= 0 {
 		categories = append(categories, "phrase")
+		fmt.Println("Phrase: ", s)
 	}
 
 	digitCount := 0
@@ -218,14 +224,96 @@ func StatClassifyToken(s string) []string {
 			digitCount++
 		}
 	}
-	if digitCount > len(s)*2/3 {
-		categories = append(categories, "high numeric ratio")
+	if digitCount > len(s)*2/4 {
+		categories = append(categories, "high-numeric-ratio")
+	}
+
+	if strings.HasPrefix(s, "$HEX[") && strings.HasSuffix(s, "]") {
+		categories = append(categories, "$HEX[...]-format")
+	}
+
+	if _, err := hex.DecodeString(s); err == nil {
+		categories = append(categories, "hex-string")
+	}
+
+	if _, err := url.ParseRequestURI(s); err == nil && strings.Contains(s, "://") {
+		categories = append(categories, "URL")
+	}
+
+	if strings.IndexFunc(s, func(r rune) bool { return r >= 0x1F600 && r <= 0x1F64F }) >= 0 {
+		categories = append(categories, "emoji-characters")
+	}
+
+	if strings.IndexFunc(s, func(r rune) bool { return r >= 0x4E00 && r <= 0x9FFF }) >= 0 {
+		categories = append(categories, "CJK-characters")
+	}
+
+	if strings.IndexFunc(s, func(r rune) bool { return r >= 0x0400 && r <= 0x04FF }) >= 0 {
+		categories = append(categories, "cyrillic-characters")
+	}
+
+	if strings.IndexFunc(s, func(r rune) bool { return r >= 0x0600 && r <= 0x06FF }) >= 0 {
+		categories = append(categories, "arabic-characters")
+	}
+
+	if strings.IndexFunc(s, func(r rune) bool { return r >= 0x0590 && r <= 0x05FF }) >= 0 {
+		categories = append(categories, "hebrew-characters")
+	}
+
+	if strings.IndexFunc(s, func(r rune) bool { return r >= 0x0E00 && r <= 0x0E7F }) >= 0 {
+		categories = append(categories, "thai-characters")
+	}
+
+	if strings.IndexFunc(s, func(r rune) bool { return r >= 0x0370 && r <= 0x03FF }) >= 0 {
+		categories = append(categories, "greek-characters")
+	}
+
+	if strings.IndexFunc(s, func(r rune) bool { return r >= 0xAC00 && r <= 0xD7AF }) >= 0 {
+		categories = append(categories, "korean-characters")
+	}
+
+	if strings.IndexFunc(s, func(r rune) bool { return r >= 0x3040 && r <= 0x309F }) >= 0 {
+		categories = append(categories, "hiragana-characters")
+	}
+
+	if strings.IndexFunc(s, func(r rune) bool { return r >= 0x30A0 && r <= 0x30FF }) >= 0 {
+		categories = append(categories, "katakana-characters")
+	}
+
+	if strings.IndexFunc(s, func(r rune) bool { return r >= 0x31F0 && r <= 0x31FF }) >= 0 {
+		categories = append(categories, "katakana-extended-characters")
+	}
+
+	if strings.IndexFunc(s, unicode.IsUpper) >= 0 {
+		if strings.IndexFunc(s, unicode.IsUpper) == 0 {
+			categories = append(categories, "starts-uppercase")
+		} else {
+			categories = append(categories, "contains-uppercase")
+		}
+	}
+
+	if strings.IndexFunc(s, unicode.IsLower) == -1 {
+		categories = append(categories, "all-uppercase")
+	}
+
+	if strings.IndexFunc(s, unicode.IsUpper) == -1 {
+		categories = append(categories, "all-lowercase")
 	}
 
 	if strings.IndexFunc(s, unicode.IsUpper) >= 0 && strings.IndexFunc(s, unicode.IsLower) >= 0 && strings.IndexFunc(s, isDigit) >= 0 && strings.IndexFunc(s, isSpecial) >= 0 {
 		categories = append(categories, "complex")
+		if len(s) > 10 {
+			categories = append(categories, "long-complex")
+		} else {
+			categories = append(categories, "short-complex")
+		}
 	} else {
 		categories = append(categories, "non-complex")
+		if len(s) > 10 {
+			categories = append(categories, "long-non-complex")
+		} else {
+			categories = append(categories, "short-non-complex")
+		}
 	}
 
 	for _, c := range s {

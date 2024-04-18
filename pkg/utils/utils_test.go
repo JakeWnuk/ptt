@@ -25,6 +25,7 @@ import (
 // - CheckASCIIString()
 // - CheckHexString()
 // - CheckAreMapsEqual()
+// - CheckAreArraysEqual()
 //
 // ----------------------------------------------------------------------------
 // Functions without Unit Tests
@@ -465,6 +466,46 @@ func TestCheckAreMapsEqual(t *testing.T) {
 		given := CheckAreMapsEqual(input1, input2)
 		if given != output {
 			t.Errorf("CheckAreMapsEqual(%v, %v) = %v; want %v", input1, input2, given, output)
+		}
+	}
+}
+
+// Unit Test for CheckAreArraysEqual()
+func TestCheckAreArraysEqual(t *testing.T) {
+
+	// Define a test case struct
+	type TestCase struct {
+		Input1 []string
+		Input2 []string
+		Output bool
+	}
+
+	type TestCases []TestCase
+
+	// Define test cases
+	testCases := TestCases{
+		{[]string{"love1", "love2", "love3"}, []string{"love1", "love2", "love3"}, true},
+		{[]string{"<31", "<32", "<33"}, []string{"<31", "<32", "<33"}, true},
+		{[]string{"爱1", "爱2", "爱3"}, []string{"爱1", "爱2", "爱3"}, true},
+		{[]string{"amor1", "amor2", "amor3"}, []string{"amor1", "amor2", "amor3"}, true},
+		{[]string{"amour1", "amour2", "amour3"}, []string{"amour1", "amour2", "amour3"}, true},
+		{[]string{"愛1", "愛2", "愛3"}, []string{"愛1", "愛2", "愛3"}, true},
+		{[]string{"love1", "love2", "love3"}, []string{"love1", "love2", "love3", "love4"}, false},
+		{[]string{"<31", "<32", "<33"}, []string{"<31", "<32", "<33", "<34"}, false},
+		{[]string{"爱1", "爱2", "爱3"}, []string{"爱1", "爱2", "爱3", "爱4"}, false},
+		{[]string{"amor1", "amor2", "amor3"}, []string{"amor1", "amor2", "amor3", "amor4"}, false},
+		{[]string{"amour1", "amour2", "amour3"}, []string{"amour1", "amour2", "amour3", "amour4"}, false},
+	}
+
+	// Run test cases
+	for _, testCase := range testCases {
+		input1 := testCase.Input1
+		input2 := testCase.Input2
+		output := testCase.Output
+
+		given := CheckAreArraysEqual(input1, input2)
+		if given != output {
+			t.Errorf("CheckAreArraysEqual(%v, %v) = %v; want %v", input1, input2, given, output)
 		}
 	}
 }

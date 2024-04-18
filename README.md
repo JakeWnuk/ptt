@@ -83,7 +83,7 @@ Transformation Modes:
         Transforms input by removing characters with provided mask characters.
   -t retain -rm [uldsb] -tf [file]
         Transforms input by creating masks that still retain strings from file.
-  -t shuf -tf [file]
+  -t shuffle -tf [file]
         Transforms input by shuffling tokens from a partial mask file and a input file.
   -t swap -tf [file]
         Transforms input by swapping tokens with exact matches from a ':' separated file.
@@ -92,9 +92,6 @@ Transformation Modes:
 ```
 
 ## Getting Started:
-
->[!NOTE]
-> This tool is still in development and considered early access. Please report any issues, bugs, or feature requests to the GitHub repository.
 
 Documentation on usage and examples can be found in the `/docs` directory or on the repository here: [link](https://github.com/JakeWnuk/ptt/tree/main/docs)
 

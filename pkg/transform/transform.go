@@ -90,7 +90,7 @@ func TransformationController(input map[string]int, mode string, startingIndex i
 		output = ReplaceKeysInMap(input, transformationFilesMap)
 	case "pop", "split", "boundary-split", "boundary-pop", "pop-split", "split-pop", "po":
 		output = mask.BoundarySplitPopMap(input, replacementMask)
-	case "shuf", "mask-swap", "shuffle", "token-swap", "sh":
+	case "shuffle", "mask-swap", "shuf", "token-swap", "sh":
 		if len(transformationFilesMap) == 0 {
 			fmt.Println("Shuffle operations require use of one or more -tf flags to specify one or more files")
 			fmt.Println("This transformation mode requres a 'retain-mask' file to use for swapping")

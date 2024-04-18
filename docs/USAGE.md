@@ -132,7 +132,7 @@ keywords above:
 - `fuzzy-swap`: `fs`, `fuzzy`, `fuzzy-replace`, `fuzz`, `mutate`
 - `swap`: `s`, `replace`
 - `pop`: `po`, `split`, `boundary-split`, `boundary-pop`, `pop-split`, `split-pop`
-- `shuf`: `sh`, `shuffle`, `mask-swap`, `token-swap`
+- `shuffle`: `sh`, `shuf`, `mask-swap`, `token-swap`
 
 ### Examples
 
@@ -219,6 +219,7 @@ Starting statistics generation. Please wait...
 Verbose Statistics: max=25
 --------------------------------------------------
 General Stats:
+Total Items: 4730675
 Total Unique items: 585203
 Total Characters: 2758719
 Total Words: 585199
@@ -231,13 +232,22 @@ Median frequency: 1
 Mode frequency: 29529
 
 Category Counts:
-alphanumeric with special: 8
-alphabetical: 496555
+alphabetical: 496547
+all-lowercase: 524227
+short-non-complex: 585203
+high-numeric-ratio: 86021
+greek-characters: 16
+hex-string: 11208
 non-complex: 585203
 numeric: 86028
-high numeric ratio: 86014
-phrase: 11
 non-ASCII: 566
+cyrillic-characters: 15
+alphanumeric-with-special: 8
+starts-uppercase: 60976
+all-uppercase: 149650
+arabic-characters: 17
+thai-characters: 14
+hebrew-characters: 3
 
 --------------------------------------------------
 1234  [29529]==================================================
