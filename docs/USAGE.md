@@ -108,7 +108,7 @@ The following transformations can be used with the `-t` flag:
 - `fuzzy-swap`: Transforms input by swapping tokens with fuzzy matches from another
 - `swap`: Transforms input by swapping tokens with exact matches from a ':' separated file.
 - `pop`: Transforms input by generating tokens from popping strings at character boundaries.
-- `shuf`: Transforms input by shuffling tokens from a partial mask file and a input file.
+- `shuffle`: Transforms input by shuffling tokens from a partial mask file and a input file.
 
 The modes also have aliases that can be used with the `-t` flag instead of the
 keywords above:
