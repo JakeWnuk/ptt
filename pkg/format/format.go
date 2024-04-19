@@ -215,7 +215,6 @@ func StatClassifyToken(s string) []string {
 
 	if strings.Count(s, " ") >= 2 && strings.IndexFunc(s, isAlpha) >= 0 {
 		categories = append(categories, "phrase")
-		fmt.Println("Phrase: ", s)
 	}
 
 	digitCount := 0
