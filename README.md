@@ -8,7 +8,7 @@
 - All transformations support multibyte characters.
 
 ```
-Usage of Password Transformation Tool (ptt) version (0.0.0):
+Usage of Password Transformation Tool (ptt) version (0.1.0):
 
 ptt [options] [...]
 Accepts standard input and/or additonal arguments.
@@ -17,11 +17,11 @@ Options:
   -f value
         Read additional files for input.
   -i value
-        Starting index for transformations if applicable. Accepts ranges separated by '-'. (default 0)
+        Starting index for transformations if applicable. Accepts ranges separated by '-'.
   -k value
         Only keep items in a file.
   -l value
-        Keeps output equal to or within a range of lengths. Accepts ranges separated by '-'. (default 0)
+        Keeps output equal to or within a range of lengths. Accepts ranges separated by '-'.
   -m int
         Minimum numerical frequency to include in output.
   -n int
@@ -44,7 +44,7 @@ Options:
   -vvv
         Show verbose statistics output when possible.
 
-The -f, -k, -r, -tf, and -u flags can be used multiple times.
+The -f, -k, -r, -tf, and -u flags can be used multiple times and together.
 
 Transformation Modes:
   -t append
@@ -59,14 +59,14 @@ Transformation Modes:
         Transforms input by decoding $HEX[...] formatted strings.
   -t encode
         Transforms input by URL, HTML, and Unicode escape encoding.
-  -t fuzzy-swap -tf [file]
-        Transforms input by swapping tokens with fuzzy matches from another file.
   -t hex
         Transforms input by encoding strings into $HEX[...] format.
   -t insert -i [index]
         Transforms input into insert rules starting at index.
   -t mask -rm [uldsb] -v
         Transforms input by masking characters with provided mask.
+  -t mask-swap -tf [file]
+        Transforms input by swapping tokens from a partial mask file and a input file.
   -t match -tf [file]
         Transforms input by keeping only strings with matching masks from a mask file.
   -t overwrite -i [index]
@@ -79,12 +79,10 @@ Transformation Modes:
         Transforms input into prepend-remove rules.
   -t prepend-shift
         Transforms input into prepend-shift rules.
-  -t remove -rm [uldsb] -v
+  -t remove -rm [uldsb]
         Transforms input by removing characters with provided mask characters.
   -t retain -rm [uldsb] -tf [file]
         Transforms input by creating masks that still retain strings from file.
-  -t shuffle -tf [file]
-        Transforms input by shuffling tokens from a partial mask file and a input file.
   -t swap -tf [file]
         Transforms input by swapping tokens with exact matches from a ':' separated file.
   -t toggle -i [index]
@@ -100,7 +98,7 @@ Documentation on usage and examples can be found in the `/docs` directory or on 
 #### Source:
 Fast method with Go installed:
 ```
-TODO
+go install github.com/jakewnuk/ptt@latest
 ```
 Slow method with Go installed:
 ```
@@ -115,10 +113,4 @@ docker run -it -v ${PWD}:/data jwnuk/ptt
 Build the Docker image from the Dockerfile:
 ```
 git clone https://github.com/JakeWnuk/ptt && cd ptt && docker build -t ptt . && docker run -it -v ${PWD}:/data ptt
-```
-
-#### Binary:
-Download the latest release from the GitHub repository:
-```
-TODO
 ```
