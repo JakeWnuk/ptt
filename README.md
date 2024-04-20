@@ -17,11 +17,11 @@ Options:
   -f value
         Read additional files for input.
   -i value
-        Starting index for transformations if applicable. Accepts ranges separated by '-'. (default 0)
+        Starting index for transformations if applicable. Accepts ranges separated by '-'.
   -k value
         Only keep items in a file.
   -l value
-        Keeps output equal to or within a range of lengths. Accepts ranges separated by '-'. (default 0)
+        Keeps output equal to or within a range of lengths. Accepts ranges separated by '-'.
   -m int
         Minimum numerical frequency to include in output.
   -n int
@@ -44,7 +44,7 @@ Options:
   -vvv
         Show verbose statistics output when possible.
 
-The -f, -k, -r, -tf, and -u flags can be used multiple times.
+The -f, -k, -r, -tf, and -u flags can be used multiple times and together.
 
 Transformation Modes:
   -t append
