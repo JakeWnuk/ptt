@@ -4,10 +4,11 @@ package transform
 import (
 	"fmt"
 	"os"
-	"ptt/pkg/format"
-	"ptt/pkg/mask"
-	"ptt/pkg/rule"
-	"ptt/pkg/utils"
+
+	"github.com/jakewnuk/ptt/pkg/format"
+	"github.com/jakewnuk/ptt/pkg/mask"
+	"github.com/jakewnuk/ptt/pkg/rule"
+	"github.com/jakewnuk/ptt/pkg/utils"
 )
 
 // ----------------------------------------------------------------------------

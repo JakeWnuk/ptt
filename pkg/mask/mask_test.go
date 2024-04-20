@@ -1,9 +1,10 @@
 package mask
 
 import (
-	"ptt/pkg/utils"
 	"reflect"
 	"testing"
+
+	"github.com/jakewnuk/ptt/pkg/utils"
 )
 
 // ----------------------------------------------------------------------------

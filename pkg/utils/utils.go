@@ -7,7 +7,6 @@ import (
 	"io"
 	"net/http"
 	"os"
-	"ptt/pkg/models"
 	"regexp"
 	"sort"
 	"strconv"
@@ -15,6 +14,8 @@ import (
 	"sync"
 	"time"
 	"unicode/utf8"
+
+	"github.com/jakewnuk/ptt/pkg/models"
 
 	"golang.org/x/net/html"
 )

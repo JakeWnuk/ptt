@@ -1,8 +1,9 @@
 package rule
 
 import (
-	"ptt/pkg/utils"
 	"testing"
+
+	"github.com/jakewnuk/ptt/pkg/utils"
 )
 
 // ----------------------------------------------------------------------------

@@ -6,12 +6,13 @@ import (
 	"flag"
 	"fmt"
 	"os"
-	"ptt/pkg/format"
-	"ptt/pkg/models"
-	"ptt/pkg/transform"
-	"ptt/pkg/utils"
 	"sort"
 	"sync"
+
+	"github.com/jakewnuk/ptt/pkg/format"
+	"github.com/jakewnuk/ptt/pkg/models"
+	"github.com/jakewnuk/ptt/pkg/transform"
+	"github.com/jakewnuk/ptt/pkg/utils"
 )
 
 var version = "0.1.0"

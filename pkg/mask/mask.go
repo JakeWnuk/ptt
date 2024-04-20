@@ -3,10 +3,11 @@ package mask
 
 import (
 	"fmt"
-	"ptt/pkg/utils"
 	"regexp"
 	"strings"
 	"unicode"
+
+	"github.com/jakewnuk/ptt/pkg/utils"
 )
 
 // ----------------------------------------------------------------------------

@@ -1,8 +1,9 @@
 package utils
 
 import (
-	"ptt/pkg/models"
 	"testing"
+
+	"github.com/jakewnuk/ptt/pkg/models"
 )
 
 // ----------------------------------------------------------------------------

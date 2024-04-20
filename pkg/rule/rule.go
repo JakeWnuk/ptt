@@ -5,10 +5,11 @@ package rule
 import (
 	"fmt"
 	"os"
-	"ptt/pkg/utils"
 	"strconv"
 	"strings"
 	"unicode"
+
+	"github.com/jakewnuk/ptt/pkg/utils"
 )
 
 // ----------------------------------------------------------------------------

@@ -9,11 +9,12 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
-	"ptt/pkg/models"
 	"sort"
 	"strconv"
 	"strings"
 	"unicode"
+
+	"github.com/jakewnuk/ptt/pkg/models"
 )
 
 // ----------------------------------------------------------------------------

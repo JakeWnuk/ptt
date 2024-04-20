@@ -1,8 +1,9 @@
 package transform
 
 import (
-	"ptt/pkg/utils"
 	"testing"
+
+	"github.com/jakewnuk/ptt/pkg/utils"
 )
 
 // ----------------------------------------------------------------------------
