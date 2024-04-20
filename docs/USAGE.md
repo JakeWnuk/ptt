@@ -1,5 +1,5 @@
 # Password Transformation Tool (PTT) Usage Guide
-## Version 0.0.0
+## Version 0.1.0
 
 ### Table of Contents
 1. [Introduction](#introduction)
@@ -37,7 +37,7 @@ statistics report, or as a verbose statistics report.
 #### Source:
 Fast method with Go installed:
 ```
-TODO
+go install github.com/jakewnuk/ptt@latest
 ```
 Slow method with Go installed:
 ```
@@ -54,19 +54,13 @@ Build the Docker image from the Dockerfile:
 git clone https://github.com/JakeWnuk/ptt && cd ptt && docker build -t ptt . && docker run -it -v ${PWD}:/data ptt
 ```
 
-#### Binary:
-Download the latest release from the GitHub repository:
-```
-TODO
-```
-
 ### Usage
 
 The tool can read input from standard input, files, or URLs and can read from
 multiple sources at the same time. The tool can also read additional files in a
 similar manner for some other options.
 
-There are some additonal notes when importing data:
+There are some additional notes when importing data:
 - Check for hidden characters in files that may cause issues. `Dos2unix` can be used to remove these characters.
 - When reading from standard input, the tool can detect chaining `ptt` commands
   when the `-v` flag is used. This can be used to pipe multiple commands together.

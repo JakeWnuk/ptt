@@ -14,7 +14,7 @@ import (
 	"sync"
 )
 
-var version = "0.0.0"
+var version = "0.1.0"
 var wg sync.WaitGroup
 var mutex = &sync.Mutex{}
 var retain models.FileArgumentFlag
@@ -51,7 +51,7 @@ func main() {
 			"hex":                           "Transforms input by encoding strings into $HEX[...] format.",
 			"dehex":                         "Transforms input by decoding $HEX[...] formatted strings.",
 			"mask -rm [uldsb] -v":           "Transforms input by masking characters with provided mask.",
-			"remove -rm [uldsb] -v":         "Transforms input by removing characters with provided mask characters.",
+			"remove -rm [uldsb]":            "Transforms input by removing characters with provided mask characters.",
 			"retain -rm [uldsb] -tf [file]": "Transforms input by creating masks that still retain strings from file.",
 			"pop -rm [uldsb]":               "Transforms input by generating tokens from popping strings at character boundaries.",
 			"match -tf [file]":              "Transforms input by keeping only strings with matching masks from a mask file.",

@@ -8,7 +8,7 @@
 - All transformations support multibyte characters.
 
 ```
-Usage of Password Transformation Tool (ptt) version (0.0.0):
+Usage of Password Transformation Tool (ptt) version (0.1.0):
 
 ptt [options] [...]
 Accepts standard input and/or additonal arguments.
@@ -79,7 +79,7 @@ Transformation Modes:
         Transforms input into prepend-remove rules.
   -t prepend-shift
         Transforms input into prepend-shift rules.
-  -t remove -rm [uldsb] -v
+  -t remove -rm [uldsb]
         Transforms input by removing characters with provided mask characters.
   -t retain -rm [uldsb] -tf [file]
         Transforms input by creating masks that still retain strings from file.
@@ -100,7 +100,7 @@ Documentation on usage and examples can be found in the `/docs` directory or on 
 #### Source:
 Fast method with Go installed:
 ```
-TODO
+go install github.com/jakewnuk/ptt@latest
 ```
 Slow method with Go installed:
 ```
@@ -115,10 +115,4 @@ docker run -it -v ${PWD}:/data jwnuk/ptt
 Build the Docker image from the Dockerfile:
 ```
 git clone https://github.com/JakeWnuk/ptt && cd ptt && docker build -t ptt . && docker run -it -v ${PWD}:/data ptt
-```
-
-#### Binary:
-Download the latest release from the GitHub repository:
-```
-TODO
 ```

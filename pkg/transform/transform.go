@@ -61,7 +61,7 @@ func TransformationController(input map[string]int, mode string, startingIndex i
 	case "hex", "rehex":
 		output = format.HexEncodeMap(input)
 	case "remove", "remove-all", "delete", "delete-all", "rm":
-		input = mask.MakeMaskedMap(input, replacementMask, verbose)
+		input = mask.MakeMaskedMap(input, replacementMask, false)
 		output = mask.RemoveMaskedCharacters(input)
 	case "retain-mask", "retain", "r":
 		if len(transformationFilesMap) == 0 {
