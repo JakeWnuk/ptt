@@ -2,6 +2,7 @@
 package utils
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
@@ -42,9 +43,14 @@ func ReadFilesToMap(fs models.FileSystem, filenames []string) map[string]int {
 		if err != nil {
 			panic(err)
 		}
-		fileWords := strings.Split(string(data), "\n")
-		for _, word := range fileWords {
-			wordMap[word]++
+
+		err = json.Unmarshal(data, &wordMap)
+		fmt.Fprintf(os.Stderr, "[*] Detected ptt JSON output. Importing...\n")
+		if err != nil {
+			fileWords := strings.Split(string(data), "\n")
+			for _, word := range fileWords {
+				wordMap[word]++
+			}
 		}
 	}
 
@@ -78,6 +84,7 @@ func LoadStdinToMap(scanner models.Scanner) (map[string]int, error) {
 			continue
 		}
 
+		// Detect ptt -v output
 		if matched := reDetect.MatchString(scanner.Text()); matched && pttInput == false && line0 == false {
 			fmt.Fprintf(os.Stderr, "[*] Detected ptt -v output. Importing...\n")
 			pttInput = true
