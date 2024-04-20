@@ -75,12 +75,6 @@ func TransformationController(input map[string]int, mode string, startingIndex i
 			os.Exit(1)
 		}
 		output = mask.MakeMatchedMaskedMap(input, replacementMask, transformationFilesMap)
-	case "fuzzy-swap", "fuzzy-replace", "fuzzy", "fuzz", "mutate", "fs":
-		if len(transformationFilesMap) == 0 {
-			fmt.Println("Swap operations require use of one or more -tf flags to specify one or more files")
-			os.Exit(1)
-		}
-		output = FuzzyReplaceKeysInMap(input, transformationFilesMap)
 	case "swap", "replace", "s":
 		if len(transformationFilesMap) == 0 {
 			fmt.Println("Swap operations require use of one or more -tf flags to specify one or more files")
@@ -90,10 +84,10 @@ func TransformationController(input map[string]int, mode string, startingIndex i
 		output = ReplaceKeysInMap(input, transformationFilesMap)
 	case "pop", "split", "boundary-split", "boundary-pop", "pop-split", "split-pop", "po":
 		output = mask.BoundarySplitPopMap(input, replacementMask)
-	case "shuffle", "mask-swap", "shuf", "token-swap", "sh":
+	case "mask-swap", "shuffle", "shuf", "token-swap", "ms":
 		if len(transformationFilesMap) == 0 {
-			fmt.Println("Shuffle operations require use of one or more -tf flags to specify one or more files")
-			fmt.Println("This transformation mode requres a 'retain-mask' file to use for swapping")
+			fmt.Println("Mask-swap operations require use of one or more -tf flags to specify one or more files")
+			fmt.Println("This transformation mode requres a retain mask file to use for swapping")
 			os.Exit(1)
 		}
 		output = mask.ShuffleMap(input, replacementMask, transformationFilesMap)
@@ -107,29 +101,6 @@ func TransformationController(input map[string]int, mode string, startingIndex i
 // ----------------------------------------------------------------------------
 // Generation Functions
 // ----------------------------------------------------------------------------
-
-// FuzzyReplaceKeysInMap takes a map of keys and values and replaces the keys
-// with fuzzy replacements based on the replacement map. This is useful for
-// performing operations like mutation or swapping.
-//
-// Args:
-//
-//	originalMap (map[string]int): The original map to replace keys in
-//	replacements (map[string]int): The map of replacements to use
-//
-// Returns:
-//
-//	(map[string]int): A new map with the keys replaced
-func FuzzyReplaceKeysInMap(originalMap map[string]int, replacements map[string]int) map[string]int {
-	newMap := make(map[string]int)
-	for key, value := range originalMap {
-		newKeyArray := utils.FuzzyReplaceSubstring(key, replacements)
-		for _, newKey := range newKeyArray {
-			newMap[newKey] = value
-		}
-	}
-	return newMap
-}
 
 // ReplaceKeysInMap takes a map of keys and values and replaces the keys
 // with replacements based on the replacement map. This is useful for

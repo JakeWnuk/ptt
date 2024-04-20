@@ -55,9 +55,8 @@ func main() {
 			"retain -rm [uldsb] -tf [file]": "Transforms input by creating masks that still retain strings from file.",
 			"pop -rm [uldsb]":               "Transforms input by generating tokens from popping strings at character boundaries.",
 			"match -tf [file]":              "Transforms input by keeping only strings with matching masks from a mask file.",
-			"fuzzy-swap -tf [file]":         "Transforms input by swapping tokens with fuzzy matches from another file.",
 			"swap -tf [file]":               "Transforms input by swapping tokens with exact matches from a ':' separated file.",
-			"shuffle -tf [file]":            "Transforms input by shuffling tokens from a partial mask file and a input file.",
+			"mask-swap -tf [file]":          "Transforms input by swapping tokens from a partial mask file and a input file.",
 		}
 
 		// Sort and print transformation modes

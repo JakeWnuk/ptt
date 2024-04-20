@@ -4,9 +4,8 @@
 ### Table of Contents
 1. [Introduction](#introduction)
 2. [Direct Swapping](#direct-swapping)
-3. [Fuzzy Swapping](#fuzzy-swapping)
-4. [Token Popping](#token-popping)
-5. [Token Swapping](#token-swapping)
+3. [Token Popping](#token-popping)
+4. [Token Swapping](#token-swapping)
 
 ### Introduction
 This document describes the ways to use PTT to create password cracking
@@ -19,7 +18,7 @@ wordlists. There are several ways to generate wordlists using PTT:
 - `token-popping`: Generates tokens by popping strings at character boundaries.
   This is implemented in the `pop` module.
 - `token-swapping`: Generates tokens by swapping characters in a string. This is
-  implemented in the `shuffle` module.
+  implemented in the `mask-swap` module.
 
 All modes support multibyte characters and can properly convert them. One
 transformation can be used at a time.
@@ -35,20 +34,6 @@ ptt -f <input-file> -t swap -tf <replacement-file>
 ```
 The replacement file should contain the strings to be transformed as `PRIOR:POST`
 pairs. The replacements will be applied to the first instance in each line.
-
-### Fuzzy Swapping
-The `fuzzy-swap` module swaps characters by comparing their relative character
-length. The syntax is as follows:
-```
-ptt -f <input-file> -t fuzzy-swap -tf <replacement-file>
-```
-The replacement file does not need to be in any specific format. The
-replacements will be applied to the first instance in each line.
-
-The fuzzy matcher works by removing non-letter characters from the input
-string and comparing the relative character length of the strings to those
-in the replacement file. If the relative character length is the same or
-greater, the replacement will be applied.
 
 ### Token Popping
 The `pop` module generates tokens by popping strings at character boundaries.
@@ -68,17 +53,17 @@ The default value is `uldsb` for all characters. This mode will create tokens
 by popping characters from the input string then aggregating the results.
 
 ### Token Swapping
-The `shuffle` module generates tokens by swapping characters in a string. The
+The `mask-swap` module generates tokens by swapping characters in a string. The
 syntax is as follows:
 ```
-ptt -f <input-file> -t shuffle -tf <replacement-file>
+ptt -f <input-file> -t mask-swap -tf <replacement-file>
 ```
 > [!NOTE]
-> The input for `shuffle` is partial masks from `retain`! This is different from most other modes.
+> The input for `mask-swap` is partial masks from `retain`! This is different from most other modes.
 
 The replacement file does not need to be in any specific format. The
 replacements will be applied to the first instance in each line. The
-`shuffle` mode is unique in that it uses partial masks from the `retain`
+`mask-swap` mode is unique in that it uses partial masks from the `retain`
 module to generate new candidates. This mode also uses its own replacer
 module (different from the other modes) to generate new candidates by 
 extracting the masks and then matching them to the replacement file.

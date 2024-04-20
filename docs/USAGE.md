@@ -105,10 +105,9 @@ The following transformations can be used with the `-t` flag:
 - `remove`: Transforms input by removing characters with provided mask characters.
 - `retain`: Transforms input by creating masks that still retain strings from file.
 - `match`: Transforms input by keeping only strings with matching masks from a mask file
-- `fuzzy-swap`: Transforms input by swapping tokens with fuzzy matches from another
 - `swap`: Transforms input by swapping tokens with exact matches from a ':' separated file.
 - `pop`: Transforms input by generating tokens from popping strings at character boundaries.
-- `shuffle`: Transforms input by shuffling tokens from a partial mask file and a input file.
+- `mask-swap`: Transforms input by swapping tokens from a partial mask file and a input file.
 
 The modes also have aliases that can be used with the `-t` flag instead of the
 keywords above:
@@ -132,7 +131,7 @@ keywords above:
 - `fuzzy-swap`: `fs`, `fuzzy`, `fuzzy-replace`, `fuzz`, `mutate`
 - `swap`: `s`, `replace`
 - `pop`: `po`, `split`, `boundary-split`, `boundary-pop`, `pop-split`, `split-pop`
-- `shuffle`: `sh`, `shuf`, `mask-swap`, `token-swap`
+- `mask-swap`: `ms`, `shuf`, `shuffle`, `token-swap`
 
 ### Examples
 

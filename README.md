@@ -59,14 +59,14 @@ Transformation Modes:
         Transforms input by decoding $HEX[...] formatted strings.
   -t encode
         Transforms input by URL, HTML, and Unicode escape encoding.
-  -t fuzzy-swap -tf [file]
-        Transforms input by swapping tokens with fuzzy matches from another file.
   -t hex
         Transforms input by encoding strings into $HEX[...] format.
   -t insert -i [index]
         Transforms input into insert rules starting at index.
   -t mask -rm [uldsb] -v
         Transforms input by masking characters with provided mask.
+  -t mask-swap -tf [file]
+        Transforms input by swapping tokens from a partial mask file and a input file.
   -t match -tf [file]
         Transforms input by keeping only strings with matching masks from a mask file.
   -t overwrite -i [index]
@@ -83,8 +83,6 @@ Transformation Modes:
         Transforms input by removing characters with provided mask characters.
   -t retain -rm [uldsb] -tf [file]
         Transforms input by creating masks that still retain strings from file.
-  -t shuffle -tf [file]
-        Transforms input by shuffling tokens from a partial mask file and a input file.
   -t swap -tf [file]
         Transforms input by swapping tokens with exact matches from a ':' separated file.
   -t toggle -i [index]

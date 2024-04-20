@@ -32,8 +32,6 @@ import (
 // ----------------------------------------------------------------------------
 // - ReadURLsToMap() (Loading and Processing Functions)
 // - ProcessURL() (Loading and Processing Functions)
-// - FuzzyReplaceSubstring() (Transformation Functions)
-// - CheckIsFuzzyMatch() (Validation Functions)
 
 // Unit Test for ReadFilesToMap()
 func TestReadFilesToMap(t *testing.T) {
