@@ -9,6 +9,7 @@ import (
 	"ptt/pkg/models"
 	"regexp"
 	"sort"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -67,10 +68,36 @@ func ReadFilesToMap(fs models.FileSystem, filenames []string) map[string]int {
 //	error: An error if one occurred
 func LoadStdinToMap(scanner models.Scanner) (map[string]int, error) {
 	m := make(map[string]int)
+	pttInput := false
+	line0 := false
+	reDetect := regexp.MustCompile(`^\d+\s(\d+|\w+)`)
+	reParse := regexp.MustCompile(`^\d+`)
 
 	for scanner.Scan() {
-		line := scanner.Text()
-		m[line]++
+		if scanner.Text() == "" {
+			continue
+		}
+
+		if matched := reDetect.MatchString(scanner.Text()); matched && pttInput == false && line0 == false {
+			fmt.Fprintf(os.Stderr, "[*] Detected ptt -v output. Importing...\n")
+			pttInput = true
+		}
+
+		if pttInput {
+			line := scanner.Text()
+			match := reParse.FindString(line)
+			value, err := strconv.Atoi(match)
+			if err != nil {
+				return nil, err
+			}
+			newLine := strings.TrimSpace(strings.Replace(line, match, "", 1))
+			m[newLine] += value
+
+		} else {
+			line := scanner.Text()
+			m[line]++
+		}
+		line0 = true
 	}
 
 	if err := scanner.Err(); err != nil {
