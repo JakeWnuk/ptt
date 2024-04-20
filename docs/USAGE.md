@@ -66,6 +66,12 @@ The tool can read input from standard input, files, or URLs and can read from
 multiple sources at the same time. The tool can also read additional files in a
 similar manner for some other options.
 
+There are some additonal notes when importing data:
+- Check for hidden characters in files that may cause issues. `Dos2unix` can be used to remove these characters.
+- When reading from standard input, the tool can detect chaining `ptt` commands
+  when the `-v` flag is used. This can be used to pipe multiple commands together.
+- When reading from files, the tool can detect when `ptt` JSON output is used as input and will parse the JSON data.
+
 The `-f`, `-k`, `-r`, `-tf`, and `-u` flags can be used multiple times and have
 their collective values combined. The rest of the flags can only be used once.
 

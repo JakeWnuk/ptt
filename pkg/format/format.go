@@ -146,7 +146,6 @@ func CreateVerboseStats(freq map[string]int) string {
 	totalItems := 0
 	categoryCounts := make(map[string]int)
 	for k, v := range freq {
-		totalChars += len(k)
 		totalWords += len(strings.Fields(k))
 		categories := StatClassifyToken(k)
 		totalItems += v
@@ -157,7 +156,6 @@ func CreateVerboseStats(freq map[string]int) string {
 	stats += "General Stats:\n"
 	stats += fmt.Sprintf("Total Items: %d\n", totalItems)
 	stats += fmt.Sprintf("Total Unique items: %d\n", len(p))
-	stats += fmt.Sprintf("Total Characters: %d\n", totalChars)
 	stats += fmt.Sprintf("Total Words: %d\n", totalWords)
 	stats += fmt.Sprintf("Average Characters Per Item: %d\n", totalChars/len(freq))
 	stats += fmt.Sprintf("Average Words Per Item: %d\n", totalWords/len(freq))

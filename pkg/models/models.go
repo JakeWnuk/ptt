@@ -122,14 +122,16 @@ type MockScanner struct {
 
 // Implements the Scan, Text, and Err methods of the Scanner interface for the MockScanner
 func (m *MockScanner) Scan() bool {
-	return m.Index < len(m.Lines)
+	if m.Index < len(m.Lines) {
+		m.Index++
+		return true
+	}
+	return false
 }
 
 // Implements the Text method of the Scanner interface for the MockScanner
 func (m *MockScanner) Text() string {
-	line := m.Lines[m.Index]
-	m.Index++
-	return line
+	return m.Lines[m.Index-1]
 }
 
 // Implements the Err method of the Scanner interface for the MockScanner
