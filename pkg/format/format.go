@@ -64,11 +64,6 @@ func PrintArrayToSTDOUT(freq map[string]int, verbose bool) {
 //	None
 func PrintStatsToSTDOUT(freq map[string]int, verbose bool, max int) {
 
-	// Set the max value
-	if !verbose {
-		max = 10
-	}
-
 	// Sort by frequency
 	p := make(models.PairList, len(freq))
 	normalizedP := make(models.PairList, len(freq))
