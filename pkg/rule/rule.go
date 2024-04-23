@@ -117,6 +117,11 @@ func FormatCharToRuleOutput(strs ...string) (output string) {
 		}
 	}
 
+	// if the string ends in '$ ' add a ':' to the end
+	if strings.HasSuffix(output, "$  ") {
+		output = output[:len(output)-1] + ":"
+	}
+
 	if output != "" && len(output) <= 93 {
 		return strings.TrimSpace(output)
 	}
