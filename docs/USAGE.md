@@ -222,8 +222,6 @@ Total Items: 4730675
 Total Unique items: 585203
 Total Characters: 2758719
 Total Words: 585199
-Average Characters Per Item: 4
-Average Words Per Item: 0
 Largest frequency: 29529
 Smallest frequency: 1
 Mean frequency: 1
