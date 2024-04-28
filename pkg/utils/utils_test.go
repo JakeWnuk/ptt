@@ -270,10 +270,10 @@ func TestConvertMultiByteCharToIteratingRule(t *testing.T) {
 
 	// Define test cases
 	testCases := TestCases{
-		{0, "i0l i1o i2v i3e", "i0l i1o i2v i3e"},
-		{0, "i0a i1爱", "i0a i1\\xE7 i2\\x88 i3\\xB1"},
-		{1, "i1a i2愛", "i1a i2\\xE6 i3\\x84 i4\\x9B"},
-		{0, "i0爱 i3t i4e i5s i6t", "i0\\xE7 i1\\x88 i2\\xB1 i3t i4e i5s i6t"},
+		{0, "i0l i1o i2v i3e", "i0l i1o i2v i3e "},
+		{0, "i0a i1爱", "i0a i1\\xE7 i2\\x88 i3\\xB1 "},
+		{1, "i1a i2愛", "i1a i2\\xE6 i3\\x84 i4\\x9B "},
+		{0, "i0爱 i3t i4e i5s i6t", "i0\\xE7 i1\\x88 i2\\xB1 i3t i4e i5s i6t "},
 	}
 
 	// Run test cases

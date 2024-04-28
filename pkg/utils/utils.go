@@ -413,7 +413,7 @@ func ConvertMultiByteCharToIteratingRule(index int, str string) string {
 		output += " "
 	}
 
-	return strings.TrimSpace(output)
+	return output
 }
 
 // SplitBySeparatorString splits a string by a separator string and returns a slice

@@ -8,7 +8,7 @@
 - All transformations support multibyte characters.
 
 ```
-Usage of Password Transformation Tool (ptt) version (0.1.1):
+Usage of Password Transformation Tool (ptt) version (0.1.2):
 
 ptt [options] [...]
 Accepts standard input and/or additonal arguments.
