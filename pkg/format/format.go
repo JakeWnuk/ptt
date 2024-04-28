@@ -154,9 +154,6 @@ func CreateVerboseStats(freq map[string]int) string {
 	stats += fmt.Sprintf("Total Words: %d\n", totalWords)
 	stats += fmt.Sprintf("Largest frequency: %d\n", p[0].Value)
 	stats += fmt.Sprintf("Smallest frequency: %d\n", p[len(p)-1].Value)
-	stats += fmt.Sprintf("Mean frequency: %d\n", p[len(p)/2].Value)
-	stats += fmt.Sprintf("Median frequency: %d\n", p[len(p)/2].Value)
-	stats += fmt.Sprintf("Mode frequency: %d", p[0].Value)
 
 	stats += "\n\nCategory Counts:\n"
 	for category, count := range categoryCounts {

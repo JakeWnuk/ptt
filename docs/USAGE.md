@@ -224,9 +224,6 @@ Total Characters: 2758719
 Total Words: 585199
 Largest frequency: 29529
 Smallest frequency: 1
-Mean frequency: 1
-Median frequency: 1
-Mode frequency: 29529
 
 Category Counts:
 alphabetical: 496547
