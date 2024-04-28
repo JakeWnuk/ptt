@@ -150,6 +150,13 @@ func FormatCharToIteratingRuleOutput(index int, strs ...string) (output string) 
 		}
 	}
 
+	if len(output)-3 >= 0 {
+		// allow for the last character to be a space for overwrite and insert rules
+		if output[len(output)-3:len(output)-2] == "o" || output[len(output)-3:len(output)-2] == "i" {
+			output = output + ":"
+		}
+	}
+
 	if output != "" && len(output) <= 93 {
 		return strings.TrimSpace(output)
 	}
