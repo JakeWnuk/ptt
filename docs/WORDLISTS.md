@@ -13,8 +13,6 @@ wordlists. There are several ways to generate wordlists using PTT:
 
 - `direct-swapping`: Swapping characters directly with a `:` separated file.
    This is implemented in the `swap` module.
-- `fuzzy-swapping`: Swapping characters by comparing their relative character
-  length. This is implemented in the `fuzzy-swap` module.
 - `token-popping`: Generates tokens by popping strings at character boundaries.
   This is implemented in the `pop` module.
 - `token-swapping`: Generates tokens by swapping characters in a string. This is

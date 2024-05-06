@@ -82,7 +82,7 @@ func PrintStatsToSTDOUT(freq map[string]int, verbose bool, max int) {
 
 	// Print the statistics
 	if verbose {
-		fmt.Fprintf(os.Stderr, "Starting statistics generation. Please wait...\n")
+		fmt.Fprintf(os.Stderr, "[*] Starting statistics generation. Please wait...\n")
 		fmt.Println(fmt.Sprintf("Verbose Statistics: max=%d", max))
 		fmt.Println("--------------------------------------------------")
 		fmt.Println(CreateVerboseStats(freq))
@@ -155,7 +155,7 @@ func CreateVerboseStats(freq map[string]int) string {
 	stats += fmt.Sprintf("Largest frequency: %d\n", p[0].Value)
 	stats += fmt.Sprintf("Smallest frequency: %d\n", p[len(p)-1].Value)
 
-	stats += "\n\nCategory Counts:\n"
+	stats += "\nCategory Counts:\n"
 	for category, count := range categoryCounts {
 		stats += fmt.Sprintf("%s: %d\n", category, count)
 	}
@@ -211,7 +211,7 @@ func StatClassifyToken(s string) []string {
 			digitCount++
 		}
 	}
-	if digitCount > len(s)*2/4 {
+	if digitCount > len(s)*5/7 {
 		categories = append(categories, "high-numeric-ratio")
 	}
 
@@ -279,11 +279,11 @@ func StatClassifyToken(s string) []string {
 		}
 	}
 
-	if strings.IndexFunc(s, unicode.IsLower) == -1 {
+	if strings.IndexFunc(s, unicode.IsLower) == -1 && strings.IndexFunc(s, unicode.IsUpper) >= 0 {
 		categories = append(categories, "all-uppercase")
 	}
 
-	if strings.IndexFunc(s, unicode.IsUpper) == -1 {
+	if strings.IndexFunc(s, unicode.IsUpper) == -1 && strings.IndexFunc(s, unicode.IsLower) >= 0 {
 		categories = append(categories, "all-lowercase")
 	}
 
