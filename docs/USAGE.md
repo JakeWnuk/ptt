@@ -214,7 +214,7 @@ life [14496]========================
 - `ptt -f rockyou.txt -t pop -l 4-5 -vvv`:
 ```shell
 $ ptt -f rockyou.txt -t pop -l 4-5 -vvv
-Starting statistics generation. Please wait...
+[*] Starting statistics generation. Please wait...
 Verbose Statistics: max=25
 --------------------------------------------------
 General Stats:
