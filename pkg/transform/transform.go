@@ -29,14 +29,15 @@ import (
 //	replacementMask (string): The mask characters to use for masking operations
 //	transformationFilesMap (map[string]int): A map of transformation files to
 //	use for modes like retain-mask
+//	bypass (bool): If true, the map is not used for output or filtering
 //
 // Returns:
 //
 //	(map[string]int): A map of transformed values
-func TransformationController(input map[string]int, mode string, startingIndex int, endingIndex int, verbose bool, replacementMask string, transformationFilesMap map[string]int) (output map[string]int) {
+func TransformationController(input map[string]int, mode string, startingIndex int, endingIndex int, verbose bool, replacementMask string, transformationFilesMap map[string]int, bypass bool) (output map[string]int) {
 	switch mode {
 	case "append", "append-remove", "append-shift", "a":
-		output = rule.AppendRules(input, mode)
+		output = rule.AppendRules(input, mode, bypass)
 	case "prepend", "prepend-remove", "prepend-shift", "ar":
 		output = rule.PrependRules(input, mode)
 	case "insert", "i":

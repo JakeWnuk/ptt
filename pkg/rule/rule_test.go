@@ -227,7 +227,7 @@ func TestAppendRules(t *testing.T) {
 
 	// Run test cases
 	for _, test := range tests {
-		given := AppendRules(test.items, test.operation)
+		given := AppendRules(test.items, test.operation, false)
 		if !utils.CheckAreMapsEqual(given, test.output) {
 			t.Errorf("Expected %v, but got %v", test.output, given)
 		}

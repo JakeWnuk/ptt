@@ -80,6 +80,11 @@ func PrintStatsToSTDOUT(freq map[string]int, verbose bool, max int) {
 		max = len(p)
 	}
 
+	if len(p) == 0 {
+		fmt.Println("No items to print!")
+		return
+	}
+
 	// Print the statistics
 	if verbose {
 		fmt.Fprintf(os.Stderr, "[*] Starting statistics generation. Please wait...\n")

@@ -170,11 +170,12 @@ func FormatCharToIteratingRuleOutput(index int, strs ...string) (output string) 
 //
 //	items (map[string]int): Items to use in the operation
 //	operation (string): Operation to use in the function
+//	bypass (bool): Bypass flag to skip map creation
 //
 // Returns:
 //
 // returnMap (map[string]int): Map of items to return
-func AppendRules(items map[string]int, operation string) (returnMap map[string]int) {
+func AppendRules(items map[string]int, operation string, bypass bool) (returnMap map[string]int) {
 	returnMap = make(map[string]int)
 	switch operation {
 	// remove will remove characters then append
@@ -183,8 +184,10 @@ func AppendRules(items map[string]int, operation string) (returnMap map[string]i
 			rule := CharToRule(key, "$")
 			remove := LenToRule(key, "]")
 			appendRemoveRule := FormatCharToRuleOutput(remove, rule)
-			if appendRemoveRule != "" {
+			if appendRemoveRule != "" && !bypass {
 				returnMap[appendRemoveRule] = value
+			} else if appendRemoveRule != "" && bypass {
+				fmt.Println(appendRemoveRule)
 			}
 		}
 		return returnMap
@@ -194,8 +197,10 @@ func AppendRules(items map[string]int, operation string) (returnMap map[string]i
 			rule := CharToRule(key, "$")
 			shift := LenToRule(key, "}")
 			appendShiftRule := FormatCharToRuleOutput(shift, rule)
-			if appendShiftRule != "" {
+			if appendShiftRule != "" && !bypass {
 				returnMap[appendShiftRule] = value
+			} else if appendShiftRule != "" && bypass {
+				fmt.Println(appendShiftRule)
 			}
 		}
 		return returnMap
@@ -203,8 +208,10 @@ func AppendRules(items map[string]int, operation string) (returnMap map[string]i
 		for key, value := range items {
 			rule := CharToRule(key, "$")
 			appendRule := FormatCharToRuleOutput(rule)
-			if appendRule != "" {
+			if appendRule != "" && !bypass {
 				returnMap[appendRule] = value
+			} else if appendRule != "" && bypass {
+				fmt.Println(appendRule)
 			}
 		}
 		return returnMap
