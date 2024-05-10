@@ -38,26 +38,26 @@ func main() {
 		fmt.Fprintf(os.Stderr, "\nThe -f, -k, -r, -tf, and -u flags can be used multiple times and together.\n")
 		fmt.Fprintln(os.Stderr, "\nTransformation Modes:")
 		modes := map[string]string{
-			"append":                        "Transforms input into append rules.",
-			"append-remove":                 "Transforms input into append-remove rules.",
-			"append-shift":                  "Transforms input into append-shift rules.",
-			"prepend":                       "Transforms input into prepend rules.",
-			"prepend-remove":                "Transforms input into prepend-remove rules.",
-			"prepend-shift":                 "Transforms input into prepend-shift rules.",
-			"insert -i [index]":             "Transforms input into insert rules starting at index.",
-			"overwrite -i [index]":          "Transforms input into overwrite rules starting at index.",
-			"toggle -i [index]":             "Transforms input into toggle rules starting at index.",
-			"encode":                        "Transforms input by URL, HTML, and Unicode escape encoding.",
-			"decode":                        "Transforms input by URL, HTML, and Unicode escape decoding.",
-			"hex":                           "Transforms input by encoding strings into $HEX[...] format.",
-			"dehex":                         "Transforms input by decoding $HEX[...] formatted strings.",
-			"mask -rm [uldsb] -v":           "Transforms input by masking characters with provided mask.",
-			"remove -rm [uldsb]":            "Transforms input by removing characters with provided mask characters.",
-			"retain -rm [uldsb] -tf [file]": "Transforms input by creating masks that still retain strings from file.",
-			"pop -rm [uldsb]":               "Transforms input by generating tokens from popping strings at character boundaries.",
-			"match -tf [file]":              "Transforms input by keeping only strings with matching masks from a mask file.",
-			"swap -tf [file]":               "Transforms input by swapping tokens with exact matches from a ':' separated file.",
-			"mask-swap -tf [file]":          "Transforms input by swapping tokens from a partial mask file and a input file.",
+			"append":                             "Transforms input into append rules.",
+			"append-remove":                      "Transforms input into append-remove rules.",
+			"append-shift":                       "Transforms input into append-shift rules.",
+			"prepend":                            "Transforms input into prepend rules.",
+			"prepend-remove":                     "Transforms input into prepend-remove rules.",
+			"prepend-shift":                      "Transforms input into prepend-shift rules.",
+			"insert -i [index]":                  "Transforms input into insert rules starting at index.",
+			"overwrite -i [index]":               "Transforms input into overwrite rules starting at index.",
+			"toggle -i [index]":                  "Transforms input into toggle rules starting at index.",
+			"encode":                             "Transforms input by URL, HTML, and Unicode escape encoding.",
+			"decode":                             "Transforms input by URL, HTML, and Unicode escape decoding.",
+			"hex":                                "Transforms input by encoding strings into $HEX[...] format.",
+			"dehex":                              "Transforms input by decoding $HEX[...] formatted strings.",
+			"mask -rm [uldsb] -v":                "Transforms input by masking characters with provided mask.",
+			"remove -rm [uldsb]":                 "Transforms input by removing characters with provided mask characters.",
+			"mask-retain -rm [uldsb] -tf [file]": "Transforms input by creating masks that still retain strings from file.",
+			"pop -rm [uldsb]":                    "Transforms input by generating tokens from popping strings at character boundaries.",
+			"mask-match -tf [file]":              "Transforms input by keeping only strings with matching masks from a mask file.",
+			"swap -tf [file]":                    "Transforms input by swapping tokens with exact matches from a ':' separated file.",
+			"mask-swap -tf [file]":               "Transforms input by swapping tokens from a partial mask file and a input file.",
 		}
 
 		// Sort and print transformation modes
@@ -83,6 +83,7 @@ func main() {
 	replacementMask := flag.String("rm", "uldsb", "Replacement mask for transformations if applicable.")
 	jsonOutput := flag.String("o", "", "Output to JSON file in addition to stdout.")
 	bypassMap := flag.Bool("b", false, "Bypass map creation and use stdout as primary output.")
+	//debugMode := flag.Bool("d", false, "Enable debug mode for certain transformations.")
 	flag.Var(&retain, "k", "Only keep items in a file.")
 	flag.Var(&remove, "r", "Only keep items not in a file.")
 	flag.Var(&readFiles, "f", "Read additional files for input.")

@@ -107,8 +107,8 @@ The following transformations can be used with the `-t` flag:
 - `dehex`: Transforms input by decoding $HEX[...] formatted
 - `mask`: Transforms input by masking characters with provided mask.
 - `remove`: Transforms input by removing characters with provided mask characters.
-- `retain`: Transforms input by creating masks that still retain strings from file.
-- `match`: Transforms input by keeping only strings with matching masks from a mask file
+- `mask-retain`: Transforms input by creating masks that still retain strings from file.
+- `mask-match`: Transforms input by keeping only strings with matching masks from a mask file
 - `swap`: Transforms input by swapping tokens with exact matches from a ':' separated file.
 - `pop`: Transforms input by generating tokens from popping strings at character boundaries.
 - `mask-swap`: Transforms input by swapping tokens from a partial mask file and a input file.

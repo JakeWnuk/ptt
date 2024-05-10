@@ -66,10 +66,12 @@ Transformation Modes:
         Transforms input into insert rules starting at index.
   -t mask -rm [uldsb] -v
         Transforms input by masking characters with provided mask.
+  -t mask-match -tf [file]
+        Transforms input by keeping only strings with matching masks from a mask file.
+  -t mask-retain -rm [uldsb] -tf [file]
+        Transforms input by creating masks that still retain strings from file.
   -t mask-swap -tf [file]
         Transforms input by swapping tokens from a partial mask file and a input file.
-  -t match -tf [file]
-        Transforms input by keeping only strings with matching masks from a mask file.
   -t overwrite -i [index]
         Transforms input into overwrite rules starting at index.
   -t pop -rm [uldsb]
@@ -82,8 +84,6 @@ Transformation Modes:
         Transforms input into prepend-shift rules.
   -t remove -rm [uldsb]
         Transforms input by removing characters with provided mask characters.
-  -t retain -rm [uldsb] -tf [file]
-        Transforms input by creating masks that still retain strings from file.
   -t swap -tf [file]
         Transforms input by swapping tokens with exact matches from a ':' separated file.
   -t toggle -i [index]

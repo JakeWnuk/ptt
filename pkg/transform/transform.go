@@ -65,13 +65,13 @@ func TransformationController(input map[string]int, mode string, startingIndex i
 	case "remove", "remove-all", "delete", "delete-all", "rm":
 		input = mask.MakeMaskedMap(input, replacementMask, false, false)
 		output = mask.RemoveMaskedCharacters(input, bypass)
-	case "retain-mask", "retain", "r":
+	case "retain-mask", "retain", "r", "mask-retain":
 		if len(transformationFilesMap) == 0 {
 			fmt.Fprintf(os.Stderr, "[!] Retain masks require use of one or more -tf flags to specify one or more files\n")
 			os.Exit(1)
 		}
 		output = mask.MakeRetainMaskedMap(input, replacementMask, transformationFilesMap, bypass)
-	case "match-mask", "match", "mt":
+	case "match-mask", "match", "mt", "mask-match":
 		if len(transformationFilesMap) == 0 {
 			fmt.Fprintf(os.Stderr, "[!] Match masks require use of one or more -tf flags to specify one or more files\n")
 			os.Exit(1)
