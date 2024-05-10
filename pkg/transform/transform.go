@@ -67,20 +67,20 @@ func TransformationController(input map[string]int, mode string, startingIndex i
 		output = mask.RemoveMaskedCharacters(input, bypass)
 	case "retain-mask", "retain", "r":
 		if len(transformationFilesMap) == 0 {
-			fmt.Println("Retain masks require use of one or more -tf flags to specify one or more files")
+			fmt.Fprintf(os.Stderr, "[!] Retain masks require use of one or more -tf flags to specify one or more files\n")
 			os.Exit(1)
 		}
 		output = mask.MakeRetainMaskedMap(input, replacementMask, transformationFilesMap, bypass)
 	case "match-mask", "match", "mt":
 		if len(transformationFilesMap) == 0 {
-			fmt.Println("Match masks require use of one or more -tf flags to specify one or more files")
+			fmt.Fprintf(os.Stderr, "[!] Match masks require use of one or more -tf flags to specify one or more files\n")
 			os.Exit(1)
 		}
 		output = mask.MakeMatchedMaskedMap(input, replacementMask, transformationFilesMap, bypass)
 	case "swap", "replace", "s":
 		if len(transformationFilesMap) == 0 {
-			fmt.Println("Swap operations require use of one or more -tf flags to specify one or more files")
-			fmt.Println("This transformation mode requres a ':' separated list of keys to swap")
+			fmt.Fprintf(os.Stderr, "[!] Swap operations require use of one or more -tf flags to specify one or more files\n")
+			fmt.Fprintf(os.Stderr, "[!] This transformation mode requires a ':' separated list of keys to swap\n")
 			os.Exit(1)
 		}
 		output = ReplaceKeysInMap(input, transformationFilesMap, bypass)
@@ -88,8 +88,8 @@ func TransformationController(input map[string]int, mode string, startingIndex i
 		output = mask.BoundarySplitPopMap(input, replacementMask)
 	case "mask-swap", "shuffle", "shuf", "token-swap", "ms":
 		if len(transformationFilesMap) == 0 {
-			fmt.Println("Mask-swap operations require use of one or more -tf flags to specify one or more files")
-			fmt.Println("This transformation mode requres a retain mask file to use for swapping")
+			fmt.Fprintf(os.Stderr, "[!] Mask-swap operations require use of one or more -tf flags to specify one or more files")
+			fmt.Fprintf(os.Stderr, "[!] This transformation mode requres a retain mask file to use for swapping")
 			os.Exit(1)
 		}
 		output = mask.ShuffleMap(input, replacementMask, transformationFilesMap, bypass)
@@ -113,7 +113,6 @@ func TransformationController(input map[string]int, mode string, startingIndex i
 //	originalMap (map[string]int): The original map to replace keys in
 //	replacements (map[string]int): The map of replacements to use
 //	bypass (bool): If true, the map is not used for output or filtering
-//	TODO
 //
 // Returns:
 //

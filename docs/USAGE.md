@@ -65,6 +65,9 @@ There are some additional notes when importing data:
 - When reading from standard input, the tool can detect chaining `ptt` commands
   when the `-v` flag is used. This can be used to pipe multiple commands together.
 - When reading from files, the tool can detect when `ptt` JSON output is used as input and will parse the JSON data.
+- The `-b` flag can be used to bypass map creation and use stdout as primary output. This can be useful for working with large amounts of data.
+    - If the `-b` flag is used, the final output will be empty and all
+      filtering and duplication removal will be disabled.
 
 The `-f`, `-k`, `-r`, `-tf`, and `-u` flags can be used multiple times and have
 their collective values combined. The rest of the flags can only be used once.

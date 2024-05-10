@@ -100,7 +100,7 @@ func main() {
 	transformationFilesMap := utils.ReadFilesToMap(fs, transformationFiles)
 	readURLsMap, err := utils.ReadURLsToMap(readURLs)
 	if err != nil {
-		fmt.Println("Error reading URLs:", err)
+		fmt.Fprintf(os.Stderr, "[!] Error reading URLs: %s\n", err)
 		return
 	}
 
@@ -109,7 +109,7 @@ func main() {
 	if (stat.Mode() & os.ModeCharDevice) == 0 {
 		primaryMap, err = utils.LoadStdinToMap(bufio.NewScanner(os.Stdin))
 		if err != nil {
-			fmt.Println("Error reading from stdin:", err)
+			fmt.Fprintf(os.Stderr, "[!] Error reading from stdin: %s\n", err)
 			return
 		}
 	}
@@ -126,6 +126,11 @@ func main() {
 
 	// Apply transformation if provided
 	if *transformation != "" {
+
+		if *bypassMap {
+			fmt.Fprintf(os.Stderr, "[*] Bypassing map creation and using stdout as primary output. Some features are disabled.\n")
+		}
+
 		primaryMap = transform.TransformationController(primaryMap, *transformation, intRange.Start, intRange.End, *verbose, *replacementMask, transformationFilesMap, *bypassMap)
 	}
 
@@ -133,7 +138,7 @@ func main() {
 	if len(retainMap) > 0 || len(removeMap) > 0 {
 		primaryMap, err = format.RetainRemove(primaryMap, retainMap, removeMap)
 		if err != nil {
-			fmt.Println("Error processing retain and remove flags:", err)
+			fmt.Fprintf(os.Stderr, "[!] Error processing retain and remove flags: %s\n", err)
 			return
 		}
 	}
@@ -161,7 +166,7 @@ func main() {
 	if *jsonOutput != "" {
 		err = format.SaveArrayToJSON(*jsonOutput, primaryMap)
 		if err != nil {
-			fmt.Println("Error saving output to JSON:", err)
+			fmt.Fprintf(os.Stderr, "[!] Error saving output to JSON: %s\n", err)
 			return
 		}
 	}
