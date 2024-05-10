@@ -8,12 +8,13 @@
 - All transformations support multibyte characters.
 
 ```
-Usage of Password Transformation Tool (ptt) version (0.1.3):
+Usage of Password Transformation Tool (ptt) version (0.2.0):
 
 ptt [options] [...]
 Accepts standard input and/or additonal arguments.
 
 Options:
+  -b    Bypass map creation and use stdout as primary output.
   -f value
         Read additional files for input.
   -i value

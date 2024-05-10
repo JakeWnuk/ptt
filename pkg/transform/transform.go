@@ -39,51 +39,51 @@ func TransformationController(input map[string]int, mode string, startingIndex i
 	case "append", "append-remove", "append-shift", "a":
 		output = rule.AppendRules(input, mode, bypass)
 	case "prepend", "prepend-remove", "prepend-shift", "ar":
-		output = rule.PrependRules(input, mode)
+		output = rule.PrependRules(input, mode, bypass)
 	case "insert", "i":
 		strIndex := fmt.Sprintf("%d", startingIndex)
 		endIndex := fmt.Sprintf("%d", endingIndex)
-		output = rule.InsertRules(input, strIndex, endIndex)
+		output = rule.InsertRules(input, strIndex, endIndex, bypass)
 	case "overwrite", "o":
 		strIndex := fmt.Sprintf("%d", startingIndex)
 		endIndex := fmt.Sprintf("%d", endingIndex)
-		output = rule.OverwriteRules(input, strIndex, endIndex)
+		output = rule.OverwriteRules(input, strIndex, endIndex, bypass)
 	case "toggle", "t":
 		strIndex := fmt.Sprintf("%d", startingIndex)
 		endIndex := fmt.Sprintf("%d", endingIndex)
-		output = rule.ToggleRules(input, strIndex, endIndex)
+		output = rule.ToggleRules(input, strIndex, endIndex, bypass)
 	case "encode", "e":
-		output = format.EncodeInputMap(input)
+		output = format.EncodeInputMap(input, bypass)
 	case "decode", "de":
-		output = format.DecodeInputMap(input)
+		output = format.DecodeInputMap(input, bypass)
 	case "mask", "partial-mask", "partial", "m":
-		output = mask.MakeMaskedMap(input, replacementMask, verbose)
+		output = mask.MakeMaskedMap(input, replacementMask, verbose, bypass)
 	case "dehex", "unhex", "dh":
-		output = format.DehexMap(input)
+		output = format.DehexMap(input, bypass)
 	case "hex", "rehex":
-		output = format.HexEncodeMap(input)
+		output = format.HexEncodeMap(input, bypass)
 	case "remove", "remove-all", "delete", "delete-all", "rm":
-		input = mask.MakeMaskedMap(input, replacementMask, false)
-		output = mask.RemoveMaskedCharacters(input)
+		input = mask.MakeMaskedMap(input, replacementMask, false, false)
+		output = mask.RemoveMaskedCharacters(input, bypass)
 	case "retain-mask", "retain", "r":
 		if len(transformationFilesMap) == 0 {
 			fmt.Println("Retain masks require use of one or more -tf flags to specify one or more files")
 			os.Exit(1)
 		}
-		output = mask.MakeRetainMaskedMap(input, replacementMask, transformationFilesMap)
+		output = mask.MakeRetainMaskedMap(input, replacementMask, transformationFilesMap, bypass)
 	case "match-mask", "match", "mt":
 		if len(transformationFilesMap) == 0 {
 			fmt.Println("Match masks require use of one or more -tf flags to specify one or more files")
 			os.Exit(1)
 		}
-		output = mask.MakeMatchedMaskedMap(input, replacementMask, transformationFilesMap)
+		output = mask.MakeMatchedMaskedMap(input, replacementMask, transformationFilesMap, bypass)
 	case "swap", "replace", "s":
 		if len(transformationFilesMap) == 0 {
 			fmt.Println("Swap operations require use of one or more -tf flags to specify one or more files")
 			fmt.Println("This transformation mode requres a ':' separated list of keys to swap")
 			os.Exit(1)
 		}
-		output = ReplaceKeysInMap(input, transformationFilesMap)
+		output = ReplaceKeysInMap(input, transformationFilesMap, bypass)
 	case "pop", "split", "boundary-split", "boundary-pop", "pop-split", "split-pop", "po":
 		output = mask.BoundarySplitPopMap(input, replacementMask)
 	case "mask-swap", "shuffle", "shuf", "token-swap", "ms":
@@ -92,7 +92,7 @@ func TransformationController(input map[string]int, mode string, startingIndex i
 			fmt.Println("This transformation mode requres a retain mask file to use for swapping")
 			os.Exit(1)
 		}
-		output = mask.ShuffleMap(input, replacementMask, transformationFilesMap)
+		output = mask.ShuffleMap(input, replacementMask, transformationFilesMap, bypass)
 	default:
 		output = input
 	}
@@ -112,16 +112,22 @@ func TransformationController(input map[string]int, mode string, startingIndex i
 //
 //	originalMap (map[string]int): The original map to replace keys in
 //	replacements (map[string]int): The map of replacements to use
+//	bypass (bool): If true, the map is not used for output or filtering
+//	TODO
 //
 // Returns:
 //
 //	(map[string]int): A new map with the keys replaced
-func ReplaceKeysInMap(originalMap map[string]int, replacements map[string]int) map[string]int {
+func ReplaceKeysInMap(originalMap map[string]int, replacements map[string]int, bypass bool) map[string]int {
 	newMap := make(map[string]int)
 	for key, value := range originalMap {
 		newKeyArray := utils.ReplaceSubstring(key, replacements)
 		for _, newKey := range newKeyArray {
-			newMap[newKey] = value
+			if !bypass {
+				newMap[newKey] = value
+			} else {
+				fmt.Println(newKey)
+			}
 		}
 	}
 	return newMap

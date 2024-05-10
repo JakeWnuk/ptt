@@ -256,7 +256,7 @@ func TestPrependRules(t *testing.T) {
 
 	// Run test cases
 	for _, test := range tests {
-		given := PrependRules(test.items, test.operation)
+		given := PrependRules(test.items, test.operation, false)
 		if !utils.CheckAreMapsEqual(given, test.output) {
 			t.Errorf("Expected %v, but got %v", test.output, given)
 		}
@@ -286,7 +286,7 @@ func TestInsertRules(t *testing.T) {
 
 	// Run test cases
 	for _, test := range tests {
-		given := InsertRules(test.items, test.startIndex, test.endIndex)
+		given := InsertRules(test.items, test.startIndex, test.endIndex, false)
 		if !utils.CheckAreMapsEqual(given, test.output) {
 			t.Errorf("Expected %v, but got %v", test.output, given)
 		}
@@ -316,7 +316,7 @@ func TestOverwriteRules(t *testing.T) {
 
 	// Run test cases
 	for _, test := range tests {
-		given := OverwriteRules(test.items, test.startIndex, test.endIndex)
+		given := OverwriteRules(test.items, test.startIndex, test.endIndex, false)
 		if !utils.CheckAreMapsEqual(given, test.output) {
 			t.Errorf("Expected %v, but got %v", test.output, given)
 		}
@@ -345,7 +345,7 @@ func TestToggleRules(t *testing.T) {
 
 	// Run test cases
 	for _, test := range tests {
-		given := ToggleRules(test.items, test.startIndex, test.endIndex)
+		given := ToggleRules(test.items, test.startIndex, test.endIndex, false)
 		if !utils.CheckAreMapsEqual(given, test.output) {
 			t.Errorf("Expected %v, but got %v", test.output, given)
 		}

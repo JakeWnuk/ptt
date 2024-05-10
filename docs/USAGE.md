@@ -1,5 +1,5 @@
 # Password Transformation Tool (PTT) Usage Guide
-## Version 0.1.0
+## Version 0.2.0
 
 ### Table of Contents
 1. [Introduction](#introduction)
@@ -70,6 +70,7 @@ The `-f`, `-k`, `-r`, `-tf`, and `-u` flags can be used multiple times and have
 their collective values combined. The rest of the flags can only be used once.
 
 #### Options:
+- `-b`: Bypass map creation and use stdout as primary output.
 - `-f`: Read additional files for input.
 - `-i`: Starting index for transformations if applicable. Accepts ranges separated by '-'. (default 0)
 - `-k`: Only keep items in a file.

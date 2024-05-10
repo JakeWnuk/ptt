@@ -83,7 +83,7 @@ func TestMakeMaskedMap(t *testing.T) {
 
 	// Run test cases
 	for _, test := range tests {
-		output := MakeMaskedMap(test.input, test.replacements, false)
+		output := MakeMaskedMap(test.input, test.replacements, false, false)
 		if !reflect.DeepEqual(output, test.output) {
 			t.Errorf("Test failed: %v inputted, %v expected, %v returned", test.input, test.output, output)
 		}
@@ -113,7 +113,7 @@ func TestMakeRetainMaskedMap(t *testing.T) {
 
 	// Run test cases
 	for _, test := range tests {
-		output := MakeRetainMaskedMap(test.input, test.replacements, test.retain)
+		output := MakeRetainMaskedMap(test.input, test.replacements, test.retain, false)
 		if !reflect.DeepEqual(output, test.output) {
 			t.Errorf("Test failed: %v inputted, %v expected, %v returned", test.input, test.output, output)
 		}
@@ -225,7 +225,7 @@ func TestRemoveMaskedCharacters(t *testing.T) {
 
 	// Run test cases
 	for _, test := range tests {
-		output := RemoveMaskedCharacters(test.input)
+		output := RemoveMaskedCharacters(test.input, false)
 		if !reflect.DeepEqual(output, test.output) {
 			t.Errorf("Test failed: %v inputted, %v expected, %v returned", test.input, test.output, output)
 		}
@@ -254,7 +254,7 @@ func TestMakeMatchedMaskedMap(t *testing.T) {
 
 	// Run test cases
 	for _, test := range tests {
-		output := MakeMatchedMaskedMap(test.input, test.replacements, test.masks)
+		output := MakeMatchedMaskedMap(test.input, test.replacements, test.masks, false)
 		if utils.CheckAreMapsEqual(output, test.output) == false {
 			t.Errorf("Test failed: %v inputted, %v expected, %v returned", test.input, test.output, output)
 		}
@@ -309,7 +309,7 @@ func TestShuffleMap(t *testing.T) {
 
 	// Run test cases
 	for _, test := range tests {
-		output := ShuffleMap(test.input, test.replacements, test.swaps)
+		output := ShuffleMap(test.input, test.replacements, test.swaps, false)
 		if !utils.CheckAreMapsEqual(output, test.output) {
 			t.Errorf("Test failed: %v inputted, %v expected, %v returned", test.input, test.output, output)
 		}
