@@ -1,20 +1,34 @@
 [
     {
         "StartIndex": 0,
-        "EndIndex": 3,
-        "Verbose": null,
-        "ReplacementMask": null,
-        "TransformationFile": null,
+        "EndIndex": 0,
+        "Verbose": false,
+        "ReplacementMask": "uldsb",
         "Bypass": false,
-        "TransformationMode": "insert"
+        "TransformationMode": "append"
     },
     {
         "StartIndex": 0,
         "EndIndex": 0,
-        "Verbose": null,
-        "ReplacementMask": "ulbds",
-        "TransformationFile": "",
-        "Bypass": true,
-        "TransformationMode": "mask"
+        "Verbose": false,
+        "ReplacementMask": "uldsb",
+        "Bypass": false,
+        "TransformationMode": "prepend"
+    },
+    {
+        "StartIndex": 1,
+        "EndIndex": 3,
+        "Verbose": false,
+        "ReplacementMask": "uldsb",
+        "Bypass": false,
+        "TransformationMode": "insert"
+    },
+    {
+        "StartIndex": 1,
+        "EndIndex": 3,
+        "Verbose": false,
+        "ReplacementMask": "uldsb",
+        "Bypass": false,
+        "TransformationMode": "overwrite"
     }
 ]

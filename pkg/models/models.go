@@ -60,7 +60,6 @@ type TemplateFileOperation struct {
 	EndIndex           int
 	Verbose            bool
 	ReplacementMask    string
-	TransformationFile string
 	Bypass             bool
 	TransformationMode string
 }

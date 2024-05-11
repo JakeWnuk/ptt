@@ -138,8 +138,23 @@ func main() {
 		primaryMap = transform.TransformationController(primaryMap, *transformation, intRange.Start, intRange.End, *verbose, *replacementMask, transformationFilesMap, *bypassMap, *debugMode)
 	} else if templateFiles != nil && *transformation == "" {
 		fmt.Fprintf(os.Stderr, "[*] Using template files for multiple transformations.\n")
-		// TODO: Implement template file transformations
-		fmt.Println(transformationTemplateArray)
+
+		// Make a copy of the primary map to avoid modifying the original
+		temporaryMap := make(map[string]int)
+		for k, v := range primaryMap {
+			temporaryMap[k] = v
+		}
+
+		// Apply transformations from template files
+		for i, template := range transformationTemplateArray {
+			if i == 0 {
+				temporaryMap = transform.TransformationController(primaryMap, template.TransformationMode, template.StartIndex, template.EndIndex, template.Verbose, template.ReplacementMask, transformationFilesMap, template.Bypass, *debugMode)
+			} else {
+				temporaryMap = utils.CombineMaps(temporaryMap, transform.TransformationController(primaryMap, template.TransformationMode, template.StartIndex, template.EndIndex, template.Verbose, template.ReplacementMask, transformationFilesMap, template.Bypass, *debugMode))
+			}
+		}
+		primaryMap = temporaryMap
+
 	} else {
 		fmt.Fprintf(os.Stderr, "[!] No transformation provided. Exiting.\n")
 		fmt.Fprintf(os.Stderr, "[!] Use -t flag to provide a transformation or -tp to use a template file.\n")
