@@ -39,6 +39,8 @@ Options:
         Transformation to apply to input.
   -tf value
         Read additional files for transformations if applicable.
+  -tp value
+        Read a template file for multiple transformations and operations.
   -u value
         Read additional URLs for input.
   -v    Show verbose output when possible.

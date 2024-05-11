@@ -73,6 +73,10 @@ There are some additional notes when importing data:
   of debug output that can be used.
     - Level 1 will not print each iteration transformation but overall input and output.
     - Level 2 will print each iteration transformation and overall input and output.
+- The `-tp` flag can not be used with other transformations at the same time. The
+  template file should contain a list of transformations and operations to apply
+  to the input data. The template file should be in JSON format.
+    - See `docs/template.json` ([link](https://github.com/JakeWnuk/ptt/blob/main/docs/template.json)) for an example.
 
 The `-f`, `-k`, `-r`, `-tf`, and `-u` flags can be used multiple times and have
 their collective values combined. The rest of the flags can only be used once.
@@ -91,6 +95,7 @@ their collective values combined. The rest of the flags can only be used once.
 - `-rm`: Replacement mask for transformations if applicable. (default "uldsb")
 - `-t`: Transformation to apply to input.
 - `-tf`: Read additional files for transformations if applicable.
+- `-tp`: Read a template file for multiple transformations and operations.
 - `-u`: Read additional URLs for input.
 - `-v`: Show verbose output when possible.
 - `-vv`: Show statistics output when possible.
@@ -159,6 +164,7 @@ keywords above:
 - `ptt -t [transformation] -rm ulds`: Apply a transformation with a custom mask. Default is all characters.
 - `ptt -t [transformation] -i 5`: Apply a transformation starting at a specific index.
 - `ptt -i 1-5 -t [transformation]`: Apply a transformation starting at a specific index.
+- `ptt -tp template.json`: Apply multiple transformations and operations from a template file.
 
 #### Filter Formats:
 - `ptt -k keep.txt`: Keep only items in a file.

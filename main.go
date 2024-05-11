@@ -23,6 +23,7 @@ var remove models.FileArgumentFlag
 var readFiles models.FileArgumentFlag
 var readURLs models.FileArgumentFlag
 var transformationFiles models.FileArgumentFlag
+var templateFiles models.FileArgumentFlag
 var intRange models.IntRange
 var lenRange models.IntRange
 var primaryMap map[string]int
@@ -88,6 +89,7 @@ func main() {
 	flag.Var(&remove, "r", "Only keep items not in a file.")
 	flag.Var(&readFiles, "f", "Read additional files for input.")
 	flag.Var(&transformationFiles, "tf", "Read additional files for transformations if applicable.")
+	flag.Var(&templateFiles, "tp", "Read a template file for multiple transformations and operations.")
 	flag.Var(&intRange, "i", "Starting index for transformations if applicable. Accepts ranges separated by '-'.")
 	flag.Var(&lenRange, "l", "Keeps output equal to or within a range of lengths. Accepts ranges separated by '-'.")
 	flag.Var(&readURLs, "u", "Read additional URLs for input.")
@@ -125,14 +127,20 @@ func main() {
 		primaryMap = utils.CombineMaps(primaryMap, readFilesMap, readURLsMap)
 	}
 
+	// Bypass map creation if requested
+	if *bypassMap {
+		fmt.Fprintf(os.Stderr, "[*] Bypassing map creation and using stdout as primary output. Some features are disabled.\n")
+	}
+
 	// Apply transformation if provided
-	if *transformation != "" {
-
-		if *bypassMap {
-			fmt.Fprintf(os.Stderr, "[*] Bypassing map creation and using stdout as primary output. Some features are disabled.\n")
-		}
-
+	if *transformation != "" && templateFiles == nil {
 		primaryMap = transform.TransformationController(primaryMap, *transformation, intRange.Start, intRange.End, *verbose, *replacementMask, transformationFilesMap, *bypassMap, *debugMode)
+	} else if templateFiles != nil && *transformation == "" {
+		fmt.Fprintf(os.Stderr, "[*] Using template files for multiple transformations.\n")
+		// TODO: Implement template file transformations
+	} else {
+		fmt.Fprintf(os.Stderr, "[!] No transformation provided. Exiting.\n")
+		fmt.Fprintf(os.Stderr, "[!] Use -t flag to provide a transformation or -tp to use a template file.\n")
 	}
 
 	// Process retain and remove maps if provided
