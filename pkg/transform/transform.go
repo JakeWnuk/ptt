@@ -30,71 +30,96 @@ import (
 //	transformationFilesMap (map[string]int): A map of transformation files to
 //	use for modes like retain-mask
 //	bypass (bool): If true, the map is not used for output or filtering
+//	debug (int): Different debug levels to use for debugging [0-2]
 //
 // Returns:
 //
 //	(map[string]int): A map of transformed values
-func TransformationController(input map[string]int, mode string, startingIndex int, endingIndex int, verbose bool, replacementMask string, transformationFilesMap map[string]int, bypass bool) (output map[string]int) {
+func TransformationController(input map[string]int, mode string, startingIndex int, endingIndex int, verbose bool, replacementMask string, transformationFilesMap map[string]int, bypass bool, debug int) (output map[string]int) {
+
+	functionDebug := false
+	if debug > 1 {
+		functionDebug = true
+	}
+
+	if debug > 0 {
+		fmt.Fprintf(os.Stderr, "[*] TransformationController: Starting debug mode:\n\n")
+		fmt.Fprintf(os.Stderr, "[*] TransformationController: Running in mode %s\n", mode)
+		fmt.Fprintf(os.Stderr, "[*] TransformationController: Starting index is %d\n", startingIndex)
+		fmt.Fprintf(os.Stderr, "[*] TransformationController: Ending index is %d\n", endingIndex)
+		fmt.Fprintf(os.Stderr, "[*] TransformationController: Replacement mask is %s\n", replacementMask)
+		fmt.Fprintf(os.Stderr, "[*] TransformationController: Bypass is %t\n", bypass)
+		fmt.Fprintf(os.Stderr, "[*] TransformationController: Verbose is %t\n\n", verbose)
+		fmt.Fprintf(os.Stderr, "[*] TransformationController: Transformation files map is %v\n\n", transformationFilesMap)
+		fmt.Fprintf(os.Stderr, "[*] TransformationController: Input map is %v\n\n", input)
+		fmt.Fprintf(os.Stderr, "[*] TransformationController: Starting transformation...\n\n")
+	}
+
 	switch mode {
 	case "append", "append-remove", "append-shift", "a":
-		output = rule.AppendRules(input, mode, bypass)
+		output = rule.AppendRules(input, mode, bypass, functionDebug)
 	case "prepend", "prepend-remove", "prepend-shift", "ar":
-		output = rule.PrependRules(input, mode, bypass)
+		output = rule.PrependRules(input, mode, bypass, functionDebug)
 	case "insert", "i":
 		strIndex := fmt.Sprintf("%d", startingIndex)
 		endIndex := fmt.Sprintf("%d", endingIndex)
-		output = rule.InsertRules(input, strIndex, endIndex, bypass)
+		output = rule.InsertRules(input, strIndex, endIndex, bypass, functionDebug)
 	case "overwrite", "o":
 		strIndex := fmt.Sprintf("%d", startingIndex)
 		endIndex := fmt.Sprintf("%d", endingIndex)
-		output = rule.OverwriteRules(input, strIndex, endIndex, bypass)
+		output = rule.OverwriteRules(input, strIndex, endIndex, bypass, functionDebug)
 	case "toggle", "t":
 		strIndex := fmt.Sprintf("%d", startingIndex)
 		endIndex := fmt.Sprintf("%d", endingIndex)
-		output = rule.ToggleRules(input, strIndex, endIndex, bypass)
+		output = rule.ToggleRules(input, strIndex, endIndex, bypass, functionDebug)
 	case "encode", "e":
-		output = format.EncodeInputMap(input, bypass)
+		output = format.EncodeInputMap(input, bypass, functionDebug)
 	case "decode", "de":
-		output = format.DecodeInputMap(input, bypass)
+		output = format.DecodeInputMap(input, bypass, functionDebug)
 	case "mask", "partial-mask", "partial", "m":
-		output = mask.MakeMaskedMap(input, replacementMask, verbose, bypass)
+		output = mask.MakeMaskedMap(input, replacementMask, verbose, bypass, functionDebug)
 	case "dehex", "unhex", "dh":
-		output = format.DehexMap(input, bypass)
+		output = format.DehexMap(input, bypass, functionDebug)
 	case "hex", "rehex":
-		output = format.HexEncodeMap(input, bypass)
+		output = format.HexEncodeMap(input, bypass, functionDebug)
 	case "remove", "remove-all", "delete", "delete-all", "rm":
-		input = mask.MakeMaskedMap(input, replacementMask, false, false)
-		output = mask.RemoveMaskedCharacters(input, bypass)
+		input = mask.MakeMaskedMap(input, replacementMask, false, false, false)
+		output = mask.RemoveMaskedCharacters(input, bypass, functionDebug)
 	case "retain-mask", "retain", "r", "mask-retain":
 		if len(transformationFilesMap) == 0 {
 			fmt.Fprintf(os.Stderr, "[!] Retain masks require use of one or more -tf flags to specify one or more files\n")
 			os.Exit(1)
 		}
-		output = mask.MakeRetainMaskedMap(input, replacementMask, transformationFilesMap, bypass)
+		output = mask.MakeRetainMaskedMap(input, replacementMask, transformationFilesMap, bypass, functionDebug)
 	case "match-mask", "match", "mt", "mask-match":
 		if len(transformationFilesMap) == 0 {
 			fmt.Fprintf(os.Stderr, "[!] Match masks require use of one or more -tf flags to specify one or more files\n")
 			os.Exit(1)
 		}
-		output = mask.MakeMatchedMaskedMap(input, replacementMask, transformationFilesMap, bypass)
+		output = mask.MakeMatchedMaskedMap(input, replacementMask, transformationFilesMap, bypass, functionDebug)
 	case "swap", "replace", "s":
 		if len(transformationFilesMap) == 0 {
 			fmt.Fprintf(os.Stderr, "[!] Swap operations require use of one or more -tf flags to specify one or more files\n")
 			fmt.Fprintf(os.Stderr, "[!] This transformation mode requires a ':' separated list of keys to swap\n")
 			os.Exit(1)
 		}
-		output = ReplaceKeysInMap(input, transformationFilesMap, bypass)
+		output = ReplaceKeysInMap(input, transformationFilesMap, bypass, functionDebug)
 	case "pop", "split", "boundary-split", "boundary-pop", "pop-split", "split-pop", "po":
-		output = mask.BoundarySplitPopMap(input, replacementMask)
+		output = mask.BoundarySplitPopMap(input, replacementMask, bypass, functionDebug)
 	case "mask-swap", "shuffle", "shuf", "token-swap", "ms":
 		if len(transformationFilesMap) == 0 {
 			fmt.Fprintf(os.Stderr, "[!] Mask-swap operations require use of one or more -tf flags to specify one or more files")
 			fmt.Fprintf(os.Stderr, "[!] This transformation mode requres a retain mask file to use for swapping")
 			os.Exit(1)
 		}
-		output = mask.ShuffleMap(input, replacementMask, transformationFilesMap, bypass)
+		output = mask.ShuffleMap(input, replacementMask, transformationFilesMap, bypass, functionDebug)
 	default:
 		output = input
+	}
+
+	if debug > 0 {
+		fmt.Fprintf(os.Stderr, "\n[*] TransformationController: Output map is %v\n\n", output)
+		fmt.Fprintf(os.Stderr, "[*] TransformationController: Transformation complete. Resuming output.\n")
 	}
 
 	return output
@@ -113,15 +138,22 @@ func TransformationController(input map[string]int, mode string, startingIndex i
 //	originalMap (map[string]int): The original map to replace keys in
 //	replacements (map[string]int): The map of replacements to use
 //	bypass (bool): If true, the map is not used for output or filtering
+//	debug (bool): If true, print additional debug information to stderr
 //
 // Returns:
 //
 //	(map[string]int): A new map with the keys replaced
-func ReplaceKeysInMap(originalMap map[string]int, replacements map[string]int, bypass bool) map[string]int {
+func ReplaceKeysInMap(originalMap map[string]int, replacements map[string]int, bypass bool, debug bool) map[string]int {
 	newMap := make(map[string]int)
 	for key, value := range originalMap {
 		newKeyArray := utils.ReplaceSubstring(key, replacements)
 		for _, newKey := range newKeyArray {
+
+			if debug {
+				fmt.Fprintf(os.Stderr, "Key: %s\n", key)
+				fmt.Fprintf(os.Stderr, "New Key: %s\n", newKey)
+			}
+
 			if !bypass {
 				newMap[newKey] = value
 			} else {

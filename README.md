@@ -15,6 +15,8 @@ Accepts standard input and/or additonal arguments.
 
 Options:
   -b    Bypass map creation and use stdout as primary output.
+  -d int
+        Enable debug mode with verbosity levels [0-2].
   -f value
         Read additional files for input.
   -i value

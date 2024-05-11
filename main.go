@@ -83,7 +83,7 @@ func main() {
 	replacementMask := flag.String("rm", "uldsb", "Replacement mask for transformations if applicable.")
 	jsonOutput := flag.String("o", "", "Output to JSON file in addition to stdout.")
 	bypassMap := flag.Bool("b", false, "Bypass map creation and use stdout as primary output.")
-	//debugMode := flag.Bool("d", false, "Enable debug mode for certain transformations.")
+	debugMode := flag.Int("d", 0, "Enable debug mode with verbosity levels [0-2].")
 	flag.Var(&retain, "k", "Only keep items in a file.")
 	flag.Var(&remove, "r", "Only keep items not in a file.")
 	flag.Var(&readFiles, "f", "Read additional files for input.")
@@ -132,7 +132,7 @@ func main() {
 			fmt.Fprintf(os.Stderr, "[*] Bypassing map creation and using stdout as primary output. Some features are disabled.\n")
 		}
 
-		primaryMap = transform.TransformationController(primaryMap, *transformation, intRange.Start, intRange.End, *verbose, *replacementMask, transformationFilesMap, *bypassMap)
+		primaryMap = transform.TransformationController(primaryMap, *transformation, intRange.Start, intRange.End, *verbose, *replacementMask, transformationFilesMap, *bypassMap, *debugMode)
 	}
 
 	// Process retain and remove maps if provided

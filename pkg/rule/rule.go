@@ -171,11 +171,12 @@ func FormatCharToIteratingRuleOutput(index int, strs ...string) (output string) 
 //	items (map[string]int): Items to use in the operation
 //	operation (string): Operation to use in the function
 //	bypass (bool): If true, the map is not used for output or filtering
+//	debug (bool): If true, print additional debug information to stderr
 //
 // Returns:
 //
 // returnMap (map[string]int): Map of items to return
-func AppendRules(items map[string]int, operation string, bypass bool) (returnMap map[string]int) {
+func AppendRules(items map[string]int, operation string, bypass bool, debug bool) (returnMap map[string]int) {
 	returnMap = make(map[string]int)
 	switch operation {
 	// remove will remove characters then append
@@ -184,6 +185,14 @@ func AppendRules(items map[string]int, operation string, bypass bool) (returnMap
 			rule := CharToRule(key, "$")
 			remove := LenToRule(key, "]")
 			appendRemoveRule := FormatCharToRuleOutput(remove, rule)
+
+			if debug {
+				fmt.Fprintf(os.Stderr, "Key: %s\n", key)
+				fmt.Fprintf(os.Stderr, "Rule: %s\n", rule)
+				fmt.Fprintf(os.Stderr, "Remove: %s\n", remove)
+				fmt.Fprintf(os.Stderr, "AppendRemoveRule: %s\n", appendRemoveRule)
+			}
+
 			if appendRemoveRule != "" && !bypass {
 				returnMap[appendRemoveRule] = value
 			} else if appendRemoveRule != "" && bypass {
@@ -197,6 +206,14 @@ func AppendRules(items map[string]int, operation string, bypass bool) (returnMap
 			rule := CharToRule(key, "$")
 			shift := LenToRule(key, "}")
 			appendShiftRule := FormatCharToRuleOutput(shift, rule)
+
+			if debug {
+				fmt.Fprintf(os.Stderr, "Key: %s\n", key)
+				fmt.Fprintf(os.Stderr, "Rule: %s\n", rule)
+				fmt.Fprintf(os.Stderr, "Shift: %s\n", shift)
+				fmt.Fprintf(os.Stderr, "AppendShiftRule: %s\n", appendShiftRule)
+			}
+
 			if appendShiftRule != "" && !bypass {
 				returnMap[appendShiftRule] = value
 			} else if appendShiftRule != "" && bypass {
@@ -208,6 +225,13 @@ func AppendRules(items map[string]int, operation string, bypass bool) (returnMap
 		for key, value := range items {
 			rule := CharToRule(key, "$")
 			appendRule := FormatCharToRuleOutput(rule)
+
+			if debug {
+				fmt.Fprintf(os.Stderr, "Key: %s\n", key)
+				fmt.Fprintf(os.Stderr, "Rule: %s\n", rule)
+				fmt.Fprintf(os.Stderr, "AppendRule: %s\n", appendRule)
+			}
+
 			if appendRule != "" && !bypass {
 				returnMap[appendRule] = value
 			} else if appendRule != "" && bypass {
@@ -225,11 +249,12 @@ func AppendRules(items map[string]int, operation string, bypass bool) (returnMap
 //	items (map[string]int): Items to use in the operation
 //	operation (string): Operation to use in the function
 //	bypass (bool): If true, the map is not used for output or filtering
+//	debug (bool): If true, print additional debug information to stderr
 //
 // Returns:
 //
 //	returnMap (map[string]int): Map of items to return
-func PrependRules(items map[string]int, operation string, bypass bool) (returnMap map[string]int) {
+func PrependRules(items map[string]int, operation string, bypass bool, debug bool) (returnMap map[string]int) {
 	returnMap = make(map[string]int)
 	switch operation {
 	// remove will remove characters then prepend
@@ -238,6 +263,14 @@ func PrependRules(items map[string]int, operation string, bypass bool) (returnMa
 			rule := CharToRule(utils.ReverseString(key), "^")
 			remove := LenToRule(key, "[")
 			prependRemoveRule := FormatCharToRuleOutput(remove, rule)
+
+			if debug {
+				fmt.Fprintf(os.Stderr, "Key: %s\n", key)
+				fmt.Fprintf(os.Stderr, "Rule: %s\n", rule)
+				fmt.Fprintf(os.Stderr, "Remove: %s\n", remove)
+				fmt.Fprintf(os.Stderr, "PrependRemoveRule: %s\n", prependRemoveRule)
+			}
+
 			if prependRemoveRule != "" && !bypass {
 				returnMap[prependRemoveRule] = value
 			} else if prependRemoveRule != "" && bypass {
@@ -251,6 +284,14 @@ func PrependRules(items map[string]int, operation string, bypass bool) (returnMa
 			rule := CharToRule(utils.ReverseString(key), "^")
 			shift := LenToRule(key, "{")
 			prependShiftRule := FormatCharToRuleOutput(shift, rule)
+
+			if debug {
+				fmt.Fprintf(os.Stderr, "Key: %s\n", key)
+				fmt.Fprintf(os.Stderr, "Rule: %s\n", rule)
+				fmt.Fprintf(os.Stderr, "Shift: %s\n", shift)
+				fmt.Fprintf(os.Stderr, "PrependShiftRule: %s\n", prependShiftRule)
+			}
+
 			if prependShiftRule != "" && !bypass {
 				returnMap[prependShiftRule] = value
 			} else if prependShiftRule != "" && bypass {
@@ -262,6 +303,13 @@ func PrependRules(items map[string]int, operation string, bypass bool) (returnMa
 		for key, value := range items {
 			rule := CharToRule(utils.ReverseString(key), "^")
 			prependRule := FormatCharToRuleOutput(rule)
+
+			if debug {
+				fmt.Fprintf(os.Stderr, "Key: %s\n", key)
+				fmt.Fprintf(os.Stderr, "Rule: %s\n", rule)
+				fmt.Fprintf(os.Stderr, "PrependRule: %s\n", prependRule)
+			}
+
 			if prependRule != "" && !bypass {
 				returnMap[prependRule] = value
 			} else if prependRule != "" && bypass {
@@ -280,10 +328,11 @@ func PrependRules(items map[string]int, operation string, bypass bool) (returnMa
 //	index (string): Index to insert at
 //	end (string): Index to end at
 //	bypass (bool): If true, the map is not used for output or filtering
+//	debug (bool): If true, print additional debug information to stderr
 //
 // Returns:
 // returnMap (map[string]int): Map of items to return
-func InsertRules(items map[string]int, index string, end string, bypass bool) (returnMap map[string]int) {
+func InsertRules(items map[string]int, index string, end string, bypass bool, debug bool) (returnMap map[string]int) {
 	returnMap = make(map[string]int)
 	i, err := strconv.Atoi(index)
 	if err != nil {
@@ -301,6 +350,13 @@ func InsertRules(items map[string]int, index string, end string, bypass bool) (r
 		for key, value := range items {
 			rule := CharToIteratingRule(key, "i", i)
 			insertRule := FormatCharToIteratingRuleOutput(i, rule)
+
+			if debug {
+				fmt.Fprintf(os.Stderr, "Key: %s\n", key)
+				fmt.Fprintf(os.Stderr, "Rule: %s\n", rule)
+				fmt.Fprintf(os.Stderr, "InsertRule: %s\n", insertRule)
+			}
+
 			if insertRule != "" && !bypass {
 				returnMap[insertRule] = value
 			} else if insertRule != "" && bypass {
@@ -320,11 +376,12 @@ func InsertRules(items map[string]int, index string, end string, bypass bool) (r
 // index (string): Index to overwrite at
 // end (string): Index to end at
 // bypass (bool): If true, the map is not used for output or filtering
+// debug (bool): If true, print additional debug information to stderr
 //
 // Returns:
 //
 //	returnMap (map[string]int): Map of items to return
-func OverwriteRules(items map[string]int, index string, end string, bypass bool) (returnMap map[string]int) {
+func OverwriteRules(items map[string]int, index string, end string, bypass bool, debug bool) (returnMap map[string]int) {
 	returnMap = make(map[string]int)
 	i, err := strconv.Atoi(index)
 	if err != nil {
@@ -342,6 +399,13 @@ func OverwriteRules(items map[string]int, index string, end string, bypass bool)
 		for key, value := range items {
 			rule := CharToIteratingRule(key, "o", i)
 			overwriteRule := FormatCharToIteratingRuleOutput(i, rule)
+
+			if debug {
+				fmt.Fprintf(os.Stderr, "Key: %s\n", key)
+				fmt.Fprintf(os.Stderr, "Rule: %s\n", rule)
+				fmt.Fprintf(os.Stderr, "OverwriteRule: %s\n", overwriteRule)
+			}
+
 			if overwriteRule != "" && !bypass {
 				returnMap[overwriteRule] = value
 			} else if overwriteRule != "" && bypass {
@@ -361,11 +425,12 @@ func OverwriteRules(items map[string]int, index string, end string, bypass bool)
 //	index (string): Index to start at
 //	end (string): Index to end at
 //	bypass (bool): If true, the map is not used for output or filtering
+//	debug (bool): If true, print additional debug information to stderr
 //
 // Returns:
 //
 //	returnMap (map[string]int): Map of items to return
-func ToggleRules(items map[string]int, index string, end string, bypass bool) (returnMap map[string]int) {
+func ToggleRules(items map[string]int, index string, end string, bypass bool, debug bool) (returnMap map[string]int) {
 	returnMap = make(map[string]int)
 	i, err := strconv.Atoi(index)
 	if err != nil {
@@ -383,6 +448,13 @@ func ToggleRules(items map[string]int, index string, end string, bypass bool) (r
 		for key, value := range items {
 			rule := StringToToggleRule(key, "T", i)
 			toggleRule := FormatCharToIteratingRuleOutput(i, rule)
+
+			if debug {
+				fmt.Fprintf(os.Stderr, "Key: %s\n", key)
+				fmt.Fprintf(os.Stderr, "Rule: %s\n", rule)
+				fmt.Fprintf(os.Stderr, "ToggleRule: %s\n", toggleRule)
+			}
+
 			if toggleRule != "" && !bypass {
 				returnMap[toggleRule] = value
 			} else if toggleRule != "" && bypass {

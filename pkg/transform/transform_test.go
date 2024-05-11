@@ -39,7 +39,7 @@ func TestReplaceKeysInMap(t *testing.T) {
 
 	// Run the test cases
 	for _, test := range tests {
-		result := ReplaceKeysInMap(test.input, test.replace, false)
+		result := ReplaceKeysInMap(test.input, test.replace, false, false)
 		if utils.CheckAreMapsEqual(result, test.output) == false {
 			t.Errorf("Test case failed. Expected %v, got %v", test.output, result)
 		}

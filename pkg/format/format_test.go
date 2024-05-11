@@ -171,7 +171,7 @@ func TestEncodeInputMap(t *testing.T) {
 
 	// Run test cases
 	for _, test := range tests {
-		result := EncodeInputMap(test.input, false)
+		result := EncodeInputMap(test.input, false, false)
 		if utils.CheckAreMapsEqual(result, test.output) == false {
 			t.Errorf("EncodeInputMap() failed - expected: %v, got: %v", test.output, result)
 		}
@@ -236,7 +236,7 @@ func TestDecodeInputMap(t *testing.T) {
 
 	// Run test cases
 	for _, test := range tests {
-		result := DecodeInputMap(test.input, false)
+		result := DecodeInputMap(test.input, false, false)
 		if utils.CheckAreMapsEqual(result, test.output) == false {
 			t.Errorf("DecodeInputMap() failed - expected: %v, got: %v", test.output, result)
 		}
@@ -333,7 +333,7 @@ func TestDehexMap(t *testing.T) {
 
 	// Run test cases
 	for _, test := range tests {
-		result := DehexMap(test.input, false)
+		result := DehexMap(test.input, false, false)
 		if utils.CheckAreMapsEqual(result, test.output) == false {
 			t.Errorf("DehexMap() failed - expected: %v, got: %v", test.output, result)
 		}
@@ -361,7 +361,7 @@ func TestHexEncodeMap(t *testing.T) {
 
 	// Run test cases
 	for _, test := range tests {
-		result := HexEncodeMap(test.input, false)
+		result := HexEncodeMap(test.input, false, false)
 		if utils.CheckAreMapsEqual(result, test.output) == false {
 			t.Errorf("HexEncodeMap() failed - expected: %v, got: %v", test.output, result)
 		}
