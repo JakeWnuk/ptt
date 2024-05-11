@@ -454,16 +454,19 @@ func ShuffleMap(input map[string]int, replacementMask string, swapMap map[string
 
 		// Check if the new key is in the swap map
 		for swapKey := range swapMap {
+			if debug {
+				fmt.Fprintf(os.Stderr, "[?] ShuffleMap:\n")
+				fmt.Fprintf(os.Stderr, "Key: %s\n", key)
+				fmt.Fprintf(os.Stderr, "New Key: %s\n", newKey)
+				fmt.Fprintf(os.Stderr, "Swap Key: %s\n", swapKey)
+				fmt.Fprintf(os.Stderr, "Replacement Mask: %s\n", replacementMask)
+			}
+
 			if MakeMaskedString(swapKey, replacementMask) == newKey {
 				shufKey := strings.Replace(key, newKey, swapKey, 1)
 
 				if debug {
-					fmt.Fprintf(os.Stderr, "[?] ShuffleMap:\n")
-					fmt.Fprintf(os.Stderr, "Key: %s\n", key)
-					fmt.Fprintf(os.Stderr, "New Key: %s\n", newKey)
-					fmt.Fprintf(os.Stderr, "Swap Key: %s\n", swapKey)
 					fmt.Fprintf(os.Stderr, "Shuffle Key: %s\n", shufKey)
-					fmt.Fprintf(os.Stderr, "Replacement Mask: %s\n", replacementMask)
 				}
 
 				switch bypass {
