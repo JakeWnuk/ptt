@@ -273,6 +273,39 @@ func ProcessURL(url string, ch chan<- string, wg *sync.WaitGroup) {
 	}
 }
 
+// ReadJSONToAray reads the contents of a transformation template file and
+// returns a slice of template structs.
+//
+// Args:
+//
+//	fs (FileSystem): The filesystem to read the file from (used for testing)
+//	fileArray ([]string): The name of the files to read
+//
+// Returns:
+//
+//	templates ([]models.TemplateFileOperation): The slice of template structs
+func ReadJSONToArray(fs models.FileSystem, filenames []string) []models.TemplateFileOperation {
+	var templates []models.TemplateFileOperation
+	for _, filename := range filenames {
+		data, err := fs.ReadFile(filename)
+		if err != nil {
+			panic(err)
+		}
+
+		// TODO: value validation
+		err = json.Unmarshal(data, &templates)
+		if err != nil {
+			panic(err)
+		}
+
+		for i, template := range templates {
+			fmt.Println(i, template)
+		}
+	}
+
+	return templates
+}
+
 // ----------------------------------------------------------------------------
 // Transformation Functions
 // ----------------------------------------------------------------------------

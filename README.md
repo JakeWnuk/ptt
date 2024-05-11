@@ -49,7 +49,7 @@ Options:
   -vvv
         Show verbose statistics output when possible.
 
-The -f, -k, -r, -tf, and -u flags can be used multiple times and together.
+The -f, -k, -r, -tf (-tp), and -u flags can be used multiple times and together.
 
 Transformation Modes:
   -t append

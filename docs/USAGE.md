@@ -78,7 +78,7 @@ There are some additional notes when importing data:
   to the input data. The template file should be in JSON format.
     - See `docs/template.json` ([link](https://github.com/JakeWnuk/ptt/blob/main/docs/template.json)) for an example.
 
-The `-f`, `-k`, `-r`, `-tf`, and `-u` flags can be used multiple times and have
+The `-f`, `-k`, `-r`, `-tf` (`-tp`), and `-u` flags can be used multiple times and have
 their collective values combined. The rest of the flags can only be used once.
 
 #### Options:

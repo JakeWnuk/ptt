@@ -52,6 +52,19 @@ func (i *IntRange) Set(value string) error {
 	return nil
 }
 
+// TemplateFileOperation is used to store the transformation operations loaded
+// from JSON template files. The intention is to provide a way to define the
+// operations in a structured way.
+type TemplateFileOperation struct {
+	StartIndex         int
+	EndIndex           int
+	Verbose            bool
+	ReplacementMask    string
+	TransformationFile string
+	Bypass             bool
+	TransformationMode string
+}
+
 // ----------------------------------------------------------------------------
 // Output Sorting Models
 // ----------------------------------------------------------------------------
@@ -91,7 +104,7 @@ type MockFileSystem struct {
 	Files map[string][]byte
 }
 
-// Implements the ReadFile method of the FileSystem interface for the MockFileSystem
+// ReadFile Implements the ReadFile method of the FileSystem interface for the MockFileSystem
 func (m *MockFileSystem) ReadFile(filename string) ([]byte, error) {
 	if data, ok := m.Files[filename]; ok {
 		return data, nil
@@ -120,7 +133,7 @@ type MockScanner struct {
 	Index int
 }
 
-// Implements the Scan, Text, and Err methods of the Scanner interface for the MockScanner
+// Scan implements the Scan, Text, and Err methods of the Scanner interface for the MockScanner
 func (m *MockScanner) Scan() bool {
 	if m.Index < len(m.Lines) {
 		m.Index++
@@ -129,12 +142,12 @@ func (m *MockScanner) Scan() bool {
 	return false
 }
 
-// Implements the Text method of the Scanner interface for the MockScanner
+// Text implements the Text method of the Scanner interface for the MockScanner
 func (m *MockScanner) Text() string {
 	return m.Lines[m.Index-1]
 }
 
-// Implements the Err method of the Scanner interface for the MockScanner
+// Err implements the Err method of the Scanner interface for the MockScanner
 func (m *MockScanner) Err() error {
 	return nil
 }

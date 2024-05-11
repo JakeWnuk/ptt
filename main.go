@@ -36,7 +36,7 @@ func main() {
 		fmt.Fprintf(os.Stderr, "ptt [options] [...]\nAccepts standard input and/or additonal arguments.\n\n")
 		fmt.Fprintf(os.Stderr, "Options:\n")
 		flag.PrintDefaults()
-		fmt.Fprintf(os.Stderr, "\nThe -f, -k, -r, -tf, and -u flags can be used multiple times and together.\n")
+		fmt.Fprintf(os.Stderr, "\nThe -f, -k, -r, -tf (-tp), and -u flags can be used multiple times and together.\n")
 		fmt.Fprintln(os.Stderr, "\nTransformation Modes:")
 		modes := map[string]string{
 			"append":                             "Transforms input into append rules.",
@@ -101,6 +101,7 @@ func main() {
 	removeMap := utils.ReadFilesToMap(fs, remove)
 	readFilesMap := utils.ReadFilesToMap(fs, readFiles)
 	transformationFilesMap := utils.ReadFilesToMap(fs, transformationFiles)
+	transformationTemplateArray := utils.ReadJSONToArray(fs, templateFiles)
 	readURLsMap, err := utils.ReadURLsToMap(readURLs)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "[!] Error reading URLs: %s\n", err)
@@ -138,6 +139,7 @@ func main() {
 	} else if templateFiles != nil && *transformation == "" {
 		fmt.Fprintf(os.Stderr, "[*] Using template files for multiple transformations.\n")
 		// TODO: Implement template file transformations
+		fmt.Println(transformationTemplateArray)
 	} else {
 		fmt.Fprintf(os.Stderr, "[!] No transformation provided. Exiting.\n")
 		fmt.Fprintf(os.Stderr, "[!] Use -t flag to provide a transformation or -tp to use a template file.\n")
