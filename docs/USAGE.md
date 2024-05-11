@@ -79,6 +79,7 @@ their collective values combined. The rest of the flags can only be used once.
 
 #### Options:
 - `-b`: Bypass map creation and use stdout as primary output.
+- `-d`: Enable debug mode with verbosity levels [0-2].
 - `-f`: Read additional files for input.
 - `-i`: Starting index for transformations if applicable. Accepts ranges separated by '-'. (default 0)
 - `-k`: Only keep items in a file.
