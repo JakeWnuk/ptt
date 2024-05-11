@@ -187,6 +187,7 @@ func AppendRules(items map[string]int, operation string, bypass bool, debug bool
 			appendRemoveRule := FormatCharToRuleOutput(remove, rule)
 
 			if debug {
+				fmt.Fprintf(os.Stderr, "[?] AppendRules (remove):\n")
 				fmt.Fprintf(os.Stderr, "Key: %s\n", key)
 				fmt.Fprintf(os.Stderr, "Rule: %s\n", rule)
 				fmt.Fprintf(os.Stderr, "Remove: %s\n", remove)
@@ -208,6 +209,7 @@ func AppendRules(items map[string]int, operation string, bypass bool, debug bool
 			appendShiftRule := FormatCharToRuleOutput(shift, rule)
 
 			if debug {
+				fmt.Fprintf(os.Stderr, "[?] AppendRules (shift):\n")
 				fmt.Fprintf(os.Stderr, "Key: %s\n", key)
 				fmt.Fprintf(os.Stderr, "Rule: %s\n", rule)
 				fmt.Fprintf(os.Stderr, "Shift: %s\n", shift)
@@ -227,6 +229,7 @@ func AppendRules(items map[string]int, operation string, bypass bool, debug bool
 			appendRule := FormatCharToRuleOutput(rule)
 
 			if debug {
+				fmt.Fprintf(os.Stderr, "[?] AppendRules:\n")
 				fmt.Fprintf(os.Stderr, "Key: %s\n", key)
 				fmt.Fprintf(os.Stderr, "Rule: %s\n", rule)
 				fmt.Fprintf(os.Stderr, "AppendRule: %s\n", appendRule)
@@ -265,6 +268,7 @@ func PrependRules(items map[string]int, operation string, bypass bool, debug boo
 			prependRemoveRule := FormatCharToRuleOutput(remove, rule)
 
 			if debug {
+				fmt.Fprintf(os.Stderr, "[?] PrependRules (remove):\n")
 				fmt.Fprintf(os.Stderr, "Key: %s\n", key)
 				fmt.Fprintf(os.Stderr, "Rule: %s\n", rule)
 				fmt.Fprintf(os.Stderr, "Remove: %s\n", remove)
@@ -286,6 +290,7 @@ func PrependRules(items map[string]int, operation string, bypass bool, debug boo
 			prependShiftRule := FormatCharToRuleOutput(shift, rule)
 
 			if debug {
+				fmt.Fprintf(os.Stderr, "[?] PrependRules (shift):\n")
 				fmt.Fprintf(os.Stderr, "Key: %s\n", key)
 				fmt.Fprintf(os.Stderr, "Rule: %s\n", rule)
 				fmt.Fprintf(os.Stderr, "Shift: %s\n", shift)
@@ -305,6 +310,7 @@ func PrependRules(items map[string]int, operation string, bypass bool, debug boo
 			prependRule := FormatCharToRuleOutput(rule)
 
 			if debug {
+				fmt.Fprintf(os.Stderr, "[?] PrependRules:\n")
 				fmt.Fprintf(os.Stderr, "Key: %s\n", key)
 				fmt.Fprintf(os.Stderr, "Rule: %s\n", rule)
 				fmt.Fprintf(os.Stderr, "PrependRule: %s\n", prependRule)
@@ -352,6 +358,7 @@ func InsertRules(items map[string]int, index string, end string, bypass bool, de
 			insertRule := FormatCharToIteratingRuleOutput(i, rule)
 
 			if debug {
+				fmt.Fprintf(os.Stderr, "[?] InsertRules:\n")
 				fmt.Fprintf(os.Stderr, "Key: %s\n", key)
 				fmt.Fprintf(os.Stderr, "Rule: %s\n", rule)
 				fmt.Fprintf(os.Stderr, "InsertRule: %s\n", insertRule)
@@ -401,6 +408,7 @@ func OverwriteRules(items map[string]int, index string, end string, bypass bool,
 			overwriteRule := FormatCharToIteratingRuleOutput(i, rule)
 
 			if debug {
+				fmt.Fprintf(os.Stderr, "[?] OverwriteRules:\n")
 				fmt.Fprintf(os.Stderr, "Key: %s\n", key)
 				fmt.Fprintf(os.Stderr, "Rule: %s\n", rule)
 				fmt.Fprintf(os.Stderr, "OverwriteRule: %s\n", overwriteRule)
@@ -450,6 +458,7 @@ func ToggleRules(items map[string]int, index string, end string, bypass bool, de
 			toggleRule := FormatCharToIteratingRuleOutput(i, rule)
 
 			if debug {
+				fmt.Fprintf(os.Stderr, "[?] ToggleRules:\n")
 				fmt.Fprintf(os.Stderr, "Key: %s\n", key)
 				fmt.Fprintf(os.Stderr, "Rule: %s\n", rule)
 				fmt.Fprintf(os.Stderr, "ToggleRule: %s\n", toggleRule)

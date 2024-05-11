@@ -98,7 +98,8 @@ func MakeMaskedMap(input map[string]int, replacementMask string, verbose bool, b
 		}
 
 		if debug {
-			fmt.Fprintf(os.Stderr, "Key: %s", key)
+			fmt.Fprintf(os.Stderr, "[?] MakeMaskedMap:\n")
+			fmt.Fprintf(os.Stderr, "Key: %s\n", key)
 			fmt.Fprintf(os.Stderr, "New Key: %s\n", newKey)
 			fmt.Fprintf(os.Stderr, "Replacement Mask: %s\n", replacementMask)
 		}
@@ -163,7 +164,8 @@ func MakeRetainMaskedMap(input map[string]int, replacementMask string, retain ma
 			}
 
 			if debug {
-				fmt.Fprintf(os.Stderr, "Key: %s", key)
+				fmt.Fprintf(os.Stderr, "[?] MakeRetainMaskedMap:\n")
+				fmt.Fprintf(os.Stderr, "Key: %s\n", key)
 				fmt.Fprintf(os.Stderr, "Retain Key: %s\n", retainKey)
 				fmt.Fprintf(os.Stderr, "New Key: %s\n", newKey)
 				fmt.Fprintf(os.Stderr, "Replacement Mask: %s\n", replacementMask)
@@ -283,7 +285,8 @@ func RemoveMaskedCharacters(input map[string]int, bypass bool, debug bool) map[s
 		}
 
 		if debug {
-			fmt.Fprintf(os.Stderr, "Key: %s", key)
+			fmt.Fprintf(os.Stderr, "[?] RemoveMaskedCharacters:\n")
+			fmt.Fprintf(os.Stderr, "Key: %s\n", key)
 			fmt.Fprintf(os.Stderr, "New Key: %s\n", newKey)
 		}
 
@@ -332,7 +335,8 @@ func MakeMatchedMaskedMap(input map[string]int, replacementMask string, maskMap 
 		}
 
 		if debug {
-			fmt.Fprintf(os.Stderr, "Key: %s", key)
+			fmt.Fprintf(os.Stderr, "[?] MakeMatchedMaskedMap:\n")
+			fmt.Fprintf(os.Stderr, "Key: %s\n", key)
 			fmt.Fprintf(os.Stderr, "New Key: %s\n", newKey)
 			fmt.Fprintf(os.Stderr, "Replacement Mask: %s\n", replacementMask)
 		}
@@ -401,7 +405,8 @@ func BoundarySplitPopMap(input map[string]int, replacementMask string, bypass bo
 		}
 
 		if debug {
-			fmt.Fprintf(os.Stderr, "Key: %s", s)
+			fmt.Fprintf(os.Stderr, "[?] BoundarySplitPopMap:\n")
+			fmt.Fprintf(os.Stderr, "Key: %s\n", s)
 			fmt.Fprintf(os.Stderr, "Token: %s\n", token)
 			fmt.Fprintf(os.Stderr, "Replacement Mask: %s\n", replacementMask)
 		}
@@ -453,7 +458,8 @@ func ShuffleMap(input map[string]int, replacementMask string, swapMap map[string
 				shufKey := strings.Replace(key, newKey, swapKey, 1)
 
 				if debug {
-					fmt.Fprintf(os.Stderr, "Key: %s", key)
+					fmt.Fprintf(os.Stderr, "[?] ShuffleMap:\n")
+					fmt.Fprintf(os.Stderr, "Key: %s\n", key)
 					fmt.Fprintf(os.Stderr, "New Key: %s\n", newKey)
 					fmt.Fprintf(os.Stderr, "Swap Key: %s\n", swapKey)
 					fmt.Fprintf(os.Stderr, "Shuffle Key: %s\n", shufKey)

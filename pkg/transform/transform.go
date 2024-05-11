@@ -43,16 +43,16 @@ func TransformationController(input map[string]int, mode string, startingIndex i
 	}
 
 	if debug > 0 {
-		fmt.Fprintf(os.Stderr, "[*] TransformationController: Starting debug mode:\n\n")
-		fmt.Fprintf(os.Stderr, "[*] TransformationController: Running in mode %s\n", mode)
-		fmt.Fprintf(os.Stderr, "[*] TransformationController: Starting index is %d\n", startingIndex)
-		fmt.Fprintf(os.Stderr, "[*] TransformationController: Ending index is %d\n", endingIndex)
-		fmt.Fprintf(os.Stderr, "[*] TransformationController: Replacement mask is %s\n", replacementMask)
-		fmt.Fprintf(os.Stderr, "[*] TransformationController: Bypass is %t\n", bypass)
-		fmt.Fprintf(os.Stderr, "[*] TransformationController: Verbose is %t\n\n", verbose)
-		fmt.Fprintf(os.Stderr, "[*] TransformationController: Transformation files map is %v\n\n", transformationFilesMap)
-		fmt.Fprintf(os.Stderr, "[*] TransformationController: Input map is %v\n\n", input)
-		fmt.Fprintf(os.Stderr, "[*] TransformationController: Starting transformation...\n\n")
+		fmt.Fprintf(os.Stderr, "[?] TransformationController: Starting debug mode:\n")
+		fmt.Fprintf(os.Stderr, "[?] TransformationController: Running in mode %s\n", mode)
+		fmt.Fprintf(os.Stderr, "[?] TransformationController: Starting index is %d\n", startingIndex)
+		fmt.Fprintf(os.Stderr, "[?] TransformationController: Ending index is %d\n", endingIndex)
+		fmt.Fprintf(os.Stderr, "[?] TransformationController: Replacement mask is %s\n", replacementMask)
+		fmt.Fprintf(os.Stderr, "[?] TransformationController: Bypass is %t\n", bypass)
+		fmt.Fprintf(os.Stderr, "[?] TransformationController: Verbose is %t\n", verbose)
+		fmt.Fprintf(os.Stderr, "[?] TransformationController: Transformation files map is %v\n", transformationFilesMap)
+		fmt.Fprintf(os.Stderr, "[?] TransformationController: Input map is %v\n", input)
+		fmt.Fprintf(os.Stderr, "[?] TransformationController: Starting transformation...\n")
 	}
 
 	switch mode {
@@ -118,8 +118,8 @@ func TransformationController(input map[string]int, mode string, startingIndex i
 	}
 
 	if debug > 0 {
-		fmt.Fprintf(os.Stderr, "\n[*] TransformationController: Output map is %v\n\n", output)
-		fmt.Fprintf(os.Stderr, "[*] TransformationController: Transformation complete. Resuming output.\n")
+		fmt.Fprintf(os.Stderr, "[?] TransformationController: Output map is %v\n", output)
+		fmt.Fprintf(os.Stderr, "[?] TransformationController: Transformation complete. Resuming output.\n")
 	}
 
 	return output

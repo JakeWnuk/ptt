@@ -460,6 +460,7 @@ func EncodeInputMap(input map[string]int, bypass bool, debug bool) map[string]in
 		urlEncoded, htmlEncoded, escapeEncoded := EncodeString(k)
 
 		if debug {
+			fmt.Fprintf(os.Stderr, "[?] EncodeInputMap:\n")
 			fmt.Fprintf(os.Stderr, "Input: %s\n", k)
 			fmt.Fprintf(os.Stderr, "URL Encoded: %s\n", urlEncoded)
 			fmt.Fprintf(os.Stderr, "HTML Encoded: %s\n", htmlEncoded)
@@ -537,6 +538,7 @@ func DecodeInputMap(input map[string]int, bypass bool, debug bool) map[string]in
 		urlDecoded, htmlDecoded, escapeDecoded := DecodeString(k)
 
 		if debug {
+			fmt.Fprintf(os.Stderr, "[?] DecodeInputMap:\n")
 			fmt.Fprintf(os.Stderr, "Input: %s\n", k)
 			fmt.Fprintf(os.Stderr, "URL Decoded: %s\n", urlDecoded)
 			fmt.Fprintf(os.Stderr, "HTML Decoded: %s\n", htmlDecoded)
@@ -682,6 +684,7 @@ func DehexMap(input map[string]int, bypass bool, debug bool) map[string]int {
 		decodedStr := string(decoded)
 
 		if debug {
+			fmt.Fprintf(os.Stderr, "[?] DehexMap:\n")
 			fmt.Fprintf(os.Stderr, "Input: %s\n", k)
 			fmt.Fprintf(os.Stderr, "Decoded: %s\n", decodedStr)
 		}
