@@ -1,0 +1,26 @@
+                  
+                  
+┌────────────────┐
+│ 1 Code Finding │
+└────────────────┘
+                          
+  [36m[22m[24m  main.go[0m
+    ❯❱ trailofbits.go.iterate-over-empty-map.iterate-over-empty-map
+          Iteration over a possibly empty map `modes`. This is likely a bug or redundant code
+          Details: https://sg.run/08jj                                                       
+                                                                                             
+           41┆ modes := map[string]string{
+           42┆    "append":                             "Transforms input into append rules.",
+           43┆    "append-remove":                      "Transforms input into append-remove rules.",
+           44┆    "append-shift":                       "Transforms input into append-shift rules.",
+           45┆    "prepend":                            "Transforms input into prepend rules.",
+           46┆    "prepend-remove":                     "Transforms input into prepend-remove rules.",
+           47┆    "prepend-shift":                      "Transforms input into prepend-shift rules.",
+           48┆    "insert -i [index]":                  "Transforms input into insert rules starting at
+               index.",                                                                                
+           49┆    "overwrite -i [index]":               "Transforms input into overwrite rules starting at
+               index.",                                                                                   
+           50┆    "toggle -i [index]":                  "Transforms input into toggle rules starting at
+               index.",                                                                                
+             [hid 18 additional lines, adjust with --max-lines-per-finding] 
+
