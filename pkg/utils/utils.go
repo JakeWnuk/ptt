@@ -41,7 +41,8 @@ func ReadFilesToMap(fs models.FileSystem, filenames []string) map[string]int {
 	for _, filename := range filenames {
 		data, err := fs.ReadFile(filename)
 		if err != nil {
-			panic(err)
+			fmt.Fprintf(os.Stderr, "[!] Error reading file %s\n", filename)
+			os.Exit(1)
 		}
 
 		err = json.Unmarshal(data, &wordMap)
@@ -209,7 +210,8 @@ func ProcessURL(url string, ch chan<- string, wg *sync.WaitGroup) {
 	// Read Body
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		panic(err)
+		fmt.Fprintf(os.Stderr, "[!] Error reading response body from URL %s\n", url)
+		os.Exit(1)
 	}
 	text := string(body)
 	text = html.UnescapeString(text)
@@ -221,7 +223,8 @@ func ProcessURL(url string, ch chan<- string, wg *sync.WaitGroup) {
 		// Parse the HTML
 		doc, err := html.Parse(strings.NewReader(text))
 		if err != nil {
-			panic(err)
+			fmt.Fprintf(os.Stderr, "[!] Error parsing HTML from URL %s\n", url)
+			os.Exit(1)
 		}
 
 		// Traverse the HTML tree and extract the text
@@ -271,6 +274,66 @@ func ProcessURL(url string, ch chan<- string, wg *sync.WaitGroup) {
 			}
 		}
 	}
+}
+
+// ReadJSONToAray reads the contents of a transformation template file and
+// returns a slice of template structs.
+//
+// Args:
+//
+//	fs (FileSystem): The filesystem to read the file from (used for testing)
+//	fileArray ([]string): The name of the files to read
+//
+// Returns:
+//
+//	templates ([]models.TemplateFileOperation): The slice of template structs
+func ReadJSONToArray(fs models.FileSystem, filenames []string) []models.TemplateFileOperation {
+	var templates []models.TemplateFileOperation
+	for _, filename := range filenames {
+		data, err := fs.ReadFile(filename)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "[!] Error reading file %s\n", filename)
+			os.Exit(1)
+		}
+
+		err = json.Unmarshal(data, &templates)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "[!] Error unmarshalling JSON file %s\n", filename)
+			os.Exit(1)
+		}
+
+		alphaRe := regexp.MustCompile(`[a-zA-Z]`)
+		numRe := regexp.MustCompile(`[0-9]`)
+
+		for _, template := range templates {
+			if !numRe.MatchString(fmt.Sprintf("%v", template.StartIndex)) || !numRe.MatchString(fmt.Sprintf("%v", template.EndIndex)) {
+				fmt.Fprintf(os.Stderr, "[!] Error: StartIndex and EndIndex must be integers\n")
+				os.Exit(1)
+			}
+
+			if !alphaRe.MatchString(fmt.Sprintf("%v", template.Verbose)) {
+				fmt.Fprintf(os.Stderr, "[!] Error: Verbose must be a boolean\n")
+				os.Exit(1)
+			}
+
+			if !alphaRe.MatchString(fmt.Sprintf("%v", template.ReplacementMask)) {
+				fmt.Fprintf(os.Stderr, "[!] Error: ReplacementMask must be a string\n")
+				os.Exit(1)
+			}
+
+			if !alphaRe.MatchString(fmt.Sprintf("%v", template.Bypass)) {
+				fmt.Fprintf(os.Stderr, "[!] Error: Bypass must be a boolean\n")
+				os.Exit(1)
+			}
+
+			if !alphaRe.MatchString(fmt.Sprintf("%v", template.TransformationMode)) {
+				fmt.Fprintf(os.Stderr, "[!] Error: TransformationMode must be a string\n")
+				os.Exit(1)
+			}
+		}
+	}
+
+	return templates
 }
 
 // ----------------------------------------------------------------------------

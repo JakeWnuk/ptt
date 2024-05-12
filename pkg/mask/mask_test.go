@@ -83,7 +83,7 @@ func TestMakeMaskedMap(t *testing.T) {
 
 	// Run test cases
 	for _, test := range tests {
-		output := MakeMaskedMap(test.input, test.replacements, false)
+		output := MakeMaskedMap(test.input, test.replacements, false, false, false)
 		if !reflect.DeepEqual(output, test.output) {
 			t.Errorf("Test failed: %v inputted, %v expected, %v returned", test.input, test.output, output)
 		}
@@ -113,7 +113,7 @@ func TestMakeRetainMaskedMap(t *testing.T) {
 
 	// Run test cases
 	for _, test := range tests {
-		output := MakeRetainMaskedMap(test.input, test.replacements, test.retain)
+		output := MakeRetainMaskedMap(test.input, test.replacements, test.retain, false, false)
 		if !reflect.DeepEqual(output, test.output) {
 			t.Errorf("Test failed: %v inputted, %v expected, %v returned", test.input, test.output, output)
 		}
@@ -225,7 +225,7 @@ func TestRemoveMaskedCharacters(t *testing.T) {
 
 	// Run test cases
 	for _, test := range tests {
-		output := RemoveMaskedCharacters(test.input)
+		output := RemoveMaskedCharacters(test.input, false, false)
 		if !reflect.DeepEqual(output, test.output) {
 			t.Errorf("Test failed: %v inputted, %v expected, %v returned", test.input, test.output, output)
 		}
@@ -254,7 +254,7 @@ func TestMakeMatchedMaskedMap(t *testing.T) {
 
 	// Run test cases
 	for _, test := range tests {
-		output := MakeMatchedMaskedMap(test.input, test.replacements, test.masks)
+		output := MakeMatchedMaskedMap(test.input, test.replacements, test.masks, false, false)
 		if utils.CheckAreMapsEqual(output, test.output) == false {
 			t.Errorf("Test failed: %v inputted, %v expected, %v returned", test.input, test.output, output)
 		}
@@ -282,7 +282,7 @@ func TestBoundarySplitPopMap(t *testing.T) {
 
 	// Run test cases
 	for _, test := range tests {
-		output := BoundarySplitPopMap(test.input, test.replacements)
+		output := BoundarySplitPopMap(test.input, test.replacements, false, false)
 		if !utils.CheckAreMapsEqual(output, test.output) {
 			t.Errorf("Test failed: %v inputted, %v expected, %v returned", test.input, test.output, output)
 		}
@@ -305,11 +305,12 @@ func TestShuffleMap(t *testing.T) {
 	// Define test cases
 	tests := testCases{
 		{map[string]int{"abc?d?d?d": 1, "?u?u?u456": 2, "ABC?l?l?l123!!!": 3}, "luds", map[string]int{"DEF": 1, "321": 1, "zxc": 1}, map[string]int{"ABCzxc123!!!": 3, "DEF456": 2, "abc321": 1}},
+		{map[string]int{"?d?d?dabc?d?d?d": 1, "123?l?l?l": 2, "ABC?l?l?l123!!!": 3}, "luds", map[string]int{"DEF": 1, "321": 1, "zxc": 1}, map[string]int{"123zxc": 2, "ABCzxc123!!!": 3, "321abc321": 1}},
 	}
 
 	// Run test cases
 	for _, test := range tests {
-		output := ShuffleMap(test.input, test.replacements, test.swaps)
+		output := ShuffleMap(test.input, test.replacements, test.swaps, false, false)
 		if !utils.CheckAreMapsEqual(output, test.output) {
 			t.Errorf("Test failed: %v inputted, %v expected, %v returned", test.input, test.output, output)
 		}

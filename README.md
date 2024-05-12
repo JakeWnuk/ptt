@@ -8,12 +8,15 @@
 - All transformations support multibyte characters.
 
 ```
-Usage of Password Transformation Tool (ptt) version (0.1.3):
+Usage of Password Transformation Tool (ptt) version (0.2.0):
 
 ptt [options] [...]
 Accepts standard input and/or additonal arguments.
 
 Options:
+  -b    Bypass map creation and use stdout as primary output.
+  -d int
+        Enable debug mode with verbosity levels [0-2].
   -f value
         Read additional files for input.
   -i value
@@ -36,6 +39,8 @@ Options:
         Transformation to apply to input.
   -tf value
         Read additional files for transformations if applicable.
+  -tp value
+        Read a template file for multiple transformations and operations.
   -u value
         Read additional URLs for input.
   -v    Show verbose output when possible.
@@ -44,7 +49,7 @@ Options:
   -vvv
         Show verbose statistics output when possible.
 
-The -f, -k, -r, -tf, and -u flags can be used multiple times and together.
+The -f, -k, -r, -tf, -tp, and -u flags can be used multiple times and together.
 
 Transformation Modes:
   -t append
@@ -65,10 +70,12 @@ Transformation Modes:
         Transforms input into insert rules starting at index.
   -t mask -rm [uldsb] -v
         Transforms input by masking characters with provided mask.
+  -t mask-match -tf [file]
+        Transforms input by keeping only strings with matching masks from a mask file.
+  -t mask-retain -rm [uldsb] -tf [file]
+        Transforms input by creating masks that still retain strings from file.
   -t mask-swap -tf [file]
         Transforms input by swapping tokens from a partial mask file and a input file.
-  -t match -tf [file]
-        Transforms input by keeping only strings with matching masks from a mask file.
   -t overwrite -i [index]
         Transforms input into overwrite rules starting at index.
   -t pop -rm [uldsb]
@@ -81,8 +88,6 @@ Transformation Modes:
         Transforms input into prepend-shift rules.
   -t remove -rm [uldsb]
         Transforms input by removing characters with provided mask characters.
-  -t retain -rm [uldsb] -tf [file]
-        Transforms input by creating masks that still retain strings from file.
   -t swap -tf [file]
         Transforms input by swapping tokens with exact matches from a ':' separated file.
   -t toggle -i [index]

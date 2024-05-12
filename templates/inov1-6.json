@@ -1,0 +1,18 @@
+[
+    {
+        "StartIndex": 1,
+        "EndIndex": 6,
+        "Verbose": false,
+        "ReplacementMask": "uldsb",
+        "Bypass": false,
+        "TransformationMode": "insert"
+    },
+    {
+        "StartIndex": 1,
+        "EndIndex": 6,
+        "Verbose": false,
+        "ReplacementMask": "uldsb",
+        "Bypass": false,
+        "TransformationMode": "overwrite"
+    }
+]

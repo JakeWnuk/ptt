@@ -1,5 +1,5 @@
 # Password Transformation Tool (PTT) Usage Guide
-## Version 0.1.0
+## Version 0.2.0
 
 ### Table of Contents
 1. [Introduction](#introduction)
@@ -65,11 +65,26 @@ There are some additional notes when importing data:
 - When reading from standard input, the tool can detect chaining `ptt` commands
   when the `-v` flag is used. This can be used to pipe multiple commands together.
 - When reading from files, the tool can detect when `ptt` JSON output is used as input and will parse the JSON data.
+- The `-b` flag can be used to bypass map creation and use stdout as primary output. This can be useful for working with large amounts of data.
+    - If the `-b` flag is used, the final output will be empty and all
+      filtering and duplication removal will be disabled.
+- The `-d [0-2]` flag can be used to enable debug output. This will show the data
+  object after all transformations have been applied. There are two (2) levels
+  of debug output that can be used.
+    - Level 1 will not print each iteration transformation but overall input and output.
+    - Level 2 will print each iteration transformation and overall input and output.
+- The `-tp` flag can not be used with other transformations at the same time (`-t`). The
+  template file should contain a list of transformations and operations to apply
+  to the input data. The template file should be in JSON format.
+    - See `docs/template.json` ([link](https://github.com/JakeWnuk/ptt/blob/main/docs/template.json)) for an example.
+    - See `docs/templates/` ([link](https://github.com/JakeWnuk/ptt/blob/main/docs/templates/)) for more examples.
 
-The `-f`, `-k`, `-r`, `-tf`, and `-u` flags can be used multiple times and have
+The `-f`, `-k`, `-r`, `-tf`, `-tp`, and `-u` flags can be used multiple times and have
 their collective values combined. The rest of the flags can only be used once.
 
 #### Options:
+- `-b`: Bypass map creation and use stdout as primary output.
+- `-d`: Enable debug mode with verbosity levels [0-2].
 - `-f`: Read additional files for input.
 - `-i`: Starting index for transformations if applicable. Accepts ranges separated by '-'. (default 0)
 - `-k`: Only keep items in a file.
@@ -81,6 +96,7 @@ their collective values combined. The rest of the flags can only be used once.
 - `-rm`: Replacement mask for transformations if applicable. (default "uldsb")
 - `-t`: Transformation to apply to input.
 - `-tf`: Read additional files for transformations if applicable.
+- `-tp`: Read a template file for multiple transformations and operations.
 - `-u`: Read additional URLs for input.
 - `-v`: Show verbose output when possible.
 - `-vv`: Show statistics output when possible.
@@ -103,8 +119,8 @@ The following transformations can be used with the `-t` flag:
 - `dehex`: Transforms input by decoding $HEX[...] formatted
 - `mask`: Transforms input by masking characters with provided mask.
 - `remove`: Transforms input by removing characters with provided mask characters.
-- `retain`: Transforms input by creating masks that still retain strings from file.
-- `match`: Transforms input by keeping only strings with matching masks from a mask file
+- `mask-retain`: Transforms input by creating masks that still retain strings from file.
+- `mask-match`: Transforms input by keeping only strings with matching masks from a mask file
 - `swap`: Transforms input by swapping tokens with exact matches from a ':' separated file.
 - `pop`: Transforms input by generating tokens from popping strings at character boundaries.
 - `mask-swap`: Transforms input by swapping tokens from a partial mask file and a input file.
@@ -149,6 +165,7 @@ keywords above:
 - `ptt -t [transformation] -rm ulds`: Apply a transformation with a custom mask. Default is all characters.
 - `ptt -t [transformation] -i 5`: Apply a transformation starting at a specific index.
 - `ptt -i 1-5 -t [transformation]`: Apply a transformation starting at a specific index.
+- `ptt -tp template.json`: Apply multiple transformations and operations from a template file.
 
 #### Filter Formats:
 - `ptt -k keep.txt`: Keep only items in a file.

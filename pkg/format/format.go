@@ -80,6 +80,11 @@ func PrintStatsToSTDOUT(freq map[string]int, verbose bool, max int) {
 		max = len(p)
 	}
 
+	if len(p) == 0 {
+		fmt.Println("No items to print!")
+		return
+	}
+
 	// Print the statistics
 	if verbose {
 		fmt.Fprintf(os.Stderr, "[*] Starting statistics generation. Please wait...\n")
@@ -443,25 +448,41 @@ func RemoveLengthRange(freq map[string]int, start int, end int) map[string]int {
 // Args:
 //
 //	input (map[string]int): A map of input strings
+//	bypass (bool): If true, the map is not used for output or filtering
+//	debug (bool): If true, print additional debug information to stderr
 //
 // Returns:
 //
 //	(map[string]int): A new map of encoded strings
-func EncodeInputMap(input map[string]int) map[string]int {
+func EncodeInputMap(input map[string]int, bypass bool, debug bool) map[string]int {
 	output := make(map[string]int)
 	for k, v := range input {
 		urlEncoded, htmlEncoded, escapeEncoded := EncodeString(k)
 
-		if urlEncoded != "" {
+		if debug {
+			fmt.Fprintf(os.Stderr, "[?] EncodeInputMap:\n")
+			fmt.Fprintf(os.Stderr, "Input: %s\n", k)
+			fmt.Fprintf(os.Stderr, "URL Encoded: %s\n", urlEncoded)
+			fmt.Fprintf(os.Stderr, "HTML Encoded: %s\n", htmlEncoded)
+			fmt.Fprintf(os.Stderr, "Unicode Escaped: %s\n", escapeEncoded)
+		}
+
+		if urlEncoded != "" && !bypass {
 			output[urlEncoded] = v
+		} else if urlEncoded != "" && bypass {
+			fmt.Println(urlEncoded)
 		}
 
-		if htmlEncoded != "" {
+		if htmlEncoded != "" && !bypass {
 			output[htmlEncoded] = v
+		} else if htmlEncoded != "" && bypass {
+			fmt.Println(htmlEncoded)
 		}
 
-		if escapeEncoded != "" {
+		if escapeEncoded != "" && !bypass {
 			output[escapeEncoded] = v
+		} else if escapeEncoded != "" && bypass {
+			fmt.Println(escapeEncoded)
 		}
 	}
 	return output
@@ -505,25 +526,41 @@ func EncodeString(s string) (string, string, string) {
 // Args:
 //
 //	input (map[string]int): A map of input strings
+//	bypass (bool): If true, the map is not used for output or filtering
+//	debug (bool): If true, print additional debug information to stderr
 //
 // Returns:
 //
 //	(map[string]int): A new map of decoded strings
-func DecodeInputMap(input map[string]int) map[string]int {
+func DecodeInputMap(input map[string]int, bypass bool, debug bool) map[string]int {
 	output := make(map[string]int)
 	for k, v := range input {
 		urlDecoded, htmlDecoded, escapeDecoded := DecodeString(k)
 
-		if urlDecoded != "" {
+		if debug {
+			fmt.Fprintf(os.Stderr, "[?] DecodeInputMap:\n")
+			fmt.Fprintf(os.Stderr, "Input: %s\n", k)
+			fmt.Fprintf(os.Stderr, "URL Decoded: %s\n", urlDecoded)
+			fmt.Fprintf(os.Stderr, "HTML Decoded: %s\n", htmlDecoded)
+			fmt.Fprintf(os.Stderr, "Unicode Escaped Decoded: %s\n", escapeDecoded)
+		}
+
+		if urlDecoded != "" && !bypass {
 			output[urlDecoded] = v
+		} else if urlDecoded != "" && bypass {
+			fmt.Println(urlDecoded)
 		}
 
-		if htmlDecoded != "" {
+		if htmlDecoded != "" && !bypass {
 			output[htmlDecoded] = v
+		} else if htmlDecoded != "" && bypass {
+			fmt.Println(htmlDecoded)
 		}
 
-		if escapeDecoded != "" {
+		if escapeDecoded != "" && !bypass {
 			output[escapeDecoded] = v
+		} else if escapeDecoded != "" && bypass {
+			fmt.Println(escapeDecoded)
 		}
 	}
 	return output
@@ -628,11 +665,13 @@ func DeASCIIEscapeUnicode(str string) string {
 // Args:
 //
 //	input (map[string]int): A map of hex encoded strings
+//	bypass (bool): If true, the map is not used for output or filtering
+//	debug (bool): If true, print additional debug information to stderr
 //
 // Returns:
 //
 //	(map[string]int): A new map of decoded strings
-func DehexMap(input map[string]int) map[string]int {
+func DehexMap(input map[string]int, bypass bool, debug bool) map[string]int {
 	decodedMap := make(map[string]int)
 
 	for k, v := range input {
@@ -643,7 +682,18 @@ func DehexMap(input map[string]int) map[string]int {
 			continue
 		}
 		decodedStr := string(decoded)
-		decodedMap[decodedStr] = v
+
+		if debug {
+			fmt.Fprintf(os.Stderr, "[?] DehexMap:\n")
+			fmt.Fprintf(os.Stderr, "Input: %s\n", k)
+			fmt.Fprintf(os.Stderr, "Decoded: %s\n", decodedStr)
+		}
+
+		if !bypass {
+			decodedMap[decodedStr] = v
+		} else {
+			fmt.Println(decodedStr)
+		}
 	}
 
 	return decodedMap
@@ -655,15 +705,21 @@ func DehexMap(input map[string]int) map[string]int {
 // Args:
 //
 //	input (map[string]int): A map of input strings
+//	bypass (bool): If true, the map is not used for output or filtering
+//	debug (bool): If true, print additional debug information to stderr
 //
 // Returns:
 //
 //	(map[string]int): A new map of encoded strings
-func HexEncodeMap(input map[string]int) map[string]int {
+func HexEncodeMap(input map[string]int, bypass bool, debug bool) map[string]int {
 	output := make(map[string]int)
 	for k, v := range input {
 		encoded := hex.EncodeToString([]byte(k))
-		output["$HEX["+encoded+"]"] = v
+		if !bypass {
+			output["$HEX["+encoded+"]"] = v
+		} else {
+			fmt.Println("$HEX[" + encoded + "]")
+		}
 	}
 	return output
 }

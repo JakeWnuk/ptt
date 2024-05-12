@@ -3,6 +3,7 @@ package mask
 
 import (
 	"fmt"
+	"os"
 	"regexp"
 	"strings"
 	"unicode"
@@ -74,11 +75,13 @@ func ConstructReplacements(str string) []string {
 //	input (map[string]int): Map to mask
 //	replacements ([]string): Array of characters to replace
 //	verbose (bool): Verbose information if true
+//	bypass (bool): If true, the map is not used for output or filtering
+//	debug (bool): If true, print additional debug information to stderr
 //
 // Returns:
 //
 // maskedMap (map[string]int): Masked map
-func MakeMaskedMap(input map[string]int, replacementMask string, verbose bool) map[string]int {
+func MakeMaskedMap(input map[string]int, replacementMask string, verbose bool, bypass bool, debug bool) map[string]int {
 	maskedMap := make(map[string]int)
 	replacements := ConstructReplacements(replacementMask)
 	replacer := strings.NewReplacer(replacements...)
@@ -94,10 +97,24 @@ func MakeMaskedMap(input map[string]int, replacementMask string, verbose bool) m
 			newKey = fmt.Sprintf("%s:%d:%d", newKey, len(key), TestMaskComplexity(newKey))
 		}
 
-		if oldValue, exists := maskedMap[newKey]; exists {
-			maskedMap[newKey] = oldValue + value
-		} else {
-			maskedMap[newKey] = value
+		if debug {
+			fmt.Fprintf(os.Stderr, "[?] MakeMaskedMap:\n")
+			fmt.Fprintf(os.Stderr, "Key: %s\n", key)
+			fmt.Fprintf(os.Stderr, "New Key: %s\n", newKey)
+			fmt.Fprintf(os.Stderr, "Replacement Mask: %s\n", replacementMask)
+		}
+
+		switch bypass {
+		case false:
+
+			if oldValue, exists := maskedMap[newKey]; exists {
+				maskedMap[newKey] = oldValue + value
+			} else {
+				maskedMap[newKey] = value
+			}
+
+		case true:
+			fmt.Println(newKey)
 		}
 	}
 	return maskedMap
@@ -111,11 +128,13 @@ func MakeMaskedMap(input map[string]int, replacementMask string, verbose bool) m
 //	input (map[string]int): Map to mask
 //	replacementMask (string): Mask characters to apply
 //	retain (map[string]int): Map of keywords to retain
+//	bypass (bool): If true, the map is not used for output or filtering
+//	debug (bool): If true, print additional debug information to stderr
 //
 // Returns:
 //
 //	maskedMap (map[string]int): Masked retain map
-func MakeRetainMaskedMap(input map[string]int, replacementMask string, retain map[string]int) map[string]int {
+func MakeRetainMaskedMap(input map[string]int, replacementMask string, retain map[string]int, bypass bool, debug bool) map[string]int {
 	maskedMap := make(map[string]int)
 	replacements := ConstructReplacements(replacementMask)
 	replacer := strings.NewReplacer(replacements...)
@@ -144,10 +163,23 @@ func MakeRetainMaskedMap(input map[string]int, replacementMask string, retain ma
 				continue
 			}
 
-			if oldValue, exists := maskedMap[newKey]; exists {
-				maskedMap[newKey] = oldValue + value
-			} else {
-				maskedMap[newKey] = value
+			if debug {
+				fmt.Fprintf(os.Stderr, "[?] MakeRetainMaskedMap:\n")
+				fmt.Fprintf(os.Stderr, "Key: %s\n", key)
+				fmt.Fprintf(os.Stderr, "Retain Key: %s\n", retainKey)
+				fmt.Fprintf(os.Stderr, "New Key: %s\n", newKey)
+				fmt.Fprintf(os.Stderr, "Replacement Mask: %s\n", replacementMask)
+			}
+
+			switch bypass {
+			case false:
+				if oldValue, exists := maskedMap[newKey]; exists {
+					maskedMap[newKey] = oldValue + value
+				} else {
+					maskedMap[newKey] = value
+				}
+			case true:
+				fmt.Println(newKey)
 			}
 		}
 	}
@@ -235,11 +267,13 @@ func TestMaskComplexity(str string) int {
 // Args:
 //
 //	input (map[string]int): Input map
+//	bypass (bool): If true, the map is not used for output or filtering
+//	debug (bool): If true, print additional debug information to stderr
 //
 // Returns:
 //
 //	(map[string]int): Masked map
-func RemoveMaskedCharacters(input map[string]int) map[string]int {
+func RemoveMaskedCharacters(input map[string]int, bypass bool, debug bool) map[string]int {
 	maskedMap := make(map[string]int)
 	replacer := strings.NewReplacer("?u", "", "?l", "", "?d", "", "?b", "", "?s", "")
 
@@ -250,10 +284,21 @@ func RemoveMaskedCharacters(input map[string]int) map[string]int {
 			newKey = ConvertMultiByteMask(newKey)
 		}
 
-		if oldValue, exists := maskedMap[newKey]; exists {
-			maskedMap[newKey] = oldValue + value
-		} else {
-			maskedMap[newKey] = value
+		if debug {
+			fmt.Fprintf(os.Stderr, "[?] RemoveMaskedCharacters:\n")
+			fmt.Fprintf(os.Stderr, "Key: %s\n", key)
+			fmt.Fprintf(os.Stderr, "New Key: %s\n", newKey)
+		}
+
+		switch bypass {
+		case false:
+			if oldValue, exists := maskedMap[newKey]; exists {
+				maskedMap[newKey] = oldValue + value
+			} else {
+				maskedMap[newKey] = value
+			}
+		case true:
+			fmt.Println(newKey)
 		}
 	}
 	return maskedMap
@@ -272,10 +317,12 @@ func RemoveMaskedCharacters(input map[string]int) map[string]int {
 //	input (map[string]int): Input map
 //	replacementMask (string): Mask characters to apply
 //	maskMap (map[string]int): Mask map
+//	bypass (bool): If true, the map is not used for output or filtering
+//	debug (bool): If true, print additional debug information to stderr
 //
 // Returns:
 // (map[string]int): Matched masked map
-func MakeMatchedMaskedMap(input map[string]int, replacementMask string, maskMap map[string]int) map[string]int {
+func MakeMatchedMaskedMap(input map[string]int, replacementMask string, maskMap map[string]int, bypass bool, debug bool) map[string]int {
 	maskedMap := make(map[string]int)
 	replacements := ConstructReplacements(replacementMask)
 	replacer := strings.NewReplacer(replacements...)
@@ -287,12 +334,24 @@ func MakeMatchedMaskedMap(input map[string]int, replacementMask string, maskMap 
 			newKey = ConvertMultiByteMask(newKey)
 		}
 
-		if _, exists := maskMap[newKey]; exists {
-			if oldValue, exists := maskedMap[newKey]; exists {
-				maskedMap[key] = oldValue + value
-			} else {
-				maskedMap[key] = value
+		if debug {
+			fmt.Fprintf(os.Stderr, "[?] MakeMatchedMaskedMap:\n")
+			fmt.Fprintf(os.Stderr, "Key: %s\n", key)
+			fmt.Fprintf(os.Stderr, "New Key: %s\n", newKey)
+			fmt.Fprintf(os.Stderr, "Replacement Mask: %s\n", replacementMask)
+		}
+
+		switch bypass {
+		case false:
+			if _, exists := maskMap[newKey]; exists {
+				if oldValue, exists := maskedMap[newKey]; exists {
+					maskedMap[key] = oldValue + value
+				} else {
+					maskedMap[key] = value
+				}
 			}
+		case true:
+			fmt.Println(newKey)
 		}
 	}
 	return maskedMap
@@ -306,11 +365,13 @@ func MakeMatchedMaskedMap(input map[string]int, replacementMask string, maskMap 
 //
 //	input (map[string]int): Input map
 //	replacementMask (string): Mask characters to apply
+//	bypass (bool): If true, the map is not used for output or filtering
+//	debug (bool): If true, print additional debug information to stderr
 //
 // Returns:
 //
 //	(map[string]int): Boundary split map
-func BoundarySplitPopMap(input map[string]int, replacementMask string) map[string]int {
+func BoundarySplitPopMap(input map[string]int, replacementMask string, bypass bool, debug bool) map[string]int {
 	result := make(map[string]int)
 	for s := range input {
 		token := ""
@@ -342,8 +403,20 @@ func BoundarySplitPopMap(input map[string]int, replacementMask string) map[strin
 			}
 			lastRuneType = runeType
 		}
+
+		if debug {
+			fmt.Fprintf(os.Stderr, "[?] BoundarySplitPopMap:\n")
+			fmt.Fprintf(os.Stderr, "Key: %s\n", s)
+			fmt.Fprintf(os.Stderr, "Token: %s\n", token)
+			fmt.Fprintf(os.Stderr, "Replacement Mask: %s\n", replacementMask)
+		}
+
 		if token != "" {
-			result[token]++
+			if !bypass {
+				result[token]++
+			} else {
+				fmt.Println(token)
+			}
 		}
 	}
 	return result
@@ -359,10 +432,12 @@ func BoundarySplitPopMap(input map[string]int, replacementMask string) map[strin
 //	input (map[string]int): Input map
 //	replacementMask (string): Mask characters to apply
 //	swapMap (map[string]int): Items to swap with
+//	bypass (bool): If true, the map is not used for output or filtering
+//	debug (bool): If true, print additional debug information to stderr
 //
 // Returns:
 // (map[string]int): Shuffled map with swapped keys
-func ShuffleMap(input map[string]int, replacementMask string, swapMap map[string]int) map[string]int {
+func ShuffleMap(input map[string]int, replacementMask string, swapMap map[string]int, bypass bool, debug bool) map[string]int {
 	shuffleMap := make(map[string]int)
 	re := regexp.MustCompile(`^(\?u|\?l|\?d|\?s|\?b)*$`)
 	reParser := regexp.MustCompile("(\\?[luds])")
@@ -379,16 +454,45 @@ func ShuffleMap(input map[string]int, replacementMask string, swapMap map[string
 
 		// Check if the new key is in the swap map
 		for swapKey := range swapMap {
-			if MakeMaskedString(swapKey, replacementMask) == newKey {
-				shufKey := strings.Replace(key, newKey, swapKey, 1)
-
-				if oldValue, exists := shuffleMap[shufKey]; exists {
-					shuffleMap[shufKey] = oldValue + value
-				} else {
-					shuffleMap[shufKey] = value
-				}
+			if debug {
+				fmt.Fprintf(os.Stderr, "[?] ShuffleMap:\n")
+				fmt.Fprintf(os.Stderr, "Key: %s\n", key)
+				fmt.Fprintf(os.Stderr, "New Key: %s\n", newKey)
+				fmt.Fprintf(os.Stderr, "Swap Key: %s\n", swapKey)
+				fmt.Fprintf(os.Stderr, "Replacement Mask: %s\n", replacementMask)
 			}
 
+			maskedSwapKey := MakeMaskedString(swapKey, replacementMask)
+			if maskedSwapKey == newKey || fmt.Sprintf("%s%s", maskedSwapKey, maskedSwapKey) == newKey {
+
+				var shufKey string
+				if fmt.Sprintf("%s%s", maskedSwapKey, maskedSwapKey) == newKey {
+					shufKey = strings.Replace(key, maskedSwapKey, swapKey, 2)
+				} else {
+					shufKey = strings.Replace(key, newKey, swapKey, 1)
+				}
+
+				if debug {
+					fmt.Fprintf(os.Stderr, "Masked Swap Key: %s\n", maskedSwapKey)
+					fmt.Fprintf(os.Stderr, "Shuffle Key: %s\n", shufKey)
+				}
+
+				if shufKey == key {
+					continue
+				}
+
+				switch bypass {
+				case false:
+					if oldValue, exists := shuffleMap[shufKey]; exists {
+						shuffleMap[shufKey] = oldValue + value
+					} else {
+						shuffleMap[shufKey] = value
+					}
+				case true:
+					fmt.Println(shufKey)
+				}
+
+			}
 		}
 	}
 	return shuffleMap
