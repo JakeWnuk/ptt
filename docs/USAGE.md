@@ -65,9 +65,7 @@ There are some additional notes when importing data:
 - When reading from standard input, the tool can detect chaining `ptt` commands
   when the `-v` flag is used. This can be used to pipe multiple commands together.
 - When reading from files, the tool can detect when `ptt` JSON output is used as input and will parse the JSON data.
-- The `-b` flag can be used to bypass map creation and use stdout as primary output. This can be useful for working with large amounts of data.
-    - If the `-b` flag is used, the final output will be empty and all
-      filtering and duplication removal will be disabled.
+- The `-b` flag can be used to bypass map creation and use stdout as primary output. This can be useful for working with large datasets. If the `-b` flag is used, the final output will be empty and all filtering and duplication removal will be disabled.
 - The `-d [0-2]` flag can be used to enable debug output. This will show the data
   object after all transformations have been applied. There are two (2) levels
   of debug output that can be used.
@@ -77,7 +75,7 @@ There are some additional notes when importing data:
   template file should contain a list of transformations and operations to apply
   to the input data. The template file should be in JSON format.
     - See `docs/template.json` ([link](https://github.com/JakeWnuk/ptt/blob/main/docs/template.json)) for an example.
-    - See `docs/templates/` ([link](https://github.com/JakeWnuk/ptt/blob/main/docs/templates/)) for more examples.
+    - See `docs/templates/` ([link](https://github.com/JakeWnuk/ptt/blob/main/templates/)) for more examples.
 
 The `-f`, `-k`, `-r`, `-tf`, `-tp`, and `-u` flags can be used multiple times and have
 their collective values combined. The rest of the flags can only be used once.
@@ -174,6 +172,10 @@ keywords above:
 - `ppt -l 8`: Keep only items equal to a length.
 - `ppt -l 8-12`: Keep only items within a range of lengths.
 - `ptt -m 10`: Keep only items with a minimum frequency.
+
+#### Debug Formats:
+- `ptt -d 1`: Enable debug mode with verbosity level 1.
+- `ptt -d 2`: Enable debug mode with verbosity level 2.
 
 #### Output Formats:
 - `ptt -v`: Show verbose output.

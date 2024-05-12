@@ -13,6 +13,7 @@ import (
 // - ReadFilesToMap()
 // - LoadStdinToMap()
 // - CombineMaps()
+// - ReadJSONToArray()
 //
 // ** Transformation Functions **
 // - ReverseString()
@@ -156,6 +157,45 @@ func TestCombineMaps(t *testing.T) {
 			t.Errorf("CombineMaps(%v, %v) = %v; want %v", input1, input2, given, output)
 		}
 	}
+}
+
+// Unit Test for ReadJSONToArray()
+func TestReadJSONToArray(t *testing.T) {
+	// Define a test case struct
+	type TestCase struct {
+		Input  string
+		Output []models.TemplateFileOperation
+	}
+
+	type TestCases []TestCase
+
+	// Create a mock file system with example files
+	mockFs := &models.MockFileSystem{
+		Files: map[string][]byte{
+			"file1": []byte(`[{"StartIndex":0,"EndIndex":4,"Verbose":true,"ReplacementMask":"uldbs","Bypass":false,"TransformationMode":"append"}]`),
+			"file2": []byte(`[{"StartIndex":0,"EndIndex":4,"Verbose":true,"ReplacementMask":"uldbs","Bypass":false,"TransformationMode":"append"},{"StartIndex":0,"EndIndex":4,"Verbose":true,"ReplacementMask":"uldbs","Bypass":false,"TransformationMode":"append"}]`),
+			"file3": []byte(`[{"StartIndex":0,"EndIndex":4,"Verbose":true,"ReplacementMask":"uldbs","Bypass":false,"TransformationMode":"append"},{"StartIndex":0,"EndIndex":4,"Verbose":true,"ReplacementMask":"uldbs","Bypass":false,"TransformationMode":"append"},{"StartIndex":0,"EndIndex":4,"Verbose":true,"ReplacementMask":"uldbs","Bypass":false,"TransformationMode":"append"}]`),
+		},
+	}
+
+	// Define test cases
+	testCases := TestCases{
+		{"file1", []models.TemplateFileOperation{{StartIndex: 0, EndIndex: 4, Verbose: true, ReplacementMask: "uldbs", Bypass: false, TransformationMode: "append"}}},
+		{"file2", []models.TemplateFileOperation{{StartIndex: 0, EndIndex: 4, Verbose: true, ReplacementMask: "uldbs", Bypass: false, TransformationMode: "append"}, {StartIndex: 0, EndIndex: 4, Verbose: true, ReplacementMask: "uldbs", Bypass: false, TransformationMode: "append"}}},
+		{"file3", []models.TemplateFileOperation{{StartIndex: 0, EndIndex: 4, Verbose: true, ReplacementMask: "uldbs", Bypass: false, TransformationMode: "append"}, {StartIndex: 0, EndIndex: 4, Verbose: true, ReplacementMask: "uldbs", Bypass: false, TransformationMode: "append"}, {StartIndex: 0, EndIndex: 4, Verbose: true, ReplacementMask: "uldbs", Bypass: false, TransformationMode: "append"}}},
+	}
+
+	// Run test cases
+	for _, testCase := range testCases {
+		input := []string{testCase.Input}
+		output := testCase.Output
+
+		given := ReadJSONToArray(mockFs, input)
+		if given[0].StartIndex != output[0].StartIndex || given[0].EndIndex != output[0].EndIndex || given[0].Verbose != output[0].Verbose || given[0].ReplacementMask != output[0].ReplacementMask || given[0].Bypass != output[0].Bypass || given[0].TransformationMode != output[0].TransformationMode {
+			t.Errorf("ReadJSONToArray(%v) = %v; want %v", input, given, output)
+		}
+	}
+
 }
 
 // Unit Test for ReverseString()
