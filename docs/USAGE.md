@@ -73,12 +73,13 @@ There are some additional notes when importing data:
   of debug output that can be used.
     - Level 1 will not print each iteration transformation but overall input and output.
     - Level 2 will print each iteration transformation and overall input and output.
-- The `-tp` flag can not be used with other transformations at the same time. The
+- The `-tp` flag can not be used with other transformations at the same time (`-t`). The
   template file should contain a list of transformations and operations to apply
   to the input data. The template file should be in JSON format.
     - See `docs/template.json` ([link](https://github.com/JakeWnuk/ptt/blob/main/docs/template.json)) for an example.
+    - See `docs/templates/` ([link](https://github.com/JakeWnuk/ptt/blob/main/docs/templates/)) for more examples.
 
-The `-f`, `-k`, `-r`, `-tf` (`-tp`), and `-u` flags can be used multiple times and have
+The `-f`, `-k`, `-r`, `-tf`, `-tp`, and `-u` flags can be used multiple times and have
 their collective values combined. The rest of the flags can only be used once.
 
 #### Options:

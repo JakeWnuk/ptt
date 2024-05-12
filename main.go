@@ -36,7 +36,7 @@ func main() {
 		fmt.Fprintf(os.Stderr, "ptt [options] [...]\nAccepts standard input and/or additonal arguments.\n\n")
 		fmt.Fprintf(os.Stderr, "Options:\n")
 		flag.PrintDefaults()
-		fmt.Fprintf(os.Stderr, "\nThe -f, -k, -r, -tf (-tp), and -u flags can be used multiple times and together.\n")
+		fmt.Fprintf(os.Stderr, "\nThe -f, -k, -r, -tf, -tp, and -u flags can be used multiple times and together.\n")
 		fmt.Fprintln(os.Stderr, "\nTransformation Modes:")
 		modes := map[string]string{
 			"append":                             "Transforms input into append rules.",
@@ -155,9 +155,9 @@ func main() {
 		}
 		primaryMap = temporaryMap
 
-	} else {
-		fmt.Fprintf(os.Stderr, "[!] No transformation provided. Exiting.\n")
-		fmt.Fprintf(os.Stderr, "[!] Use -t flag to provide a transformation or -tp to use a template file.\n")
+	} else if *transformation != "" && templateFiles != nil {
+		fmt.Fprintf(os.Stderr, "[!] Transformation and template flags cannot be used together.\n")
+		return
 	}
 
 	// Process retain and remove maps if provided

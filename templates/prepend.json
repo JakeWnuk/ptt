@@ -1,0 +1,26 @@
+[
+    {
+        "StartIndex": 0,
+        "EndIndex": 0,
+        "Verbose": false,
+        "ReplacementMask": "uldsb",
+        "Bypass": false,
+        "TransformationMode": "prepend"
+    },
+    {
+        "StartIndex": 0,
+        "EndIndex": 0,
+        "Verbose": false,
+        "ReplacementMask": "uldsb",
+        "Bypass": false,
+        "TransformationMode": "prepend-remove"
+    },
+    {
+        "StartIndex": 0,
+        "EndIndex": 0,
+        "Verbose": false,
+        "ReplacementMask": "uldsb",
+        "Bypass": false,
+        "TransformationMode": "prepend-shift"
+    }
+]
