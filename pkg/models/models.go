@@ -62,6 +62,7 @@ type TemplateFileOperation struct {
 	ReplacementMask    string
 	Bypass             bool
 	TransformationMode string
+	PassphraseWords    int
 }
 
 // ----------------------------------------------------------------------------

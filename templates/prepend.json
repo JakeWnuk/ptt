@@ -5,7 +5,8 @@
         "Verbose": false,
         "ReplacementMask": "uldsb",
         "Bypass": false,
-        "TransformationMode": "prepend"
+        "TransformationMode": "prepend",
+        "PassphraseWords": 0
     },
     {
         "StartIndex": 0,
@@ -13,7 +14,8 @@
         "Verbose": false,
         "ReplacementMask": "uldsb",
         "Bypass": false,
-        "TransformationMode": "prepend-remove"
+        "TransformationMode": "prepend-remove",
+        "PassphraseWords": 0
     },
     {
         "StartIndex": 0,
@@ -21,6 +23,7 @@
         "Verbose": false,
         "ReplacementMask": "uldsb",
         "Bypass": false,
-        "TransformationMode": "prepend-shift"
+        "TransformationMode": "prepend-shift",
+        "PassphraseWords": 0
     }
 ]

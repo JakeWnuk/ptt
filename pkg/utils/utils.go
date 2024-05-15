@@ -330,6 +330,11 @@ func ReadJSONToArray(fs models.FileSystem, filenames []string) []models.Template
 				fmt.Fprintf(os.Stderr, "[!] Error: TransformationMode must be a string\n")
 				os.Exit(1)
 			}
+
+			if !numRe.MatchString(fmt.Sprintf("%v", template.PassphraseWords)) {
+				fmt.Fprintf(os.Stderr, "[!] Error: PassphraseWords must be an integer\n")
+				os.Exit(1)
+			}
 		}
 	}
 
