@@ -122,6 +122,7 @@ The following transformations can be used with the `-t` flag:
 - `swap`: Transforms input by swapping tokens with exact matches from a ':' separated file.
 - `pop`: Transforms input by generating tokens from popping strings at character boundaries.
 - `mask-swap`: Transforms input by swapping tokens from a partial mask file and a input file.
+- `passphrase`: Transforms input by randomly generating passphrases with a given number of words and separators from a file.
 
 The modes also have aliases that can be used with the `-t` flag instead of the
 keywords above:
@@ -146,6 +147,7 @@ keywords above:
 - `swap`: `s`, `replace`
 - `pop`: `po`, `split`, `boundary-split`, `boundary-pop`, `pop-split`, `split-pop`
 - `mask-swap`: `ms`, `shuf`, `shuffle`, `token-swap`
+- `passphrase`: `pp`, `phrase`
 
 ### Examples
 

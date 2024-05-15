@@ -15,7 +15,7 @@ import (
 	"github.com/jakewnuk/ptt/pkg/utils"
 )
 
-var version = "0.2.0"
+var version = "0.2.1"
 var wg sync.WaitGroup
 var mutex = &sync.Mutex{}
 var retain models.FileArgumentFlag
@@ -59,6 +59,7 @@ func main() {
 			"mask-match -tf [file]":              "Transforms input by keeping only strings with matching masks from a mask file.",
 			"swap -tf [file]":                    "Transforms input by swapping tokens with exact matches from a ':' separated file.",
 			"mask-swap -tf [file]":               "Transforms input by swapping tokens from a partial mask file and a input file.",
+			"passphrase -w [words] -tf [file]":   "Transforms input by randomly generating passphrases with a given number of words and separators from a file.",
 		}
 
 		// Sort and print transformation modes
@@ -149,9 +150,9 @@ func main() {
 		// Apply transformations from template files
 		for i, template := range transformationTemplateArray {
 			if i == 0 {
-				temporaryMap = transform.TransformationController(primaryMap, template.TransformationMode, template.StartIndex, template.EndIndex, template.Verbose, template.ReplacementMask, transformationFilesMap, template.Bypass, *debugMode)
+				temporaryMap = transform.TransformationController(primaryMap, template.TransformationMode, template.StartIndex, template.EndIndex, template.Verbose, template.ReplacementMask, transformationFilesMap, template.Bypass, *debugMode, *passPhraseWords)
 			} else {
-				temporaryMap = utils.CombineMaps(temporaryMap, transform.TransformationController(primaryMap, template.TransformationMode, template.StartIndex, template.EndIndex, template.Verbose, template.ReplacementMask, transformationFilesMap, template.Bypass, *debugMode))
+				temporaryMap = utils.CombineMaps(temporaryMap, transform.TransformationController(primaryMap, template.TransformationMode, template.StartIndex, template.EndIndex, template.Verbose, template.ReplacementMask, transformationFilesMap, template.Bypass, *debugMode, *passPhraseWords))
 			}
 		}
 		primaryMap = temporaryMap

@@ -3,6 +3,7 @@ package transform
 
 import (
 	"fmt"
+	"math/rand"
 	"os"
 
 	"github.com/jakewnuk/ptt/pkg/format"
@@ -115,8 +116,8 @@ func TransformationController(input map[string]int, mode string, startingIndex i
 		}
 		output = mask.ShuffleMap(input, replacementMask, transformationFilesMap, bypass, functionDebug)
 	case "passphrase", "phrase", "pp":
-		if len(transformationFilesMap) == 0 {
-			fmt.Fprintf(os.Stderr, "[!] Passphrase operations require use of one or more -tf flags to specify one or more separated files\n")
+		if passphraseWord == 0 {
+			fmt.Fprintf(os.Stderr, "[!] Passphrase operations require use of the -w flag to specify the number of words to use\n")
 			os.Exit(1)
 		}
 		output = MakePassphraseMap(input, transformationFilesMap, bypass, functionDebug, passphraseWord)
@@ -190,24 +191,24 @@ func ReplaceKeysInMap(originalMap map[string]int, replacements map[string]int, b
 //
 //	(map[string]int): A new map with the keys replaced
 func MakePassphraseMap(input map[string]int, transformationFilesMap map[string]int, bypass bool, debug bool, passphraseWord int) map[string]int {
-	if transformationFilesMap == nil {
-		fmt.Fprintf(os.Stderr, "[!] Passphrase generation requires a transformation file to use for word selection\n")
-		os.Exit(1)
-	}
-
 	newMap := make(map[string]int)
+
+	// should generate based on the value of the total sum of the input map not
+	// each individual key. Repeat the process again for the value of each key
+
 	for key, value := range input {
-		newKeyArray := GeneratePassphrase(key, transformationFilesMap, passphraseWord)
-		for _, newKey := range newKeyArray {
+
+		for i := 0; i < value; i++ {
+			newKeyPhrase := GeneratePassphrase(input, transformationFilesMap, passphraseWord)
 			if debug {
 				fmt.Fprintf(os.Stderr, "Key: %s\n", key)
-				fmt.Fprintf(os.Stderr, "New Phrase: %s\n", newKey)
+				fmt.Fprintf(os.Stderr, "New Phrase: %s\n", newKeyPhrase)
 			}
 
 			if !bypass {
-				newMap[newKey] = value
+				newMap[newKeyPhrase] = value
 			} else {
-				fmt.Println(newKey)
+				fmt.Println(newKeyPhrase)
 			}
 		}
 	}
@@ -222,22 +223,48 @@ func MakePassphraseMap(input map[string]int, transformationFilesMap map[string]i
 //
 // Args:
 //
-//	key (string): The key to generate a passphrase for
-//	transformationFilesMap (map[string]int): A map of transformation files to
-//	use for constructing the passphrases
+//	passWords (map[string]int): Content of the passphrase for use as words in
+//	the passphrase
+//	transformationFilesMap (map[string]int): Content of the transformation
+//	files for use as separators between words
 //	passphraseWord (int): The number of words to use for passphrase generation
 //
 // Returns:
 //
-//	([]string): An array of words to use for the passphrase
-func GeneratePassphrase(key string, transformationFilesMap map[string]int, passphraseWord int) []string {
+//	(string): The generated passphrase
+func GeneratePassphrase(passWords map[string]int, transformationFilesMap map[string]int, passphraseWord int) string {
 	words := make([]string, passphraseWord)
-	for i := 0; i < passphraseWord; i++ {
 
-		// select a random word from the transformation files
-
-		// words[i] = SelectRandomWordFromFiles(transformationFilesMap)
+	seps := make([]string, 0, len(transformationFilesMap))
+	for k := range transformationFilesMap {
+		seps = append(seps, k)
 	}
 
-	return words
+	if len(seps) == 0 {
+		seps = append(seps, "")
+	}
+
+	keys := make([]string, 0, len(passWords))
+	for k := range passWords {
+		keys = append(keys, k)
+	}
+
+	for i := 0; i < passphraseWord; i++ {
+		sep := seps[rand.Intn(len(seps))]
+		key := keys[rand.Intn(len(keys))]
+
+		if i+1 >= passphraseWord {
+			words[i] = fmt.Sprintf("%s%s", key, "")
+		} else {
+			words[i] = fmt.Sprintf("%s%s", key, sep)
+		}
+
+	}
+
+	var newKeyPhrase string
+	for _, word := range words {
+		newKeyPhrase += word
+	}
+
+	return newKeyPhrase
 }
