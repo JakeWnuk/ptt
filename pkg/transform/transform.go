@@ -193,9 +193,6 @@ func ReplaceKeysInMap(originalMap map[string]int, replacements map[string]int, b
 func MakePassphraseMap(input map[string]int, transformationFilesMap map[string]int, bypass bool, debug bool, passphraseWord int) map[string]int {
 	newMap := make(map[string]int)
 
-	// should generate based on the value of the total sum of the input map not
-	// each individual key. Repeat the process again for the value of each key
-
 	for key, value := range input {
 
 		for i := 0; i < value; i++ {

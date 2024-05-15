@@ -16,7 +16,8 @@ import (
 // Functions without Unit Tests
 // ----------------------------------------------------------------------------
 // - TransformationController (TransformationController)
-// -
+// - MakePassphraseMap (Generation Functions)
+// - GeneratePassphrase (Generation Functions)
 
 // Unit Test for ReplaceKeysInMap
 func TestReplaceKeysInMap(t *testing.T) {
