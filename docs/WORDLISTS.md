@@ -17,6 +17,8 @@ wordlists. There are several ways to generate wordlists using PTT:
   This is implemented in the `pop` module.
 - `token-swapping`: Generates tokens by swapping characters in a string. This is
   implemented in the `mask-swap` module.
+- `passphrases`: Generates passphrases by combining words from a wordlist. This
+  is implemented in the `passphrase` module.
 
 All modes support multibyte characters and can properly convert them. One
 transformation can be used at a time.
@@ -70,3 +72,17 @@ This mode is most similar to token-swapping in that it generates new
 candidates by using masks. However, it is unique in that it uses partial
 masks to limit the swap positions from prior applications.
 
+### Passphrases
+The `passphrase` module generates passphrases by combining words from a wordlist.
+The `-w` flag can be used to specify the number of words to use in the passphrase.
+The `-tf` flag is optional and can be used to specify a file containing separators
+to use between words. The syntax is as follows:
+```
+ptt -f <input-file> -t passphrase -w <word-count> -tf <separator-file>
+```
+
+The passphrases are generated randomly by selecting words and separators from the input.
+If no separator file is provided, no separators will be used. The default word count is 0.
+The number of passphrases generated is equal to the number of lines in the input file
+*including* duplicates. This means that the item count is also used to determine the number
+of passphrases generated.

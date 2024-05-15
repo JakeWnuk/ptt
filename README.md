@@ -8,7 +8,7 @@
 - All transformations support multibyte characters.
 
 ```
-Usage of Password Transformation Tool (ptt) version (0.2.0):
+Usage of Password Transformation Tool (ptt) version (0.2.1):
 
 ptt [options] [...]
 Accepts standard input and/or additonal arguments.
@@ -48,6 +48,8 @@ Options:
         Show statistics output when possible.
   -vvv
         Show verbose statistics output when possible.
+  -w int
+        Number of words to generate for passphrases if applicable.
 
 The -f, -k, -r, -tf, -tp, and -u flags can be used multiple times and together.
 
@@ -78,6 +80,8 @@ Transformation Modes:
         Transforms input by swapping tokens from a partial mask file and a input file.
   -t overwrite -i [index]
         Transforms input into overwrite rules starting at index.
+  -t passphrase -w [words] -tf [file]
+        Transforms input by randomly generating passphrases with a given number of words and separators from a file.
   -t pop -rm [uldsb]
         Transforms input by generating tokens from popping strings at character boundaries.
   -t prepend
