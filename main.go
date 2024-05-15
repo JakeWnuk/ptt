@@ -85,6 +85,7 @@ func main() {
 	jsonOutput := flag.String("o", "", "Output to JSON file in addition to stdout.")
 	bypassMap := flag.Bool("b", false, "Bypass map creation and use stdout as primary output.")
 	debugMode := flag.Int("d", 0, "Enable debug mode with verbosity levels [0-2].")
+	passPhraseWords := flag.Int("w", 0, "Number of words to generate for passphrases if applicable.")
 	flag.Var(&retain, "k", "Only keep items in a file.")
 	flag.Var(&remove, "r", "Only keep items not in a file.")
 	flag.Var(&readFiles, "f", "Read additional files for input.")
@@ -135,7 +136,7 @@ func main() {
 
 	// Apply transformation if provided
 	if *transformation != "" && templateFiles == nil {
-		primaryMap = transform.TransformationController(primaryMap, *transformation, intRange.Start, intRange.End, *verbose, *replacementMask, transformationFilesMap, *bypassMap, *debugMode)
+		primaryMap = transform.TransformationController(primaryMap, *transformation, intRange.Start, intRange.End, *verbose, *replacementMask, transformationFilesMap, *bypassMap, *debugMode, *passPhraseWords)
 	} else if templateFiles != nil && *transformation == "" {
 		fmt.Fprintf(os.Stderr, "[*] Using template files for multiple transformations.\n")
 
