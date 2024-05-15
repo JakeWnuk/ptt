@@ -32,12 +32,12 @@ import (
 //	use for modes like retain-mask
 //	bypass (bool): If true, the map is not used for output or filtering
 //	debug (int): Different debug levels to use for debugging [0-2]
-//	passphraseWord (int): The number of words to use for passphrase generation
+//	passphraseWords (int): The number of words to use for passphrase generation
 //
 // Returns:
 //
 //	(map[string]int): A map of transformed values
-func TransformationController(input map[string]int, mode string, startingIndex int, endingIndex int, verbose bool, replacementMask string, transformationFilesMap map[string]int, bypass bool, debug int, passphraseWord int) (output map[string]int) {
+func TransformationController(input map[string]int, mode string, startingIndex int, endingIndex int, verbose bool, replacementMask string, transformationFilesMap map[string]int, bypass bool, debug int, passphraseWords int) (output map[string]int) {
 
 	functionDebug := false
 	if debug > 1 {
@@ -116,11 +116,11 @@ func TransformationController(input map[string]int, mode string, startingIndex i
 		}
 		output = mask.ShuffleMap(input, replacementMask, transformationFilesMap, bypass, functionDebug)
 	case "passphrase", "phrase", "pp":
-		if passphraseWord == 0 {
+		if passphraseWords == 0 {
 			fmt.Fprintf(os.Stderr, "[!] Passphrase operations require use of the -w flag to specify the number of words to use\n")
 			os.Exit(1)
 		}
-		output = MakePassphraseMap(input, transformationFilesMap, bypass, functionDebug, passphraseWord)
+		output = MakePassphraseMap(input, transformationFilesMap, bypass, functionDebug, passphraseWords)
 	default:
 		output = input
 	}
