@@ -15,7 +15,7 @@ import (
 	"github.com/jakewnuk/ptt/pkg/utils"
 )
 
-var version = "0.2.1"
+var version = "0.2.2"
 var wg sync.WaitGroup
 var mutex = &sync.Mutex{}
 var retain models.FileArgumentFlag
@@ -60,6 +60,7 @@ func main() {
 			"swap -tf [file]":                    "Transforms input by swapping tokens with exact matches from a ':' separated file.",
 			"mask-swap -tf [file]":               "Transforms input by swapping tokens from a partial mask file and a input file.",
 			"passphrase -w [words] -tf [file]":   "Transforms input by randomly generating passphrases with a given number of words and separators from a file.",
+			"substring -i [index]":               "Transforms input by extracting substrings starting at index and ending at index.",
 		}
 
 		// Sort and print transformation modes

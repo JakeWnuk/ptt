@@ -534,6 +534,40 @@ func ReplaceSubstring(original string, replacements map[string]int) []string {
 	return newStrings
 }
 
+// SubstringMap returns a map of substrings from a map of strings starting at
+// the start index and ending at the end index. If the bypass flag is set to
+// true, the function will print to stdout and return an empty map.
+//
+// Args:
+//
+//	sMap (map[string]int): The map of substrings
+//	sIndex (int): The start index of the substring
+//	eIndex (int): The end index of the substring
+//	bypass (bool): Skip returning the map and print to stdout
+//	debug (bool): A flag to print debug information
+//
+// Returns:
+//
+//	map[string]int: A map of substrings
+func SubstringMap(sMap map[string]int, sIndex int, eIndex int, bypass bool, debug bool) map[string]int {
+	if bypass {
+		fmt.Fprintf(os.Stderr, "[*] Bypassing transformation\n")
+		return make(map[string]int)
+	}
+
+	newMap := make(map[string]int)
+	for s := range sMap {
+		if sIndex > len(s) || eIndex > len(s) {
+			if debug {
+				fmt.Fprintf(os.Stderr, "[!] Error: StartIndex or EndIndex out of bounds\n")
+			}
+			continue
+		}
+		newMap[s[sIndex:eIndex]]++
+	}
+	return newMap
+}
+
 // ----------------------------------------------------------------------------
 // Validation Functions
 // ----------------------------------------------------------------------------

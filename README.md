@@ -8,7 +8,7 @@
 - All transformations support multibyte characters.
 
 ```
-Usage of Password Transformation Tool (ptt) version (0.2.1):
+Usage of Password Transformation Tool (ptt) version (0.2.2):
 
 ptt [options] [...]
 Accepts standard input and/or additonal arguments.
@@ -92,6 +92,8 @@ Transformation Modes:
         Transforms input into prepend-shift rules.
   -t remove -rm [uldsb]
         Transforms input by removing characters with provided mask characters.
+  -t substring -i [index]
+        Transforms input by extracting substrings starting at index and ending at index.
   -t swap -tf [file]
         Transforms input by swapping tokens with exact matches from a ':' separated file.
   -t toggle -i [index]
