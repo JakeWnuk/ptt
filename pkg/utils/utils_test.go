@@ -22,6 +22,7 @@ import (
 // - ConvertMultiByteCharToIteratingRule()
 // - SplitBySeparatorString()
 // - ReplaceSubstring()
+// - SubstringMap()
 //
 // ** Validation Functions **
 // - CheckASCIIString()
@@ -396,6 +397,38 @@ func TestReplaceSubstring(t *testing.T) {
 		given := ReplaceSubstring(input, replacements)
 		if given[0] != output[0] {
 			t.Errorf("ReplaceSubstring(%v, %v) = %v; want %v", input, replacements, given, output)
+		}
+	}
+}
+
+// Unit Test for SubstringMap()
+func TestSubstringMap(t *testing.T) {
+
+	// Define a test case struct
+	type TestCase struct {
+		input  map[string]int
+		start  int
+		end    int
+		output map[string]int
+	}
+
+	// Define test cases
+	testCases := []TestCase{
+		{map[string]int{"love1": 1, "love2": 1, "love3": 1}, 0, 4, map[string]int{"love": 3}},
+		{map[string]int{"<31": 1, "<32": 1, "<33": 1}, 1, 2, map[string]int{"3": 3}},
+		{map[string]int{"爱1": 1, "爱2": 1, "爱3": 1}, 0, 3, map[string]int{"爱": 3}},
+	}
+
+	// Run test cases
+	for _, testCase := range testCases {
+		input := testCase.input
+		start := testCase.start
+		end := testCase.end
+		output := testCase.output
+
+		given := SubstringMap(input, start, end, false, false)
+		if CheckAreMapsEqual(given, output) == false {
+			t.Errorf("SubstringMap(%v, %v, %v) = %v; want %v", input, start, end, given, output)
 		}
 	}
 }
