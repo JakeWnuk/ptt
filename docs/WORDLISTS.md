@@ -6,6 +6,7 @@
 2. [Direct Swapping](#direct-swapping)
 3. [Token Popping](#token-popping)
 4. [Token Swapping](#token-swapping)
+5. [Passphrases](#passphrases)
 
 ### Introduction
 This document describes the ways to use PTT to create password cracking

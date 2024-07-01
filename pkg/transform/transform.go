@@ -121,6 +121,8 @@ func TransformationController(input map[string]int, mode string, startingIndex i
 			os.Exit(1)
 		}
 		output = MakePassphraseMap(input, transformationFilesMap, bypass, functionDebug, passphraseWords)
+	case "substring", "sub", "sb":
+		output = utils.SubstringMap(input, startingIndex, endingIndex, bypass, functionDebug)
 	default:
 		output = input
 	}

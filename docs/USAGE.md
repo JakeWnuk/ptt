@@ -1,5 +1,5 @@
 # Password Transformation Tool (PTT) Usage Guide
-## Version 0.2.0
+## Version 0.2.2
 
 ### Table of Contents
 1. [Introduction](#introduction)
@@ -117,6 +117,7 @@ The following transformations can be used with the `-t` flag:
 - `dehex`: Transforms input by decoding $HEX[...] formatted
 - `mask`: Transforms input by masking characters with provided mask.
 - `remove`: Transforms input by removing characters with provided mask characters.
+- `substring`: Transforms input by extracting substrings starting at index and ending at index.
 - `mask-retain`: Transforms input by creating masks that still retain strings from file.
 - `mask-match`: Transforms input by keeping only strings with matching masks from a mask file
 - `swap`: Transforms input by swapping tokens with exact matches from a ':' separated file.
@@ -141,6 +142,7 @@ keywords above:
 - `dehex`: `dh`, `unhex`
 - `mask`: `m`, `partial-mask`, `partial`
 - `remove`: `rm`, `remove-all`, `delete`, `delete-all`
+- `substring`: `sub`, `sb`
 - `retain`: `r`, `retain-mask`,
 - `match`: `mt`, `match-mask`
 - `fuzzy-swap`: `fs`, `fuzzy`, `fuzzy-replace`, `fuzz`, `mutate`
