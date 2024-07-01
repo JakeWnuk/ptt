@@ -5,6 +5,7 @@
 1. [Introduction](#introduction)
 2. [Encoding and Decoding](#encoding-and-decoding)
 3. [Hex and Dehex](#hex-and-dehex)
+4. [Substrings](#substrings)
 
 ### Introduction
 This document describes the ways to use PTT to create miscellaneous transformations.
@@ -53,3 +54,20 @@ The following table shows the supported transformations:
 | --- | --- | --- | --- |
 | `hex` | Hex encoding | `Hello` | `$HEX[48656c6c6f]` |
 | `dehex` | Hex decoding | `$HEX[48656c6c6f]` | `Hello` |
+
+### Substrings
+This mode allows extracting substrings from the input based on position. The syntax is as follows:
+```
+ptt -f <input_file> -t substring -i <start_index>
+```
+or
+```
+ptt -f <input_file> -t substring -i <start_index>-<end_index>
+```
+
+This transformation extracts the substring from the input based on the provided
+index. If the end index is greater than the length of the input, it will be
+changed to the length of the input.
+
+This transformation can be used to extract specific parts of the input for
+further processing.

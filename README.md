@@ -6,6 +6,8 @@
 - Transforms input strings with a variety of functions for password cracking.
 - Accepts input from multiple sources including; standard input, files, and URLs.
 - All transformations support multibyte characters.
+- Supports JSON output for easy parsing and integration with other tools.
+- Supports multiple transformations and operations with a template file.
 
 ```
 Usage of Password Transformation Tool (ptt) version (0.2.2):

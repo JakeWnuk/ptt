@@ -276,7 +276,7 @@ func ProcessURL(url string, ch chan<- string, wg *sync.WaitGroup) {
 	}
 }
 
-// ReadJSONToAray reads the contents of a transformation template file and
+// ReadJSONToArray reads the contents of a transformation template file and
 // returns a slice of template structs.
 //
 // Args:
@@ -536,7 +536,9 @@ func ReplaceSubstring(original string, replacements map[string]int) []string {
 
 // SubstringMap returns a map of substrings from a map of strings starting at
 // the start index and ending at the end index. If the bypass flag is set to
-// true, the function will print to stdout and return an empty map.
+// true, the function will print to stdout and return an empty map. If the
+// end index is greater than the length of the string, the function will use
+// the length of the string as the end index for that string.
 //
 // Args:
 //
@@ -550,20 +552,23 @@ func ReplaceSubstring(original string, replacements map[string]int) []string {
 //
 //	map[string]int: A map of substrings
 func SubstringMap(sMap map[string]int, sIndex int, eIndex int, bypass bool, debug bool) map[string]int {
-	if bypass {
-		fmt.Fprintf(os.Stderr, "[*] Bypassing transformation\n")
-		return make(map[string]int)
-	}
-
 	newMap := make(map[string]int)
 	for s := range sMap {
-		if sIndex > len(s) || eIndex > len(s) {
+		maxLen := eIndex
+		if sIndex > len(s) {
 			if debug {
-				fmt.Fprintf(os.Stderr, "[!] Error: StartIndex or EndIndex out of bounds\n")
+				fmt.Fprintf(os.Stderr, fmt.Sprintf("[!] Error: Start index is out of bounds: %s\n", s))
 			}
 			continue
+		} else if eIndex > len(s) {
+			maxLen = len(s)
 		}
-		newMap[s[sIndex:eIndex]]++
+
+		if bypass {
+			fmt.Fprintf(os.Stdout, "%s\n", s[sIndex:maxLen])
+			continue
+		}
+		newMap[s[sIndex:maxLen]]++
 	}
 	return newMap
 }
