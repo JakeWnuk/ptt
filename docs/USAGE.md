@@ -145,7 +145,6 @@ keywords above:
 - `substring`: `sub`, `sb`
 - `retain`: `r`, `retain-mask`,
 - `match`: `mt`, `match-mask`
-- `fuzzy-swap`: `fs`, `fuzzy`, `fuzzy-replace`, `fuzz`, `mutate`
 - `swap`: `s`, `replace`
 - `pop`: `po`, `split`, `boundary-split`, `boundary-pop`, `pop-split`, `split-pop`
 - `mask-swap`: `ms`, `shuf`, `shuffle`, `token-swap`
