@@ -180,7 +180,7 @@ func AppendRules(items map[string]int, operation string, bypass bool, debug bool
 	returnMap = make(map[string]int)
 	switch operation {
 	// remove will remove characters then append
-	case "append-remove":
+	case "append-remove", "ar":
 		for key, value := range items {
 			rule := CharToRule(key, "$")
 			remove := LenToRule(key, "]")
@@ -202,7 +202,7 @@ func AppendRules(items map[string]int, operation string, bypass bool, debug bool
 		}
 		return returnMap
 	// shift will shift characters back to front then append
-	case "append-shift":
+	case "append-shift", "as":
 		for key, value := range items {
 			rule := CharToRule(key, "$")
 			shift := LenToRule(key, "}")
@@ -261,7 +261,7 @@ func PrependRules(items map[string]int, operation string, bypass bool, debug boo
 	returnMap = make(map[string]int)
 	switch operation {
 	// remove will remove characters then prepend
-	case "prepend-remove":
+	case "prepend-remove", "pr":
 		for key, value := range items {
 			rule := CharToRule(utils.ReverseString(key), "^")
 			remove := LenToRule(key, "[")
@@ -283,7 +283,7 @@ func PrependRules(items map[string]int, operation string, bypass bool, debug boo
 		}
 		return returnMap
 	// shift will shift characters front to back then prepend
-	case "prepend-shift":
+	case "prepend-shift", "ps":
 		for key, value := range items {
 			rule := CharToRule(utils.ReverseString(key), "^")
 			shift := LenToRule(key, "{")
