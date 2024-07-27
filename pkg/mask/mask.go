@@ -267,20 +267,21 @@ func TestMaskComplexity(str string) int {
 // Args:
 //
 //	input (map[string]int): Input map
+//	replacementMask (string): Mask characters to apply
 //	bypass (bool): If true, the map is not used for output or filtering
 //	debug (bool): If true, print additional debug information to stderr
 //
 // Returns:
 //
 //	(map[string]int): Masked map
-func RemoveMaskedCharacters(input map[string]int, bypass bool, debug bool) map[string]int {
+func RemoveMaskedCharacters(input map[string]int, replacementMask string, bypass bool, debug bool) map[string]int {
 	maskedMap := make(map[string]int)
 	replacer := strings.NewReplacer("?u", "", "?l", "", "?d", "", "?b", "", "?s", "")
 
 	for key, value := range input {
 		newKey := replacer.Replace(key)
 
-		if !utils.CheckASCIIString(newKey) {
+		if !utils.CheckASCIIString(newKey) && strings.Contains(replacementMask, "b") {
 			newKey = ConvertMultiByteMask(newKey)
 		}
 

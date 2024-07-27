@@ -86,7 +86,7 @@ func TransformationController(input map[string]int, mode string, startingIndex i
 		output = format.HexEncodeMap(input, bypass, functionDebug)
 	case "remove", "remove-all", "delete", "delete-all", "rm":
 		input = mask.MakeMaskedMap(input, replacementMask, false, false, false)
-		output = mask.RemoveMaskedCharacters(input, bypass, functionDebug)
+		output = mask.RemoveMaskedCharacters(input, replacementMask, bypass, functionDebug)
 	case "retain-mask", "retain", "r", "mask-retain":
 		if len(transformationFilesMap) == 0 {
 			fmt.Fprintf(os.Stderr, "[!] Retain masks require use of one or more -tf flags to specify one or more files\n")
