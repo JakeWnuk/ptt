@@ -48,9 +48,10 @@ Where `<mask_characters>` can be any of the following:
 - `d`: Digits
 - `s`: Special characters
 - `b`: Byte characters
+- `t`: Title case words (requires `u` and `l`)
 - Multiple characters can be combined to create a mask.
 
-The default value is `uldsb` for all characters. This mode will create tokens
+The default value is `uldsbt` for all characters. This mode will create tokens
 by popping characters from the input string then aggregating the results.
 
 ### Token Swapping

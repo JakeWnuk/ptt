@@ -225,7 +225,7 @@ func TestRemoveMaskedCharacters(t *testing.T) {
 
 	// Run test cases
 	for _, test := range tests {
-		output := RemoveMaskedCharacters(test.input, false, false)
+		output := RemoveMaskedCharacters(test.input, "ulsbd", false, false)
 		if !reflect.DeepEqual(output, test.output) {
 			t.Errorf("Test failed: %v inputted, %v expected, %v returned", test.input, test.output, output)
 		}

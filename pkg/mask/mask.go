@@ -394,7 +394,9 @@ func BoundarySplitPopMap(input map[string]int, replacementMask string, bypass bo
 			}
 
 			if (lastRuneType != 0 && lastRuneType != runeType) || !strings.ContainsRune(replacementMask, runeType) {
-				if token != "" {
+				if strings.ContainsRune(replacementMask, 't') && lastRuneType == 'u' && runeType == 'l' {
+					// do nothing so the token continues
+				} else if token != "" {
 					result[token]++
 					token = ""
 				}

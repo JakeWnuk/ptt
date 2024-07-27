@@ -55,7 +55,7 @@ func main() {
 			"mask -rm [uldsb] -v":                "Transforms input by masking characters with provided mask.",
 			"remove -rm [uldsb]":                 "Transforms input by removing characters with provided mask characters.",
 			"mask-retain -rm [uldsb] -tf [file]": "Transforms input by creating masks that still retain strings from file.",
-			"pop -rm [uldsb]":                    "Transforms input by generating tokens from popping strings at character boundaries.",
+			"pop -rm [uldsbt]":                   "Transforms input by generating tokens from popping strings at character boundaries.",
 			"mask-match -tf [file]":              "Transforms input by keeping only strings with matching masks from a mask file.",
 			"swap -tf [file]":                    "Transforms input by swapping tokens with exact matches from a ':' separated file.",
 			"mask-swap -tf [file]":               "Transforms input by swapping tokens from a partial mask file and a input file.",
@@ -83,7 +83,7 @@ func main() {
 	minimum := flag.Int("m", 0, "Minimum numerical frequency to include in output.")
 	verboseStatsMax := flag.Int("n", 25, "Maximum number of items to display in verbose statistics output.")
 	transformation := flag.String("t", "", "Transformation to apply to input.")
-	replacementMask := flag.String("rm", "uldsb", "Replacement mask for transformations if applicable.")
+	replacementMask := flag.String("rm", "uldsbt", "Replacement mask for transformations if applicable.")
 	jsonOutput := flag.String("o", "", "Output to JSON file in addition to stdout.")
 	bypassMap := flag.Bool("b", false, "Bypass map creation and use stdout as primary output.")
 	debugMode := flag.Int("d", 0, "Enable debug mode with verbosity levels [0-2].")
