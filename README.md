@@ -10,7 +10,7 @@
 - Supports multiple transformations and operations with a template file.
 
 ```
-Usage of Password Transformation Tool (ptt) version (0.2.2):
+Usage of Password Transformation Tool (ptt) version (0.2.3):
 
 ptt [options] [...]
 Accepts standard input and/or additonal arguments.
