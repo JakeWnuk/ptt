@@ -5,6 +5,7 @@ ADD ./main.go .
 ADD ./go.mod .
 ADD ./go.sum .
 ADD ./pkg ./pkg
+ADD ./templates/ ./templates
 RUN go build .
 
 FROM alpine
