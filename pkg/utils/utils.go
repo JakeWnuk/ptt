@@ -289,7 +289,12 @@ func ProcessURL(url string, ch chan<- string, wg *sync.WaitGroup) {
 //	templates ([]models.TemplateFileOperation): The slice of template structs
 func ReadJSONToArray(fs models.FileSystem, filenames []string) []models.TemplateFileOperation {
 	var templates []models.TemplateFileOperation
+
 	for _, filename := range filenames {
+		// Check to see if a directory was passed
+		// If so, read all files in the directory and append them to the filenames
+		// slice
+
 		data, err := fs.ReadFile(filename)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "[!] Error reading file %s\n", filename)
@@ -656,4 +661,20 @@ func CheckAreArraysEqual(a, b []string) bool {
 		}
 	}
 	return true
+}
+
+// IsFileSystemDirectory checks to see if a string is a valid file system
+// directory by checking if the path exists and if it is a directory
+//
+// Args:
+//  path (string): The path to check
+//
+// Returns:
+//  bool: True if the path is a directory, false otherwise
+func IsFileSystemDirectory(path string) bool {
+	fileInfo, err := os.Stat(path)
+	if os.IsNotExist(err) {
+		return false
+	}
+	return fileInfo.IsDir()
 }
