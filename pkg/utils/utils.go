@@ -288,7 +288,8 @@ func ProcessURL(url string, ch chan<- string, wg *sync.WaitGroup) {
 //
 //	templates ([]models.TemplateFileOperation): The slice of template structs
 func ReadJSONToArray(fs models.FileSystem, filenames []string) []models.TemplateFileOperation {
-	var templates []models.TemplateFileOperation
+	var combinedTemplate []models.TemplateFileOperation
+	var template []models.TemplateFileOperation
 
 	for _, filename := range filenames {
 		// Check to see if a directory was passed
@@ -301,49 +302,51 @@ func ReadJSONToArray(fs models.FileSystem, filenames []string) []models.Template
 			os.Exit(1)
 		}
 
-		err = json.Unmarshal(data, &templates)
+		err = json.Unmarshal(data, &template)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "[!] Error unmarshalling JSON file %s\n", filename)
 			os.Exit(1)
 		}
 
-		alphaRe := regexp.MustCompile(`[a-zA-Z]`)
-		numRe := regexp.MustCompile(`[0-9]`)
+		combinedTemplate = append(combinedTemplate, template...)
+	}
 
-		for _, template := range templates {
-			if !numRe.MatchString(fmt.Sprintf("%v", template.StartIndex)) || !numRe.MatchString(fmt.Sprintf("%v", template.EndIndex)) {
-				fmt.Fprintf(os.Stderr, "[!] Error: StartIndex and EndIndex must be integers\n")
-				os.Exit(1)
-			}
+	alphaRe := regexp.MustCompile(`[a-zA-Z]`)
+	numRe := regexp.MustCompile(`[0-9]`)
 
-			if !alphaRe.MatchString(fmt.Sprintf("%v", template.Verbose)) {
-				fmt.Fprintf(os.Stderr, "[!] Error: Verbose must be a boolean\n")
-				os.Exit(1)
-			}
+	for _, template := range combinedTemplate {
+		if !numRe.MatchString(fmt.Sprintf("%v", template.StartIndex)) || !numRe.MatchString(fmt.Sprintf("%v", template.EndIndex)) {
+			fmt.Fprintf(os.Stderr, "[!] Error: StartIndex and EndIndex must be integers\n")
+			os.Exit(1)
+		}
 
-			if !alphaRe.MatchString(fmt.Sprintf("%v", template.ReplacementMask)) {
-				fmt.Fprintf(os.Stderr, "[!] Error: ReplacementMask must be a string\n")
-				os.Exit(1)
-			}
+		if !alphaRe.MatchString(fmt.Sprintf("%v", template.Verbose)) {
+			fmt.Fprintf(os.Stderr, "[!] Error: Verbose must be a boolean\n")
+			os.Exit(1)
+		}
 
-			if !alphaRe.MatchString(fmt.Sprintf("%v", template.Bypass)) {
-				fmt.Fprintf(os.Stderr, "[!] Error: Bypass must be a boolean\n")
-				os.Exit(1)
-			}
+		if !alphaRe.MatchString(fmt.Sprintf("%v", template.ReplacementMask)) {
+			fmt.Fprintf(os.Stderr, "[!] Error: ReplacementMask must be a string\n")
+			os.Exit(1)
+		}
 
-			if !alphaRe.MatchString(fmt.Sprintf("%v", template.TransformationMode)) {
-				fmt.Fprintf(os.Stderr, "[!] Error: TransformationMode must be a string\n")
-				os.Exit(1)
-			}
+		if !alphaRe.MatchString(fmt.Sprintf("%v", template.Bypass)) {
+			fmt.Fprintf(os.Stderr, "[!] Error: Bypass must be a boolean\n")
+			os.Exit(1)
+		}
 
-			if !numRe.MatchString(fmt.Sprintf("%v", template.PassphraseWords)) {
-				fmt.Fprintf(os.Stderr, "[!] Error: PassphraseWords must be an integer\n")
-				os.Exit(1)
-			}
+		if !alphaRe.MatchString(fmt.Sprintf("%v", template.TransformationMode)) {
+			fmt.Fprintf(os.Stderr, "[!] Error: TransformationMode must be a string\n")
+			os.Exit(1)
+		}
+
+		if !numRe.MatchString(fmt.Sprintf("%v", template.PassphraseWords)) {
+			fmt.Fprintf(os.Stderr, "[!] Error: PassphraseWords must be an integer\n")
+			os.Exit(1)
 		}
 	}
 
-	return templates
+	return combinedTemplate
 }
 
 // ----------------------------------------------------------------------------
@@ -667,10 +670,12 @@ func CheckAreArraysEqual(a, b []string) bool {
 // directory by checking if the path exists and if it is a directory
 //
 // Args:
-//  path (string): The path to check
+//
+//	path (string): The path to check
 //
 // Returns:
-//  bool: True if the path is a directory, false otherwise
+//
+//	bool: True if the path is a directory, false otherwise
 func IsFileSystemDirectory(path string) bool {
 	fileInfo, err := os.Stat(path)
 	if os.IsNotExist(err) {

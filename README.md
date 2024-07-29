@@ -53,7 +53,7 @@ Options:
   -w int
         Number of words to generate for passphrases if applicable.
 
-The -f, -k, -r, -tf, and -u flags can be used multiple times and together.
+The -f, -k, -r, -tf, -tp, and -u flags can be used multiple times and together.
 
 Transformation Modes:
   -t append
