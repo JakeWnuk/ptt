@@ -7,6 +7,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"path/filepath"
 	"regexp"
 	"sort"
 	"strconv"
@@ -291,24 +292,42 @@ func ReadJSONToArray(fs models.FileSystem, filenames []string) []models.Template
 	var combinedTemplate []models.TemplateFileOperation
 	var template []models.TemplateFileOperation
 
-	for _, filename := range filenames {
+	i := 0
+	for i < len(filenames) {
+		filename := filenames[i]
 		// Check to see if a directory was passed
 		// If so, read all files in the directory and append them to the filenames
 		// slice
+		if IsFileSystemDirectory(filename) {
+			err := filepath.Walk(filename, func(path string, info os.FileInfo, err error) error {
+				if err != nil {
+					return err
+				}
+				if !info.IsDir() && strings.HasSuffix(info.Name(), ".json") {
+					filenames = append(filenames, path)
+				}
+				return nil
+			})
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "[!] Error walking the path %v: %v\n", filename, err)
+				os.Exit(1)
+			}
+		} else {
+			data, err := fs.ReadFile(filename)
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "[!] Error reading file %s\n", filename)
+				os.Exit(1)
+			}
 
-		data, err := fs.ReadFile(filename)
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "[!] Error reading file %s\n", filename)
-			os.Exit(1)
+			err = json.Unmarshal(data, &template)
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "[!] Error unmarshalling JSON file %s\n", filename)
+				os.Exit(1)
+			}
+
+			combinedTemplate = append(combinedTemplate, template...)
 		}
-
-		err = json.Unmarshal(data, &template)
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "[!] Error unmarshalling JSON file %s\n", filename)
-			os.Exit(1)
-		}
-
-		combinedTemplate = append(combinedTemplate, template...)
+		i++
 	}
 
 	alphaRe := regexp.MustCompile(`[a-zA-Z]`)
