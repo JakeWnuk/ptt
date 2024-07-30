@@ -104,7 +104,7 @@ Transformation Modes:
 
 ## Getting Started:
 
-Documentation on usage and examples can be found in the `/docs` directory or on the repository here: [link](https://github.com/JakeWnuk/ptt/tree/main/docs)
+Documentation on usage and examples can be found in the `/docs/USAGE.md` directory or on the repository here: [link](https://github.com/JakeWnuk/ptt/tree/main/docs/USAGE.md)
 
 ### Install:
 
