@@ -1,5 +1,4 @@
 # Password Transformation Tool (PTT) Mask Creation Guide
-## Version 0.1.0
 
 ### Table of Contents
 1. [Introduction](#introduction)
