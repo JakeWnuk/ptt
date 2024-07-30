@@ -15,7 +15,7 @@ import (
 	"github.com/jakewnuk/ptt/pkg/utils"
 )
 
-var version = "0.2.3"
+var version = "0.2.4"
 var wg sync.WaitGroup
 var mutex = &sync.Mutex{}
 var retain models.FileArgumentFlag
@@ -36,7 +36,7 @@ func main() {
 		fmt.Fprintf(os.Stderr, "ptt [options] [...]\nAccepts standard input and/or additonal arguments.\n\n")
 		fmt.Fprintf(os.Stderr, "Options:\n")
 		flag.PrintDefaults()
-		fmt.Fprintf(os.Stderr, "\nThe -f, -k, -r, -tf, -tp, and -u flags can be used multiple times and together.\n")
+		fmt.Fprintf(os.Stderr, "\nThe -f, -k, -r, -tf, -tp, and -u flags can be used multiple times, together, and with files or directories.\n")
 		fmt.Fprintln(os.Stderr, "\nTransformation Modes:")
 		modes := map[string]string{
 			"append":                             "Transforms input into append rules.",

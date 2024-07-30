@@ -10,7 +10,7 @@
 - Supports multiple transformations and operations with a template file.
 
 ```
-Usage of Password Transformation Tool (ptt) version (0.2.3):
+Usage of Password Transformation Tool (ptt) version (0.2.4):
 
 ptt [options] [...]
 Accepts standard input and/or additonal arguments.
@@ -36,7 +36,7 @@ Options:
   -r value
         Only keep items not in a file.
   -rm string
-        Replacement mask for transformations if applicable. (default "uldsb")
+        Replacement mask for transformations if applicable. (default "uldsbt")
   -t string
         Transformation to apply to input.
   -tf value
@@ -53,7 +53,7 @@ Options:
   -w int
         Number of words to generate for passphrases if applicable.
 
-The -f, -k, -r, -tf, -tp, and -u flags can be used multiple times and together.
+The -f, -k, -r, -tf, -tp, and -u flags can be used multiple times, together, and with files or directories.
 
 Transformation Modes:
   -t append
@@ -84,7 +84,7 @@ Transformation Modes:
         Transforms input into overwrite rules starting at index.
   -t passphrase -w [words] -tf [file]
         Transforms input by randomly generating passphrases with a given number of words and separators from a file.
-  -t pop -rm [uldsb]
+  -t pop -rm [uldsbt]
         Transforms input by generating tokens from popping strings at character boundaries.
   -t prepend
         Transforms input into prepend rules.
@@ -104,7 +104,7 @@ Transformation Modes:
 
 ## Getting Started:
 
-Documentation on usage and examples can be found in the `/docs` directory or on the repository here: [link](https://github.com/JakeWnuk/ptt/tree/main/docs)
+Documentation on usage and examples can be found in the `/docs/USAGE.md` directory or on the repository here: [link](https://github.com/JakeWnuk/ptt/tree/main/docs/USAGE.md)
 
 ### Install:
 

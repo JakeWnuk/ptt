@@ -1,13 +1,44 @@
 # Password Transformation Tool (PTT) Usage Guide
-## Version 0.2.2
+## Version 0.2.4
 
 ### Table of Contents
+#### Getting Started
 1. [Introduction](#introduction)
 2. [Installation](#installation)
 3. [Usage](#usage)
 4. [Examples](#examples)
 5. [Contributing](#contributing)
 6. [License](#license)
+
+#### Mask Creation Guide
+1. [Mask Creation Introduction](#mask-creation-introduction)
+2. [Mask Creation](#mask-creation)
+3. [Mask Matching](#mask-matching)
+4. [Removing Characters by Mask](#removing-characters-by-mask)
+5. [Creating Retain/Partial Masks](#creating-retainpartial-masks)
+
+### Rule Creation Guide
+1. [Rule Creation Introduction](#rule-creation-introduction)
+2. [Append Rules](#append-rules)
+3. [Prepend Rules](#prepend-rules)
+4. [Toggle Rules](#toggle-rules)
+5. [Insert Rules](#insert-rules)
+6. [Overwrite Rules](#overwrite-rules)
+
+### Wordlist Creation Guide
+1. [Wordlist Creation Introduction](#wordlist-creation-introduction)
+2. [Direct Swapping](#direct-swapping)
+3. [Token Popping](#token-popping)
+4. [Token Swapping](#token-swapping)
+5. [Passphrases](#passphrases)
+
+### Misc Creation Guide
+1. [Misc Creation Introduction](#misc-creation-introduction)
+2. [Encoding and Decoding](#encoding-and-decoding)
+3. [Hex and Dehex](#hex-and-dehex)
+4. [Substrings](#substrings)
+
+## Getting Started
 
 ### Introduction
 The Password Transformation Tool (PTT) is a command-line utility that allows
@@ -79,6 +110,7 @@ There are some additional notes when importing data:
 
 The `-f`, `-k`, `-r`, `-tf`, `-tp`, and `-u` flags can be used multiple times and have
 their collective values combined. The rest of the flags can only be used once.
+These flags work with files and directories.
 
 #### Options:
 - `-b`: Bypass map creation and use stdout as primary output.
@@ -300,4 +332,311 @@ when contributing to this project.
 
 ### License
 This project is licensed under the MIT License - see the LICENSE file for details.
+
+## Mask Creation Guide
+
+### Mask Creation Introduction
+This document describes the ways to use PTT to create `Hashcat` compatible
+masks. There are several ways to use masks in PTT:
+
+- `Mask Creation`: Create a mask from a given string.
+- `Mask Matching`: Match a mask to a given string.
+- `Removing Characters by Mask`: Remove characters from a given string by a mask.
+- `Creating Retain/Partial Masks`: Create a mask that retains only certain keywords.
+
+All modes support multibyte characters and can properly convert them. One
+transformation can be used at a time.
+
+> [!CAUTION]
+> Ensure input is provided in the correct format and does not contain hidden characters. `Dos2Unix` can be used to convert the file to proper format if needed.
+
+### Mask Creation
+Masks replace characters in a string with a common character. The syntax to
+create a mask is as follows:
+```
+ptt -f <input_file> -t mask -rm <mask_characters> -v
+```
+Where `<mask_characters>` can be any of the following:
+- `u`: Uppercase characters
+- `l`: Lowercase characters
+- `d`: Digits
+- `s`: Special characters
+- `b`: Byte characters
+- Multiple characters can be combined to create a mask.
+
+The default value is `uldsb` for all characters. The `-v` flag is optional and
+if provided, will print the length of the original string and its character
+complexity. The format will be `:length:complexity` appended to the end of the
+output.
+
+### Mask Matching
+Masks can be matched to a given string to determine if the string matches the
+mask. The syntax to match a mask is as follows:
+```
+ptt -f <input_file> -t match -tf <mask_file>
+```
+Where `<mask_file>` is the file containing the mask to match. The mask file
+should only contain valid masks. The output will be all of the strings that
+match the masks.
+
+### Removing Characters by Mask
+Characters can be removed from a string by a mask. The syntax to remove
+characters by mask is as follows:
+```
+ptt -f <input_file> -t remove -rm <mask_characters>
+```
+Where `<mask_characters>` is the mask to remove from the string. The output will
+be the string with the characters removed.
+
+### Creating Retain/Partial Masks
+Retain masks can be created to retain only certain keywords in a string. The
+syntax to create a retain mask is as follows:
+```
+ptt -f <input_file> -t retain -rm <mask_characters> -tf <keep_file>
+```
+Where `<mask_characters>` is the mask to retain and `<keep_file>` is the file
+containing the keywords to retain. The output will be the mask with only the
+keywords retained.
+
+## Rules Creation Guide
+
+### Rule Creation Introduction
+This document describes the ways to use PTT to create `Hashcat` compatible
+rules. There are several types of rules that can be created using PTT:
+
+- `Append Rules`: Append a string to the end of the password.
+- `Append Remove Rules`: Remove characters from the end of the password before appending a string.
+- `Append Shift Rules`: Shift the characters of the password to the right before appending a string.
+- `Prepend Rules`: Prepend a string to the beginning of the password.
+- `Prepend Remove Rules`: Remove characters from the beginning of the password before prepending a string.
+- `Prepend Shift Rules`: Shift the characters of the password to the left before prepending a string.
+- `Toggle Rules`: Toggle the case of the password.
+- `Insert Rules`: Insert a string at a specific position in the password.
+- `Overwrite Rules`: Overwrite a string at a specific position in the password.
+
+All modes support multibyte characters and can properly convert them. One
+transformation can be used at a time.
+
+> [!CAUTION]
+> Ensure input is provided in the correct format and does not contain hidden characters. `Dos2Unix` can be used to convert the file to proper format if needed.
+
+### Append Rules
+Append rules are used to append a string to the end of the password. The syntax for an append rule is as follows:
+```
+ptt -f <input_file> -t append
+```
+
+The append mode also has two additional options:
+- `append-remove`: Remove characters from the end of the password before appending a string.
+- `append-shift`: Shift the characters of the password to the right before appending a string.
+
+The syntax for an append-remove rule is as follows:
+```
+ptt -f <input_file> -t append-remove
+```
+
+The syntax for an append-shift rule is as follows:
+```
+ptt -f <input_file> -t append-shift
+```
+
+### Prepend Rules
+Prepend rules are used to prepend a string to the beginning of the password. The syntax for a prepend rule is as follows:
+```
+ptt -f <input_file> -t prepend
+```
+
+The prepend mode also has two additional options:
+- `prepend-remove`: Remove characters from the beginning of the password before prepending a string.
+- `prepend-shift`: Shift the characters of the password to the left before prepending a string.
+
+The syntax for a prepend-remove rule is as follows:
+```
+ptt -f <input_file> -t prepend-remove
+```
+
+The syntax for a prepend-shift rule is as follows:
+```
+ptt -f <input_file> -t prepend-shift
+```
+
+### Toggle Rules
+Toggle rules are used to toggle the case of the password. The syntax for a toggle rule is as follows:
+```
+ptt -f <input_file> -t toggle -i <index>
+```
+Where `<index>` is the starting index of the toggle pattern. If no index is provided,
+the toggle pattern will start at the beginning of the password. The `<index>`
+can also accept range values in the format of `start-end`. For example, `1-5` will
+print output for the toggle transformation starting from index 1 to 5.
+
+### Insert Rules
+Insert rules are used to insert a string at a specific position in the password. The syntax for an insert rule is as follows:
+```
+ptt -f <input_file> -t insert -i <index>
+```
+Where `<index>` is the position where the string will be inserted. If no index is provided,
+the string will be inserted at the beginning of the password. The `<index>`
+can also accept range values in the format of `start-end`. For example, `1-5` will
+print output for the insert transformation starting from index 1 to 5.
+
+### Overwrite Rules
+Overwrite rules are used to overwrite a string at a specific position in the password. The syntax for an overwrite rule is as follows:
+```
+ptt -f <input_file> -t overwrite -i <index>
+```
+Where `<index>` is the position where the string will be overwritten. If no index is provided,
+the string will be overwritten at the beginning of the password. The `<index>`
+can also accept range values in the format of `start-end`. For example, `1-5` will
+print output for the overwrite transformation starting from index 1 to 5.
+
+## Wordlist Creation Guide
+
+### Wordlist Creation Introduction
+This document describes the ways to use PTT to create password cracking
+wordlists. There are several ways to generate wordlists using PTT:
+
+- `direct-swapping`: Swapping characters directly with a `:` separated file.
+   This is implemented in the `swap` module.
+- `token-popping`: Generates tokens by popping strings at character boundaries.
+  This is implemented in the `pop` module.
+- `token-swapping`: Generates tokens by swapping characters in a string. This is
+  implemented in the `mask-swap` module.
+- `passphrases`: Generates passphrases by combining words from a wordlist. This
+  is implemented in the `passphrase` module.
+
+All modes support multibyte characters and can properly convert them. One
+transformation can be used at a time.
+
+> [!CAUTION]
+> Ensure input is provided in the correct format and does not contain hidden characters. `Dos2Unix` can be used to convert the file to proper format if needed.
+
+### Direct Swapping
+The `swap` module swaps characters directly with a `:` separated file. The
+syntax is as follows:
+```
+ptt -f <input-file> -t swap -tf <replacement-file>
+```
+The replacement file should contain the strings to be transformed as `PRIOR:POST`
+pairs. The replacements will be applied to the first instance in each line.
+
+### Token Popping
+The `pop` module generates tokens by popping strings at character boundaries.
+The syntax is as follows:
+```
+ptt -f <input-file> -t pop -rm <mask-characters>
+```
+Where `<mask_characters>` can be any of the following:
+- `u`: Uppercase characters
+- `l`: Lowercase characters
+- `d`: Digits
+- `s`: Special characters
+- `b`: Byte characters
+- `t`: Title case words (requires `u` and `l`)
+- Multiple characters can be combined to create a mask.
+
+The default value is `uldsbt` for all characters. This mode will create tokens
+by popping characters from the input string then aggregating the results.
+
+### Token Swapping
+The `mask-swap` module generates tokens by swapping characters in a string. The
+syntax is as follows:
+```
+ptt -f <input-file> -t mask-swap -tf <replacement-file>
+```
+> [!NOTE]
+> The input for `mask-swap` is partial masks from `retain`! This is different from most other modes.
+
+The replacement file does not need to be in any specific format. The
+replacements will be applied to the first instance in each line. The
+`mask-swap` mode is unique in that it uses partial masks from the `retain`
+module to generate new candidates. This mode also uses its own replacer
+module (different from the other modes) to generate new candidates by
+extracting the masks and then matching them to the replacement file.
+
+This mode is most similar to token-swapping in that it generates new
+candidates by using masks. However, it is unique in that it uses partial
+masks to limit the swap positions from prior applications.
+
+### Passphrases
+The `passphrase` module generates passphrases by combining words from a wordlist.
+The `-w` flag can be used to specify the number of words to use in the passphrase.
+The `-tf` flag is optional and can be used to specify a file containing separators
+to use between words. The syntax is as follows:
+```
+ptt -f <input-file> -t passphrase -w <word-count> -tf <separator-file>
+```
+
+The passphrases are generated randomly by selecting words and separators from the input.
+If no separator file is provided, no separators will be used. The default word count is 0.
+The number of passphrases generated is equal to the number of lines in the input file
+*including* duplicates. This means that the item count is also used to determine the number
+of passphrases generated.
+
+## Misc Creation Guide
+
+### Misc Creation Introduction
+This document describes the ways to use PTT to create miscellaneous transformations.
+There are several types that can be created using PTT:
+
+- `Encoding and Decoding`: This transforms input to and from URL, HTML, and Unicode escaped strings.
+- `Hex and Dehex`: This transforms input to and from `$HEX[....]` strings.
+
+All modes support multibyte characters and can properly convert them. One
+transformation can be used at a time.
+
+> [!CAUTION]
+> Ensure input is provided in the correct format and does not contain hidden characters. `Dos2Unix` can be used to convert the file to proper format if needed.
+
+### Encoding and Decoding
+This mode allows encoding and decoding of input to and from URL, HTML, and Unicode escaped strings.
+The syntax is as follows:
+```
+ptt -f <input_file> -t encode
+```
+or
+```
+ptt -f <input_file> -t decode
+```
+The following table shows the supported transformations:
+
+| Transformation | Description | Input Example | Output Example |
+| --- | --- | --- | --- |
+| `url` | URL encoding | `https://www.example.com` | `https%3A%2F%2Fwww.example.com` |
+| `html` | HTML encoding | `<html>` | `&lt;html&gt;` |
+| `unicode` | Unicode encoding | `Hello😎` | `Hello\u1f60e` |
+
+### Hex and Dehex
+This mode allows encoding and decoding of input to and from `$HEX[....]` strings.
+The syntax is as follows:
+```
+ptt -f <input_file> -t hex
+```
+or
+```
+ptt -f <input_file> -t dehex
+```
+The following table shows the supported transformations:
+
+| Transformation | Description | Input Example | Output Example |
+| --- | --- | --- | --- |
+| `hex` | Hex encoding | `Hello` | `$HEX[48656c6c6f]` |
+| `dehex` | Hex decoding | `$HEX[48656c6c6f]` | `Hello` |
+
+### Substrings
+This mode allows extracting substrings from the input based on position. The syntax is as follows:
+```
+ptt -f <input_file> -t substring -i <start_index>
+```
+or
+```
+ptt -f <input_file> -t substring -i <start_index>-<end_index>
+```
+
+This transformation extracts the substring from the input based on the provided
+index. If the end index is greater than the length of the input, it will be
+changed to the length of the input.
+
+This transformation can be used to extract specific parts of the input for
+further processing.
 
