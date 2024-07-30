@@ -1,5 +1,5 @@
 # Password Transformation Tool (PTT) Usage Guide
-## Version 0.2.4
+## Version 0.2.5
 
 ### Table of Contents
 #### Getting Started
@@ -28,9 +28,10 @@
 ### Wordlist Creation Guide
 1. [Wordlist Creation Introduction](#wordlist-creation-introduction)
 2. [Direct Swapping](#direct-swapping)
-3. [Token Popping](#token-popping)
-4. [Token Swapping](#token-swapping)
-5. [Passphrases](#passphrases)
+3. [Replacing Text and Characters](#replacing-text-and-characters)
+4. [Token Popping](#token-popping)
+5. [Token Swapping](#token-swapping)
+6. [Passphrases](#passphrases)
 
 ### Misc Creation Guide
 1. [Misc Creation Introduction](#misc-creation-introduction)
@@ -174,10 +175,11 @@ keywords above:
 - `dehex`: `dh`, `unhex`
 - `mask`: `m`, `partial-mask`, `partial`
 - `remove`: `rm`, `remove-all`, `delete`, `delete-all`
+- `replace`: `rp`, `rep`
 - `substring`: `sub`, `sb`
 - `retain`: `r`, `retain-mask`,
 - `match`: `mt`, `match-mask`
-- `swap`: `s`, `replace`
+- `swap`: `sw`, `swp`
 - `pop`: `po`, `split`, `boundary-split`, `boundary-pop`, `pop-split`, `split-pop`
 - `mask-swap`: `ms`, `shuf`, `shuffle`, `token-swap`
 - `passphrase`: `pp`, `phrase`
@@ -518,7 +520,18 @@ syntax is as follows:
 ptt -f <input-file> -t swap -tf <replacement-file>
 ```
 The replacement file should contain the strings to be transformed as `PRIOR:POST`
-pairs. The replacements will be applied to the first instance in each line.
+pairs. The replacements will be applied to the all instance in each line but
+only one swap is applied at once. This mode is ideal for subsituting words or characters in a string.
+
+### Replacing Text and Characters
+The `replace` module replaces text and characters in a string. This mode replaces all strings with all matches from a ':' separated file. The syntax is as follows:
+```
+ptt -f <input-file> -t replace -tf <replacement-file>
+```
+The replacement file should contain the strings to be transformed as
+`PRIOR:POST` pairs. The replacements will be applied to all instances in each
+line and all replacements are applied to the string. This mode is ideal for replacing all instances of a word or character in
+a string.
 
 ### Token Popping
 The `pop` module generates tokens by popping strings at character boundaries.

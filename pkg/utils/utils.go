@@ -579,6 +579,37 @@ func ReplaceSubstring(original string, replacements map[string]int) []string {
 	return newStrings
 }
 
+// ReplaceAllSubstring replaces all instances of a substring in a string with
+// a new substring if the substring is found in the original string. All of the
+// replacements are applied to the original string. The new substring is
+// determined by the key in the replacements map separated by a colon
+// character.
+//
+// Args:
+//
+//	original (string): The original string
+//	replacements (map[string]int): A map of substrings to replace
+//
+// Returns:
+//
+// []string: The original string with all instances of the substring replaced
+func ReplaceAllSubstring(original string, replacements map[string]int) []string {
+	newStrings := []string{original}
+	for newSubstr := range replacements {
+		// Split the new substring into the old and new strings by the colon character
+		if !strings.Contains(newSubstr, ":") {
+			continue
+		}
+		oldStr, newStr := strings.Split(newSubstr, ":")[0], strings.Split(newSubstr, ":")[1]
+		var tempStrings []string
+		for _, s := range newStrings {
+			tempStrings = append(tempStrings, strings.Replace(s, oldStr, newStr, -1))
+		}
+		newStrings = tempStrings
+	}
+	return newStrings
+}
+
 // SubstringMap returns a map of substrings from a map of strings starting at
 // the start index and ending at the end index. If the bypass flag is set to
 // true, the function will print to stdout and return an empty map. If the
