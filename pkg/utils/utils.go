@@ -38,24 +38,42 @@ import (
 func ReadFilesToMap(fs models.FileSystem, filenames []string) map[string]int {
 	wordMap := make(map[string]int)
 
-	// Read the contents of the files and add the words to the map
-	for _, filename := range filenames {
-		data, err := fs.ReadFile(filename)
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "[!] Error reading file %s\n", filename)
-			os.Exit(1)
-		}
+	i := 0
+	for i < len(filenames) {
+		filename := filenames[i]
+		if IsFileSystemDirectory(filename) {
+			err := filepath.Walk(filename, func(path string, info os.FileInfo, err error) error {
+				if err != nil {
+					return err
+				}
+				if !info.IsDir() {
+					filenames = append(filenames, path)
+				}
+				return nil
+			})
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "[!] Error walking the path %v: %v\n", filename, err)
+				os.Exit(1)
+			}
+		} else {
+			data, err := fs.ReadFile(filename)
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "[!] Error reading file %s\n", filename)
+				os.Exit(1)
+			}
 
-		err = json.Unmarshal(data, &wordMap)
-		if err == nil {
-			fmt.Fprintf(os.Stderr, "[*] Detected ptt JSON output. Importing...\n")
-			continue
-		}
+			err = json.Unmarshal(data, &wordMap)
+			if err == nil {
+				fmt.Fprintf(os.Stderr, "[*] Detected ptt JSON output. Importing...\n")
+				continue
+			}
 
-		fileWords := strings.Split(string(data), "\n")
-		for _, word := range fileWords {
-			wordMap[word]++
+			fileWords := strings.Split(string(data), "\n")
+			for _, word := range fileWords {
+				wordMap[word]++
+			}
 		}
+		i++
 	}
 
 	// Remove empty strings from the map

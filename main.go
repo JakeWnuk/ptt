@@ -36,7 +36,7 @@ func main() {
 		fmt.Fprintf(os.Stderr, "ptt [options] [...]\nAccepts standard input and/or additonal arguments.\n\n")
 		fmt.Fprintf(os.Stderr, "Options:\n")
 		flag.PrintDefaults()
-		fmt.Fprintf(os.Stderr, "\nThe -f, -k, -r, -tf, -tp, and -u flags can be used multiple times and together.\n")
+		fmt.Fprintf(os.Stderr, "\nThe -f, -k, -r, -tf, -tp, and -u flags can be used multiple times, together, and with files or directories.\n")
 		fmt.Fprintln(os.Stderr, "\nTransformation Modes:")
 		modes := map[string]string{
 			"append":                             "Transforms input into append rules.",
@@ -92,7 +92,7 @@ func main() {
 	flag.Var(&remove, "r", "Only keep items not in a file.")
 	flag.Var(&readFiles, "f", "Read additional files for input.")
 	flag.Var(&transformationFiles, "tf", "Read additional files for transformations if applicable.")
-	flag.Var(&templateFiles, "tp", "Read a template file or directory of template files for multiple transformations and operations.")
+	flag.Var(&templateFiles, "tp", "Read a template file for multiple transformations and operations.")
 	flag.Var(&intRange, "i", "Starting index for transformations if applicable. Accepts ranges separated by '-'.")
 	flag.Var(&lenRange, "l", "Keeps output equal to or within a range of lengths. Accepts ranges separated by '-'.")
 	flag.Var(&readURLs, "u", "Read additional URLs for input.")
