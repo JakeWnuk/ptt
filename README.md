@@ -42,7 +42,7 @@ Options:
   -tf value
         Read additional files for transformations if applicable.
   -tp value
-        Read a template file or directory of template files for multiple transformations and operations.
+        Read a template file for multiple transformations and operations.
   -u value
         Read additional URLs for input.
   -v    Show verbose output when possible.
@@ -53,7 +53,7 @@ Options:
   -w int
         Number of words to generate for passphrases if applicable.
 
-The -f, -k, -r, -tf, -tp, and -u flags can be used multiple times and together.
+The -f, -k, -r, -tf, -tp, and -u flags can be used multiple times, together, and with files or directories.
 
 Transformation Modes:
   -t append
