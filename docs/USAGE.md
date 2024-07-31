@@ -498,13 +498,15 @@ print output for the overwrite transformation starting from index 1 to 5.
 This document describes the ways to use PTT to create password cracking
 wordlists. There are several ways to generate wordlists using PTT:
 
-- `direct-swapping`: Swapping characters directly with a `:` separated file.
+- `Direct Swapping`: Swapping characters directly with a `:` separated file.
    This is implemented in the `swap` module.
-- `token-popping`: Generates tokens by popping strings at character boundaries.
+- `Replacing Text and Characters`: Replacing text and characters in a string.
+  This is implemented in the `replace` module
+- `Token Popping`: Generates tokens by popping strings at character boundaries.
   This is implemented in the `pop` module.
-- `token-swapping`: Generates tokens by swapping characters in a string. This is
+- `Token Swapping`: Generates tokens by swapping characters in a string. This is
   implemented in the `mask-swap` module.
-- `passphrases`: Generates passphrases by combining words from a wordlist. This
+- `Passphrases`: Generates passphrases by combining words from a wordlist. This
   is implemented in the `passphrase` module.
 
 All modes support multibyte characters and can properly convert them. One
@@ -594,6 +596,7 @@ There are several types that can be created using PTT:
 
 - `Encoding and Decoding`: This transforms input to and from URL, HTML, and Unicode escaped strings.
 - `Hex and Dehex`: This transforms input to and from `$HEX[....]` strings.
+- `Substrings`: This extracts substrings from the input based on position.
 
 All modes support multibyte characters and can properly convert them. One
 transformation can be used at a time.
