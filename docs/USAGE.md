@@ -269,45 +269,51 @@ life [14496]========================
 ```
 - `ptt -f rockyou.txt -t pop -l 4-5 -vvv`:
 ```shell
-$ ptt -f rockyou.txt -t pop -l 4-5 -vvv
 [*] Starting statistics generation. Please wait...
 Verbose Statistics: max=25
 --------------------------------------------------
 General Stats:
-Total Items: 4730675
-Total Unique items: 585203
-Total Characters: 2758719
-Total Words: 585199
+Total Items: 4695779
+Total Unique items: 613210
+Total Words: 613206
 Largest frequency: 29529
 Smallest frequency: 1
 
+Plots:
+Item Length: |[|==========]|
+Min: 4, Q1: 4, Q2: 4, Q3: 5, Max: 5
+Item Frequency: |[|]--------------------------------------------------|
+Min: 1, Q1: 1, Q2: 1, Q3: 3, Max: 29529
+Item Complexity: |[|]----------------------------------|
+Min: 1, Q1: 1, Q2: 1, Q3: 1, Max: 3
+
 Category Counts:
-alphabetical: 496547
-all-lowercase: 524227
-short-non-complex: 585203
-high-numeric-ratio: 86021
-greek-characters: 16
-hex-string: 11208
-non-complex: 585203
-numeric: 86028
-non-ASCII: 566
-cyrillic-characters: 15
+all-uppercase: 58433
+non-ASCII: 547
 alphanumeric-with-special: 8
-starts-uppercase: 60976
-all-uppercase: 149650
-arabic-characters: 17
-thai-characters: 14
+alphabetical: 524554
+short-non-complex: 613210
+numeric: 86028
+all-lowercase: 410494
+non-complex: 613210
 hebrew-characters: 3
+hex-string: 11395
+thai-characters: 14
+arabic-characters: 17
+cyrillic-characters: 13
+starts-uppercase: 114042
+high-numeric-ratio: 86014
+greek-characters: 16
 
 --------------------------------------------------
 1234  [29529]==================================================
 2007  [24459]=========================================
 2006  [22002]=====================================
-love  [21516]====================================
+love  [20435]==================================
 2008  [20022]=================================
-ever  [17694]=============================
+ever  [17605]=============================
 1994  [14514]========================
-life  [14496]========================
+life  [14460]========================
 2005  [14300]========================
 1992  [14159]=======================
 1993  [14070]=======================
@@ -322,7 +328,7 @@ life  [14496]========================
 1988  [9718]================
 2009  [9257]===============
 2004  [9091]===============
-yahoo [8953]===============
+yahoo [8942]===============
 1986  [8860]===============
 1985  [8513]==============
 ```
