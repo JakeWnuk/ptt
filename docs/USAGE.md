@@ -1,5 +1,5 @@
 # Password Transformation Tool (PTT) Usage Guide
-## Version 0.2.4
+## Version 0.2.5
 
 ### Table of Contents
 #### Getting Started
@@ -28,9 +28,10 @@
 ### Wordlist Creation Guide
 1. [Wordlist Creation Introduction](#wordlist-creation-introduction)
 2. [Direct Swapping](#direct-swapping)
-3. [Token Popping](#token-popping)
-4. [Token Swapping](#token-swapping)
-5. [Passphrases](#passphrases)
+3. [Replacing Text and Characters](#replacing-text-and-characters)
+4. [Token Popping](#token-popping)
+5. [Token Swapping](#token-swapping)
+6. [Passphrases](#passphrases)
 
 ### Misc Creation Guide
 1. [Misc Creation Introduction](#misc-creation-introduction)
@@ -174,10 +175,11 @@ keywords above:
 - `dehex`: `dh`, `unhex`
 - `mask`: `m`, `partial-mask`, `partial`
 - `remove`: `rm`, `remove-all`, `delete`, `delete-all`
+- `replace`: `rp`, `rep`
 - `substring`: `sub`, `sb`
 - `retain`: `r`, `retain-mask`,
 - `match`: `mt`, `match-mask`
-- `swap`: `s`, `replace`
+- `swap`: `sw`, `swp`
 - `pop`: `po`, `split`, `boundary-split`, `boundary-pop`, `pop-split`, `split-pop`
 - `mask-swap`: `ms`, `shuf`, `shuffle`, `token-swap`
 - `passphrase`: `pp`, `phrase`
@@ -267,45 +269,51 @@ life [14496]========================
 ```
 - `ptt -f rockyou.txt -t pop -l 4-5 -vvv`:
 ```shell
-$ ptt -f rockyou.txt -t pop -l 4-5 -vvv
 [*] Starting statistics generation. Please wait...
 Verbose Statistics: max=25
 --------------------------------------------------
 General Stats:
-Total Items: 4730675
-Total Unique items: 585203
-Total Characters: 2758719
-Total Words: 585199
+Total Items: 4695779
+Total Unique items: 613210
+Total Words: 613206
 Largest frequency: 29529
 Smallest frequency: 1
 
+Plots:
+Item Length: |[|==========]|
+Min: 4, Q1: 4, Q2: 4, Q3: 5, Max: 5
+Item Frequency: |[|]--------------------------------------------------|
+Min: 1, Q1: 1, Q2: 1, Q3: 3, Max: 29529
+Item Complexity: |[|]----------------------------------|
+Min: 1, Q1: 1, Q2: 1, Q3: 1, Max: 3
+
 Category Counts:
-alphabetical: 496547
-all-lowercase: 524227
-short-non-complex: 585203
-high-numeric-ratio: 86021
-greek-characters: 16
-hex-string: 11208
-non-complex: 585203
-numeric: 86028
-non-ASCII: 566
-cyrillic-characters: 15
+all-uppercase: 58433
+non-ASCII: 547
 alphanumeric-with-special: 8
-starts-uppercase: 60976
-all-uppercase: 149650
-arabic-characters: 17
-thai-characters: 14
+alphabetical: 524554
+short-non-complex: 613210
+numeric: 86028
+all-lowercase: 410494
+non-complex: 613210
 hebrew-characters: 3
+hex-string: 11395
+thai-characters: 14
+arabic-characters: 17
+cyrillic-characters: 13
+starts-uppercase: 114042
+high-numeric-ratio: 86014
+greek-characters: 16
 
 --------------------------------------------------
 1234  [29529]==================================================
 2007  [24459]=========================================
 2006  [22002]=====================================
-love  [21516]====================================
+love  [20435]==================================
 2008  [20022]=================================
-ever  [17694]=============================
+ever  [17605]=============================
 1994  [14514]========================
-life  [14496]========================
+life  [14460]========================
 2005  [14300]========================
 1992  [14159]=======================
 1993  [14070]=======================
@@ -320,7 +328,7 @@ life  [14496]========================
 1988  [9718]================
 2009  [9257]===============
 2004  [9091]===============
-yahoo [8953]===============
+yahoo [8942]===============
 1986  [8860]===============
 1985  [8513]==============
 ```
@@ -496,13 +504,15 @@ print output for the overwrite transformation starting from index 1 to 5.
 This document describes the ways to use PTT to create password cracking
 wordlists. There are several ways to generate wordlists using PTT:
 
-- `direct-swapping`: Swapping characters directly with a `:` separated file.
+- `Direct Swapping`: Swapping characters directly with a `:` separated file.
    This is implemented in the `swap` module.
-- `token-popping`: Generates tokens by popping strings at character boundaries.
+- `Replacing Text and Characters`: Replacing text and characters in a string.
+  This is implemented in the `replace` module
+- `Token Popping`: Generates tokens by popping strings at character boundaries.
   This is implemented in the `pop` module.
-- `token-swapping`: Generates tokens by swapping characters in a string. This is
+- `Token Swapping`: Generates tokens by swapping characters in a string. This is
   implemented in the `mask-swap` module.
-- `passphrases`: Generates passphrases by combining words from a wordlist. This
+- `Passphrases`: Generates passphrases by combining words from a wordlist. This
   is implemented in the `passphrase` module.
 
 All modes support multibyte characters and can properly convert them. One
@@ -518,7 +528,18 @@ syntax is as follows:
 ptt -f <input-file> -t swap -tf <replacement-file>
 ```
 The replacement file should contain the strings to be transformed as `PRIOR:POST`
-pairs. The replacements will be applied to the first instance in each line.
+pairs. The replacements will be applied to the all instance in each line but
+only one swap is applied at once. This mode is ideal for subsituting words or characters in a string.
+
+### Replacing Text and Characters
+The `replace` module replaces text and characters in a string. This mode replaces all strings with all matches from a ':' separated file. The syntax is as follows:
+```
+ptt -f <input-file> -t replace -tf <replacement-file>
+```
+The replacement file should contain the strings to be transformed as
+`PRIOR:POST` pairs. The replacements will be applied to all instances in each
+line and all replacements are applied to the string. This mode is ideal for replacing all instances of a word or character in
+a string.
 
 ### Token Popping
 The `pop` module generates tokens by popping strings at character boundaries.
@@ -581,6 +602,7 @@ There are several types that can be created using PTT:
 
 - `Encoding and Decoding`: This transforms input to and from URL, HTML, and Unicode escaped strings.
 - `Hex and Dehex`: This transforms input to and from `$HEX[....]` strings.
+- `Substrings`: This extracts substrings from the input based on position.
 
 All modes support multibyte characters and can properly convert them. One
 transformation can be used at a time.

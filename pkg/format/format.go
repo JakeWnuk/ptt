@@ -14,6 +14,7 @@ import (
 	"strings"
 	"unicode"
 
+	"github.com/jakewnuk/ptt/pkg/mask"
 	"github.com/jakewnuk/ptt/pkg/models"
 )
 
@@ -144,11 +145,24 @@ func CreateVerboseStats(freq map[string]int) string {
 	// Pull stats
 	totalWords := 0
 	totalItems := 0
+	lengths := make([]int, 0)
+	frequencies := make([]int, 0)
+	complexities := make([]int, 0)
 	categoryCounts := make(map[string]int)
 	for k, v := range freq {
 		totalWords += len(strings.Fields(k))
 		categories := StatClassifyToken(k)
+		frequencies = append(frequencies, v)
 		totalItems += v
+
+		for i := 0; i < v; i++ {
+			lengths = append(lengths, len(k))
+		}
+
+		m := mask.MakeMaskedString(k, "uldbs")
+		complexity := mask.TestMaskComplexity(m)
+		complexities = append(complexities, complexity)
+
 		for _, category := range categories {
 			categoryCounts[category]++
 		}
@@ -159,6 +173,17 @@ func CreateVerboseStats(freq map[string]int) string {
 	stats += fmt.Sprintf("Total Words: %d\n", totalWords)
 	stats += fmt.Sprintf("Largest frequency: %d\n", p[0].Value)
 	stats += fmt.Sprintf("Smallest frequency: %d\n", p[len(p)-1].Value)
+
+	stats += "\nPlots:\n"
+	plot, min, q1, q2, q3, max := CreateBoxAndWhiskersPlot(lengths)
+	stats += fmt.Sprintf("Item Length: %s\n", plot)
+	stats += fmt.Sprintf("Min: %d, Q1: %d, Q2: %d, Q3: %d, Max: %d\n", min, q1, q2, q3, max)
+	plot, min, q1, q2, q3, max = CreateBoxAndWhiskersPlot(frequencies)
+	stats += fmt.Sprintf("Item Frequency: %s\n", plot)
+	stats += fmt.Sprintf("Min: %d, Q1: %d, Q2: %d, Q3: %d, Max: %d\n", min, q1, q2, q3, max)
+	plot, min, q1, q2, q3, max = CreateBoxAndWhiskersPlot(complexities)
+	stats += fmt.Sprintf("Item Complexity: %s\n", plot)
+	stats += fmt.Sprintf("Min: %d, Q1: %d, Q2: %d, Q3: %d, Max: %d\n", min, q1, q2, q3, max)
 
 	stats += "\nCategory Counts:\n"
 	for category, count := range categoryCounts {
@@ -316,6 +341,58 @@ func StatClassifyToken(s string) []string {
 	}
 
 	return categories
+}
+
+// CalculateQuartiles calculates the first, second, and third quartiles of a
+// list of integers and returns the values.
+//
+// Args:
+// data ([]int): A list of integers
+//
+// Returns:
+// int: The first quartile value
+// int: The second quartile value
+// int: The third quartile value
+func CalculateQuartiles(data []int) (int, int, int) {
+	sort.Ints(data)
+	n := len(data)
+
+	q1 := data[n/4]
+	q2 := data[n/2]
+	q3 := data[3*n/4]
+
+	return q1, q2, q3
+}
+
+// CreateBoxAndWhiskersPlot creates a box and whiskers plot from a list of
+// integers.
+//
+// Args:
+//
+//	data ([]int): A list of integers
+//
+//	Returns:
+//	string: A string representation of the box and whiskers plot
+//	int: The minimum value
+//	int: The first quartile value
+//	int: The second quartile value
+//	int: The third quartile value
+//	int: The maximum value
+func CreateBoxAndWhiskersPlot(data []int) (string, int, int, int, int, int) {
+	q1, q2, q3 := CalculateQuartiles(data)
+	min := data[0]
+	max := data[len(data)-1]
+
+	// Normalize the plot
+	largest := max
+	normalizedQ1 := q1 * 50 / largest
+	normalizedQ2 := q2 * 50 / largest
+	normalizedQ3 := q3 * 50 / largest
+	normalizedMin := min * 50 / largest
+	normalizedMax := max * 50 / largest
+
+	plot := fmt.Sprintf("|%s[%s|%s]%s|", strings.Repeat("-", normalizedQ1-normalizedMin), strings.Repeat("=", normalizedQ2-normalizedQ1), strings.Repeat("=", normalizedQ3-normalizedQ2), strings.Repeat("-", normalizedMax-normalizedQ3))
+	return plot, min, q1, q2, q3, max
 }
 
 // SaveArrayToJSON saves an array of items to a JSON file at the specified path
@@ -715,6 +792,12 @@ func HexEncodeMap(input map[string]int, bypass bool, debug bool) map[string]int 
 	output := make(map[string]int)
 	for k, v := range input {
 		encoded := hex.EncodeToString([]byte(k))
+		if debug {
+			fmt.Fprintf(os.Stderr, "[?] HexEncodeMap:\n")
+			fmt.Fprintf(os.Stderr, "Input: %s\n", k)
+			fmt.Fprintf(os.Stderr, "Encoded: %s\n", encoded)
+		}
+
 		if !bypass {
 			output["$HEX["+encoded+"]"] = v
 		} else {

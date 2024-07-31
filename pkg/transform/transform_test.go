@@ -10,7 +10,8 @@ import (
 // Functions with Unit Tests
 // ----------------------------------------------------------------------------
 // ** Generation Functions **
-// - ReplaceKeysInMap
+// - ReplaceKeysInMap()
+// - ReplaceAllKeysInMap()
 //
 // ----------------------------------------------------------------------------
 // Functions without Unit Tests
@@ -41,6 +42,33 @@ func TestReplaceKeysInMap(t *testing.T) {
 	// Run the test cases
 	for _, test := range tests {
 		result := ReplaceKeysInMap(test.input, test.replace, false, false)
+		if utils.CheckAreMapsEqual(result, test.output) == false {
+			t.Errorf("Test case failed. Expected %v, got %v", test.output, result)
+		}
+	}
+}
+
+// Unit Test for ReplaceAllKeysInMap
+func TestReplaceAllKeysInMap(t *testing.T) {
+
+	// Define a test case struct
+	type testCase struct {
+		input   map[string]int
+		replace map[string]int
+		output  map[string]int
+	}
+
+	type testCases []testCase
+
+	// Define the test cases
+	tests := testCases{
+		{map[string]int{"abc": 1}, map[string]int{"a:1": 1, "b:2": 2, "c:3": 3}, map[string]int{"123": 1}},
+		{map[string]int{"123Testing": 1, "456Testing": 2, "789Testing": 3}, map[string]int{"123:foo": 1, "456:bar": 2, "789:love": 3}, map[string]int{"fooTesting": 1, "barTesting": 2, "loveTesting": 3}},
+	}
+
+	// Run the test cases
+	for _, test := range tests {
+		result := ReplaceAllKeysInMap(test.input, test.replace, false, false)
 		if utils.CheckAreMapsEqual(result, test.output) == false {
 			t.Errorf("Test case failed. Expected %v, got %v", test.output, result)
 		}
