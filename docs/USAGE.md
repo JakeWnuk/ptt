@@ -1,5 +1,5 @@
 # Password Transformation Tool (PTT) Usage Guide
-## Version 0.2.5
+## Version 0.3.0
 
 ### Table of Contents
 #### Getting Started
@@ -137,10 +137,8 @@ These flags work with files and directories.
 The following transformations can be used with the `-t` flag:
 - `append`: Transforms input into append rules.
 - `append-remove`: Transforms input into append-remove rules
-- `append-shift`: Transforms input into append-shift rules.
 - `prepend`: Transforms input into prepend rules.
 - `prepend-remove`: Transforms input into prepend-remove rules.
-- `prepend-shift`: Transforms input into prepend-shift rules.
 - `insert`: Transforms input into insert rules starting at index.
 - `overwrite`: Transforms input into overwrite rules starting at index.
 - `toggle`: Transforms input into toggle rules starting at index.
@@ -157,32 +155,6 @@ The following transformations can be used with the `-t` flag:
 - `pop`: Transforms input by generating tokens from popping strings at character boundaries.
 - `mask-swap`: Transforms input by swapping tokens from a partial mask file and a input file.
 - `passphrase`: Transforms input by randomly generating passphrases with a given number of words and separators from a file.
-
-The modes also have aliases that can be used with the `-t` flag instead of the
-keywords above:
-- `append`: `a`
-- `append-remove`: `ar`
-- `append-shift`: `as`
-- `prepend`: `p`
-- `prepend-remove`: `pr`
-- `prepend-shift`: `ps`
-- `insert`: `i`
-- `overwrite`: `o`
-- `toggle`: `t`
-- `encode`: `e`
-- `decode`: `de`
-- `hex`: `h`, `rehex`
-- `dehex`: `dh`, `unhex`
-- `mask`: `m`, `partial-mask`, `partial`
-- `remove`: `rm`, `remove-all`, `delete`, `delete-all`
-- `replace`: `rp`, `rep`
-- `substring`: `sub`, `sb`
-- `retain`: `r`, `retain-mask`,
-- `match`: `mt`, `match-mask`
-- `swap`: `sw`, `swp`
-- `pop`: `po`, `split`, `boundary-split`, `boundary-pop`, `pop-split`, `split-pop`
-- `mask-swap`: `ms`, `shuf`, `shuffle`, `token-swap`
-- `passphrase`: `pp`, `phrase`
 
 ### Examples
 
@@ -414,10 +386,8 @@ rules. There are several types of rules that can be created using PTT:
 
 - `Append Rules`: Append a string to the end of the password.
 - `Append Remove Rules`: Remove characters from the end of the password before appending a string.
-- `Append Shift Rules`: Shift the characters of the password to the right before appending a string.
 - `Prepend Rules`: Prepend a string to the beginning of the password.
 - `Prepend Remove Rules`: Remove characters from the beginning of the password before prepending a string.
-- `Prepend Shift Rules`: Shift the characters of the password to the left before prepending a string.
 - `Toggle Rules`: Toggle the case of the password.
 - `Insert Rules`: Insert a string at a specific position in the password.
 - `Overwrite Rules`: Overwrite a string at a specific position in the password.
@@ -436,16 +406,10 @@ ptt -f <input_file> -t append
 
 The append mode also has two additional options:
 - `append-remove`: Remove characters from the end of the password before appending a string.
-- `append-shift`: Shift the characters of the password to the right before appending a string.
 
 The syntax for an append-remove rule is as follows:
 ```
 ptt -f <input_file> -t append-remove
-```
-
-The syntax for an append-shift rule is as follows:
-```
-ptt -f <input_file> -t append-shift
 ```
 
 ### Prepend Rules
@@ -456,16 +420,10 @@ ptt -f <input_file> -t prepend
 
 The prepend mode also has two additional options:
 - `prepend-remove`: Remove characters from the beginning of the password before prepending a string.
-- `prepend-shift`: Shift the characters of the password to the left before prepending a string.
 
 The syntax for a prepend-remove rule is as follows:
 ```
 ptt -f <input_file> -t prepend-remove
-```
-
-The syntax for a prepend-shift rule is as follows:
-```
-ptt -f <input_file> -t prepend-shift
 ```
 
 ### Toggle Rules

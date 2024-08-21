@@ -58,72 +58,72 @@ func TransformationController(input map[string]int, mode string, startingIndex i
 	}
 
 	switch mode {
-	case "append", "append-remove", "append-shift", "a", "ar", "as":
+	case "rule-append", "rule-append-remove", "append", "append-remove":
 		output = rule.AppendRules(input, mode, bypass, functionDebug)
-	case "prepend", "prepend-remove", "prepend-shift", "p", "pr", "ps":
+	case "rule-prepend", "rule-prepend-remove", "prepend", "prepend-remove":
 		output = rule.PrependRules(input, mode, bypass, functionDebug)
-	case "insert", "i":
+	case "rule-insert", "insert":
 		strIndex := fmt.Sprintf("%d", startingIndex)
 		endIndex := fmt.Sprintf("%d", endingIndex)
 		output = rule.InsertRules(input, strIndex, endIndex, bypass, functionDebug)
-	case "overwrite", "o":
+	case "rule-overwrite", "overwrite":
 		strIndex := fmt.Sprintf("%d", startingIndex)
 		endIndex := fmt.Sprintf("%d", endingIndex)
 		output = rule.OverwriteRules(input, strIndex, endIndex, bypass, functionDebug)
-	case "toggle", "t":
+	case "rule-toggle", "toggle":
 		strIndex := fmt.Sprintf("%d", startingIndex)
 		endIndex := fmt.Sprintf("%d", endingIndex)
 		output = rule.ToggleRules(input, strIndex, endIndex, bypass, functionDebug)
-	case "encode", "e":
+	case "encode":
 		output = format.EncodeInputMap(input, bypass, functionDebug)
-	case "decode", "de":
+	case "decode":
 		output = format.DecodeInputMap(input, bypass, functionDebug)
-	case "mask", "partial-mask", "partial", "m":
+	case "mask":
 		output = mask.MakeMaskedMap(input, replacementMask, verbose, bypass, functionDebug)
-	case "dehex", "unhex", "dh":
+	case "dehex":
 		output = format.DehexMap(input, bypass, functionDebug)
-	case "hex", "rehex":
+	case "hex":
 		output = format.HexEncodeMap(input, bypass, functionDebug)
-	case "remove", "remove-all", "delete", "delete-all", "rm":
+	case "mask-remove", "remove":
 		input = mask.MakeMaskedMap(input, replacementMask, false, false, false)
 		output = mask.RemoveMaskedCharacters(input, replacementMask, bypass, functionDebug)
-	case "retain-mask", "retain", "r", "mask-retain":
+	case "mask-retain", "retain":
 		if len(transformationFilesMap) == 0 {
 			fmt.Fprintf(os.Stderr, "[!] Retain masks require use of one or more -tf flags to specify one or more files\n")
 			os.Exit(1)
 		}
 		output = mask.MakeRetainMaskedMap(input, replacementMask, transformationFilesMap, bypass, functionDebug)
-	case "match-mask", "match", "mt", "mask-match":
+	case "mask-match", "match":
 		if len(transformationFilesMap) == 0 {
 			fmt.Fprintf(os.Stderr, "[!] Match masks require use of one or more -tf flags to specify one or more files\n")
 			os.Exit(1)
 		}
 		output = mask.MakeMatchedMaskedMap(input, replacementMask, transformationFilesMap, bypass, functionDebug)
-	case "swap", "sw", "swp":
+	case "swap":
 		if len(transformationFilesMap) == 0 {
 			fmt.Fprintf(os.Stderr, "[!] Swap operations require use of one or more -tf flags to specify one or more files\n")
 			fmt.Fprintf(os.Stderr, "[!] This transformation mode requires a ':' separated list of keys to swap\n")
 			os.Exit(1)
 		}
 		output = ReplaceKeysInMap(input, transformationFilesMap, bypass, functionDebug)
-	case "pop", "split", "boundary-split", "boundary-pop", "pop-split", "split-pop", "po":
+	case "mask-pop", "pop":
 		output = mask.BoundarySplitPopMap(input, replacementMask, bypass, functionDebug)
-	case "mask-swap", "shuffle", "shuf", "token-swap", "ms":
+	case "mask-swap":
 		if len(transformationFilesMap) == 0 {
 			fmt.Fprintf(os.Stderr, "[!] Mask-swap operations require use of one or more -tf flags to specify one or more files")
 			fmt.Fprintf(os.Stderr, "[!] This transformation mode requres a retain mask file to use for swapping")
 			os.Exit(1)
 		}
 		output = mask.ShuffleMap(input, replacementMask, transformationFilesMap, bypass, functionDebug)
-	case "passphrase", "phrase", "pp":
+	case "passphrase":
 		if passphraseWords == 0 {
 			fmt.Fprintf(os.Stderr, "[!] Passphrase operations require use of the -w flag to specify the number of words to use\n")
 			os.Exit(1)
 		}
 		output = MakePassphraseMap(input, transformationFilesMap, bypass, functionDebug, passphraseWords)
-	case "substring", "sub", "sb":
+	case "substring":
 		output = utils.SubstringMap(input, startingIndex, endingIndex, bypass, functionDebug)
-	case "replace", "rp", "rep":
+	case "replace":
 		if len(transformationFilesMap) == 0 {
 			fmt.Fprintf(os.Stderr, "[!] Replace operations require use of one or more -tf flags to specify one or more files\n")
 			os.Exit(1)

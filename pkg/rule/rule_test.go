@@ -219,7 +219,6 @@ func TestAppendRules(t *testing.T) {
 	// Define test cases
 	tests := testCases{
 		{map[string]int{"abc": 1, "efg": 2}, "append", map[string]int{"$a $b $c": 1, "$e $f $g": 2}},
-		{map[string]int{"abc": 1, "efg": 2}, "append-shift", map[string]int{"} } } $a $b $c": 1, "} } } $e $f $g": 2}},
 		{map[string]int{"abc": 1, "efg": 2}, "append-remove", map[string]int{"] ] ] $a $b $c": 1, "] ] ] $e $f $g": 2}},
 		{map[string]int{"爱test": 1, "a爱test": 2}, "append", map[string]int{"$\\xE7 $\\x88 $\\xB1 $t $e $s $t": 1, "$a $\\xE7 $\\x88 $\\xB1 $t $e $s $t": 2}},
 		{map[string]int{"test ": 1}, "append", map[string]int{"$t $e $s $t $ :": 1}},
@@ -249,7 +248,6 @@ func TestPrependRules(t *testing.T) {
 	// Define test cases
 	tests := testCases{
 		{map[string]int{"abc": 1, "efg": 2}, "prepend", map[string]int{"^c ^b ^a": 1, "^g ^f ^e": 2}},
-		{map[string]int{"abc": 1, "efg": 2}, "prepend-shift", map[string]int{"{ { { ^c ^b ^a": 1, "{ { { ^g ^f ^e": 2}},
 		{map[string]int{"abc": 1, "efg": 2}, "prepend-remove", map[string]int{"[ [ [ ^c ^b ^a": 1, "[ [ [ ^g ^f ^e": 2}},
 		{map[string]int{"爱test": 1, "a爱test": 2}, "prepend", map[string]int{"^t ^s ^e ^t ^\\xB1 ^\\x88 ^\\xE7": 1, "^t ^s ^e ^t ^\\xB1 ^\\x88 ^\\xE7 ^a": 2}},
 	}

@@ -201,28 +201,6 @@ func AppendRules(items map[string]int, operation string, bypass bool, debug bool
 			}
 		}
 		return returnMap
-	// shift will shift characters back to front then append
-	case "append-shift", "as":
-		for key, value := range items {
-			rule := CharToRule(key, "$")
-			shift := LenToRule(key, "}")
-			appendShiftRule := FormatCharToRuleOutput(shift, rule)
-
-			if debug {
-				fmt.Fprintf(os.Stderr, "[?] AppendRules (shift):\n")
-				fmt.Fprintf(os.Stderr, "Key: %s\n", key)
-				fmt.Fprintf(os.Stderr, "Rule: %s\n", rule)
-				fmt.Fprintf(os.Stderr, "Shift: %s\n", shift)
-				fmt.Fprintf(os.Stderr, "AppendShiftRule: %s\n", appendShiftRule)
-			}
-
-			if appendShiftRule != "" && !bypass {
-				returnMap[appendShiftRule] = value
-			} else if appendShiftRule != "" && bypass {
-				fmt.Println(appendShiftRule)
-			}
-		}
-		return returnMap
 	default:
 		for key, value := range items {
 			rule := CharToRule(key, "$")
@@ -279,28 +257,6 @@ func PrependRules(items map[string]int, operation string, bypass bool, debug boo
 				returnMap[prependRemoveRule] = value
 			} else if prependRemoveRule != "" && bypass {
 				fmt.Println(prependRemoveRule)
-			}
-		}
-		return returnMap
-	// shift will shift characters front to back then prepend
-	case "prepend-shift", "ps":
-		for key, value := range items {
-			rule := CharToRule(utils.ReverseString(key), "^")
-			shift := LenToRule(key, "{")
-			prependShiftRule := FormatCharToRuleOutput(shift, rule)
-
-			if debug {
-				fmt.Fprintf(os.Stderr, "[?] PrependRules (shift):\n")
-				fmt.Fprintf(os.Stderr, "Key: %s\n", key)
-				fmt.Fprintf(os.Stderr, "Rule: %s\n", rule)
-				fmt.Fprintf(os.Stderr, "Shift: %s\n", shift)
-				fmt.Fprintf(os.Stderr, "PrependShiftRule: %s\n", prependShiftRule)
-			}
-
-			if prependShiftRule != "" && !bypass {
-				returnMap[prependShiftRule] = value
-			} else if prependShiftRule != "" && bypass {
-				fmt.Println(prependShiftRule)
 			}
 		}
 		return returnMap

@@ -15,7 +15,7 @@ import (
 	"github.com/jakewnuk/ptt/pkg/utils"
 )
 
-var version = "0.2.5"
+var version = "0.3.0"
 var wg sync.WaitGroup
 var mutex = &sync.Mutex{}
 var retain models.FileArgumentFlag
@@ -34,28 +34,30 @@ func main() {
 	flag.Usage = func() {
 		fmt.Fprintf(os.Stderr, "Usage of Password Transformation Tool (ptt) version (%s):\n\n", version)
 		fmt.Fprintf(os.Stderr, "ptt [options] [...]\nAccepts standard input and/or additonal arguments.\n\n")
+		fmt.Fprintf(os.Stderr, "The -f, -k, -r, -tf, -tp, and -u flags can be used multiple times, together, and with files or directories.\n")
+		fmt.Fprintf(os.Stderr, "-------------------------------------------------------------------------------------------------------------\n")
 		fmt.Fprintf(os.Stderr, "Options:\n")
+		fmt.Fprintf(os.Stderr, "These modify or filter the transformation mode.\n\n")
 		flag.PrintDefaults()
-		fmt.Fprintf(os.Stderr, "\nThe -f, -k, -r, -tf, -tp, and -u flags can be used multiple times, together, and with files or directories.\n")
+		fmt.Fprintf(os.Stderr, "-------------------------------------------------------------------------------------------------------------")
 		fmt.Fprintln(os.Stderr, "\nTransformation Modes:")
+		fmt.Fprintf(os.Stderr, "These create or alter based on the selected mode.\n\n")
 		modes := map[string]string{
-			"append":                             "Transforms input into append rules.",
-			"append-remove":                      "Transforms input into append-remove rules.",
-			"append-shift":                       "Transforms input into append-shift rules.",
-			"prepend":                            "Transforms input into prepend rules.",
-			"prepend-remove":                     "Transforms input into prepend-remove rules.",
-			"prepend-shift":                      "Transforms input into prepend-shift rules.",
-			"insert -i [index]":                  "Transforms input into insert rules starting at index.",
-			"overwrite -i [index]":               "Transforms input into overwrite rules starting at index.",
-			"toggle -i [index]":                  "Transforms input into toggle rules starting at index.",
+			"rule-append":                        "Transforms input into append rules.",
+			"rule-append-remove":                 "Transforms input into append-remove rules.",
+			"rule-prepend":                       "Transforms input into prepend rules.",
+			"rule-prepend-remove":                "Transforms input into prepend-remove rules.",
+			"rule-insert -i [index]":             "Transforms input into insert rules starting at index.",
+			"rule-overwrite -i [index]":          "Transforms input into overwrite rules starting at index.",
+			"rule-toggle -i [index]":             "Transforms input into toggle rules starting at index.",
 			"encode":                             "Transforms input by URL, HTML, and Unicode escape encoding.",
 			"decode":                             "Transforms input by URL, HTML, and Unicode escape decoding.",
 			"hex":                                "Transforms input by encoding strings into $HEX[...] format.",
 			"dehex":                              "Transforms input by decoding $HEX[...] formatted strings.",
 			"mask -rm [uldsb] -v":                "Transforms input by masking characters with provided mask.",
-			"remove -rm [uldsb]":                 "Transforms input by removing characters with provided mask characters.",
+			"mask-remove -rm [uldsb]":            "Transforms input by removing characters with provided mask characters.",
 			"mask-retain -rm [uldsb] -tf [file]": "Transforms input by creating masks that still retain strings from file.",
-			"pop -rm [uldsbt]":                   "Transforms input by generating tokens from popping strings at character boundaries.",
+			"mask-pop -rm [uldsbt]":              "Transforms input by generating tokens from popping strings at character boundaries.",
 			"mask-match -tf [file]":              "Transforms input by keeping only strings with matching masks from a mask file.",
 			"swap -tf [file]":                    "Transforms input by swapping tokens with exact matches from a ':' separated file.",
 			"mask-swap -tf [file]":               "Transforms input by swapping tokens from a partial mask file and a input file.",
@@ -74,6 +76,7 @@ func main() {
 		for _, k := range keys {
 			fmt.Fprintf(os.Stderr, "  -t %s\n\t%s\n", k, modes[k])
 		}
+		fmt.Fprintf(os.Stderr, "-------------------------------------------------------------------------------------------------------------\n")
 
 	}
 
