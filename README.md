@@ -37,6 +37,7 @@ git clone https://github.com/JakeWnuk/ptt && cd ptt && docker build -t ptt . && 
 
 ---
 
+### Usage:
 ```
 Usage of Password Transformation Tool (ptt) version (0.3.0):
 
