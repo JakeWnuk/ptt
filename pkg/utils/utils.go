@@ -98,7 +98,7 @@ func LoadStdinToMap(scanner models.Scanner) (map[string]int, error) {
 	m := make(map[string]int)
 	pttInput := false
 	line0 := false
-	reDetect := regexp.MustCompile(`^\d+\s(\d+|\w+)`)
+	reDetect := regexp.MustCompile(`^\d+\s(\w+|\W+)$`)
 	reParse := regexp.MustCompile(`^\d+`)
 
 	for scanner.Scan() {
