@@ -142,8 +142,8 @@ The following transformations can be used with the `-t` flag:
 - `insert`: Transforms input into insert rules starting at index.
 - `overwrite`: Transforms input into overwrite rules starting at index.
 - `toggle`: Transforms input into toggle rules starting at index.
-- `encode`: Transforms input by URL, HTML, and Unicode escape encoding.
-- `decode`: Transforms input by URL, HTML, and Unicode escape decoding.
+- `encode`: Transforms input by HTML and Unicode escape encoding.
+- `decode`: Transforms input by HTML and Unicode escape decoding.
 - `hex`: Transforms input by encoding strings into $HEX[...] format.
 - `dehex`: Transforms input by decoding $HEX[...] formatted
 - `mask`: Transforms input by masking characters with provided mask.
@@ -558,7 +558,7 @@ of passphrases generated.
 This document describes the ways to use PTT to create miscellaneous transformations.
 There are several types that can be created using PTT:
 
-- `Encoding and Decoding`: This transforms input to and from URL, HTML, and Unicode escaped strings.
+- `Encoding and Decoding`: This transforms input to and from HTML and Unicode escaped strings.
 - `Hex and Dehex`: This transforms input to and from `$HEX[....]` strings.
 - `Substrings`: This extracts substrings from the input based on position.
 
@@ -569,7 +569,7 @@ transformation can be used at a time.
 > Ensure input is provided in the correct format and does not contain hidden characters. `Dos2Unix` can be used to convert the file to proper format if needed.
 
 ### Encoding and Decoding
-This mode allows encoding and decoding of input to and from URL, HTML, and Unicode escaped strings.
+This mode allows encoding and decoding of input to and from HTML and Unicode escaped strings.
 The syntax is as follows:
 ```
 ptt -f <input_file> -t encode
@@ -582,7 +582,6 @@ The following table shows the supported transformations:
 
 | Transformation | Description | Input Example | Output Example |
 | --- | --- | --- | --- |
-| `url` | URL encoding | `https://www.example.com` | `https%3A%2F%2Fwww.example.com` |
 | `html` | HTML encoding | `<html>` | `&lt;html&gt;` |
 | `unicode` | Unicode encoding | `Hello😎` | `Hello\u1f60e` |
 

@@ -519,7 +519,7 @@ func RemoveLengthRange(freq map[string]int, start int, end int) map[string]int {
 // Encoding Functions
 // ----------------------------------------------------------------------------
 
-// EncodeInputMap will encode a map of strings to URL, HTML, and unicode escaped strings
+// EncodeInputMap will encode a map of strings to HTML and unicode escaped strings
 // where possible and return a new map of encoded strings
 //
 // Args:
@@ -534,20 +534,13 @@ func RemoveLengthRange(freq map[string]int, start int, end int) map[string]int {
 func EncodeInputMap(input map[string]int, bypass bool, debug bool) map[string]int {
 	output := make(map[string]int)
 	for k, v := range input {
-		urlEncoded, htmlEncoded, escapeEncoded := EncodeString(k)
+		htmlEncoded, escapeEncoded := EncodeString(k)
 
 		if debug {
 			fmt.Fprintf(os.Stderr, "[?] EncodeInputMap:\n")
 			fmt.Fprintf(os.Stderr, "Input: %s\n", k)
-			fmt.Fprintf(os.Stderr, "URL Encoded: %s\n", urlEncoded)
 			fmt.Fprintf(os.Stderr, "HTML Encoded: %s\n", htmlEncoded)
 			fmt.Fprintf(os.Stderr, "Unicode Escaped: %s\n", escapeEncoded)
-		}
-
-		if urlEncoded != "" && !bypass {
-			output[urlEncoded] = v
-		} else if urlEncoded != "" && bypass {
-			fmt.Println(urlEncoded)
 		}
 
 		if htmlEncoded != "" && !bypass {
@@ -574,17 +567,11 @@ func EncodeInputMap(input map[string]int, bypass bool, debug bool) map[string]in
 //
 // Returns:
 //
-//	urlEncoded (string): Input string URL encoded
 //	htmlEncoded (string): Input string HTML encoded
 //	escapedEncoded (string): Input string unicode escaped encoded
-func EncodeString(s string) (string, string, string) {
-	urlEncoded := url.QueryEscape(s)
+func EncodeString(s string) (string, string) {
 	htmlEncoded := html.EscapeString(s)
 	escapedEncoded := ASCIIEscapeUnicode(s)
-
-	if urlEncoded == s {
-		urlEncoded = ""
-	}
 
 	if htmlEncoded == s {
 		htmlEncoded = ""
@@ -594,10 +581,10 @@ func EncodeString(s string) (string, string, string) {
 		escapedEncoded = ""
 	}
 
-	return urlEncoded, htmlEncoded, escapedEncoded
+	return htmlEncoded, escapedEncoded
 }
 
-// DecodeInputMap will decode a map of URL, HTML, and unicode escaped strings
+// DecodeInputMap will decode a map of HTML and unicode escaped strings
 // where possible and return a new map of decoded strings.
 //
 // Args:
@@ -612,20 +599,13 @@ func EncodeString(s string) (string, string, string) {
 func DecodeInputMap(input map[string]int, bypass bool, debug bool) map[string]int {
 	output := make(map[string]int)
 	for k, v := range input {
-		urlDecoded, htmlDecoded, escapeDecoded := DecodeString(k)
+		htmlDecoded, escapeDecoded := DecodeString(k)
 
 		if debug {
 			fmt.Fprintf(os.Stderr, "[?] DecodeInputMap:\n")
 			fmt.Fprintf(os.Stderr, "Input: %s\n", k)
-			fmt.Fprintf(os.Stderr, "URL Decoded: %s\n", urlDecoded)
 			fmt.Fprintf(os.Stderr, "HTML Decoded: %s\n", htmlDecoded)
 			fmt.Fprintf(os.Stderr, "Unicode Escaped Decoded: %s\n", escapeDecoded)
-		}
-
-		if urlDecoded != "" && !bypass {
-			output[urlDecoded] = v
-		} else if urlDecoded != "" && bypass {
-			fmt.Println(urlDecoded)
 		}
 
 		if htmlDecoded != "" && !bypass {
@@ -652,21 +632,12 @@ func DecodeInputMap(input map[string]int, bypass bool, debug bool) map[string]in
 //
 // Returns:
 //
-//	urlDecoded (string): Input string URL decoded
 //	htmlDecoded (string): Input string HTML decoded
 //	escapedDecoded (string): Input string unicode escaped decoded
-func DecodeString(s string) (string, string, string) {
-	urlDecoded, err := url.QueryUnescape(s)
-	if err != nil {
-		urlDecoded = ""
-	}
+func DecodeString(s string) (string, string) {
 
 	htmlDecoded := html.UnescapeString(s)
 	escapedDecoded := DeASCIIEscapeUnicode(s)
-
-	if urlDecoded == s {
-		urlDecoded = ""
-	}
 
 	if htmlDecoded == s {
 		htmlDecoded = ""
@@ -676,7 +647,7 @@ func DecodeString(s string) (string, string, string) {
 		escapedDecoded = ""
 	}
 
-	return urlDecoded, htmlDecoded, escapedDecoded
+	return htmlDecoded, escapedDecoded
 }
 
 // ASCIIEscapeUnicode will convert a string into an unicode escaped format

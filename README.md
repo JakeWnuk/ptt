@@ -90,11 +90,11 @@ Transformation Modes:
 These create or alter based on the selected mode.
 
   -t decode
-        Transforms input by URL, HTML, and Unicode escape decoding.
+        Transforms input by HTML and Unicode escape decoding.
   -t dehex
         Transforms input by decoding $HEX[...] formatted strings.
   -t encode
-        Transforms input by URL, HTML, and Unicode escape encoding.
+        Transforms input by HTML and Unicode escape encoding.
   -t hex
         Transforms input by encoding strings into $HEX[...] format.
   -t mask -rm [uldsb] -v
@@ -133,4 +133,3 @@ These create or alter based on the selected mode.
         Transforms input by swapping tokens with exact matches from a ':' separated file.
 -------------------------------------------------------------------------------------------------------------
 ```
-
