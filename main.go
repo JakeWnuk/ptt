@@ -98,9 +98,14 @@ func main() {
 	flag.Var(&transformationFiles, "tf", "Read additional files for transformations if applicable.")
 	flag.Var(&templateFiles, "tp", "Read a template file for multiple transformations and operations.")
 	flag.Var(&intRange, "i", "Starting index for transformations if applicable. Accepts ranges separated by '-'.")
-	flag.Var(&lenRange, "l", "Keeps output equal to or within a range of lengths. Accepts ranges separated by '-'.")
+	flag.Var(&lenRange, "l", "Length of input to accept into transformation. Accepts ranges separated by '-'.")
 	flag.Var(&readURLs, "u", "Read additional URLs for input.")
 	flag.Parse()
+
+	// Bypass map creation if requested
+	if *bypassMap {
+		fmt.Fprintf(os.Stderr, "[*] Bypassing map creation and using stdout as primary output. Options are disabled.\n")
+	}
 
 	// Parse any retain, remove, or transformation file arguments
 	fs := &models.RealFileSystem{}
@@ -135,9 +140,9 @@ func main() {
 		primaryMap = utils.CombineMaps(primaryMap, readFilesMap, readURLsMap)
 	}
 
-	// Bypass map creation if requested
-	if *bypassMap {
-		fmt.Fprintf(os.Stderr, "[*] Bypassing map creation and using stdout as primary output. Some features are disabled.\n")
+	// Remove items outside of length range if provided
+	if lenRange.Start > 0 || lenRange.End > 0 {
+		primaryMap = format.RemoveLengthRange(primaryMap, lenRange.Start, lenRange.End)
 	}
 
 	// Apply transformation if provided
@@ -179,11 +184,6 @@ func main() {
 	// Remove items under minimum frequency if provided
 	if *minimum > 0 {
 		primaryMap = format.RemoveMinimumFrequency(primaryMap, *minimum)
-	}
-
-	// Remove items outside of length range if provided
-	if lenRange.Start > 0 || lenRange.End > 0 {
-		primaryMap = format.RemoveLengthRange(primaryMap, lenRange.Start, lenRange.End)
 	}
 
 	// Print output to stdout

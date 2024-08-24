@@ -117,9 +117,9 @@ These flags work with files and directories.
 - `-b`: Bypass map creation and use stdout as primary output.
 - `-d`: Enable debug mode with verbosity levels [0-2].
 - `-f`: Read additional files for input.
-- `-i`: Starting index for transformations if applicable. Accepts ranges separated by '-'. (default 0)
+- `-i`: Starting index for transformations if applicable. Accepts ranges separated by '-'.
 - `-k`: Only keep items in a file.
-- `-l`: Keeps output equal to or within a range of lengths. Accepts ranges separated by '-'. (default 0)
+- `-l`: Length of input to accept into transformation. Accepts ranges separated by '-'.
 - `-m`: Minimum numerical frequency to include in output.
 - `-n`: Maximum number of items to display in verbose statistics output. (default 25)
 - `-o`: Output to JSON file in addition to stdout.
