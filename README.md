@@ -59,7 +59,7 @@ These modify or filter the transformation mode.
   -k value
         Only keep items in a file.
   -l value
-        Keeps output equal to or within a range of lengths. Accepts ranges separated by '-'.
+        Length of input to accept into transformation. Accepts ranges separated by '-'.
   -m int
         Minimum numerical frequency to include in output.
   -n int
@@ -125,6 +125,8 @@ These create or alter based on the selected mode.
         Transforms input into prepend rules.
   -t rule-prepend-remove
         Transforms input into prepend-remove rules.
+  -t rule-prepend-toggle
+        Transforms input into prepend-toggle rules. Creating camelCase and PascalCase.
   -t rule-toggle -i [index]
         Transforms input into toggle rules starting at index.
   -t substring -i [index]

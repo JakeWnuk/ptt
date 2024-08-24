@@ -60,7 +60,7 @@ func TransformationController(input map[string]int, mode string, startingIndex i
 	switch mode {
 	case "rule-append", "rule-append-remove", "append", "append-remove":
 		output = rule.AppendRules(input, mode, bypass, functionDebug)
-	case "rule-prepend", "rule-prepend-remove", "prepend", "prepend-remove":
+	case "rule-prepend", "rule-prepend-remove", "rule-prepend-toggle", "prepend", "prepend-remove", "prepend-toggle":
 		output = rule.PrependRules(input, mode, bypass, functionDebug)
 	case "rule-insert", "insert":
 		strIndex := fmt.Sprintf("%d", startingIndex)

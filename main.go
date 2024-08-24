@@ -47,6 +47,7 @@ func main() {
 			"rule-append-remove":                 "Transforms input into append-remove rules.",
 			"rule-prepend":                       "Transforms input into prepend rules.",
 			"rule-prepend-remove":                "Transforms input into prepend-remove rules.",
+			"rule-prepend-toggle":                "Transforms input into prepend-toggle rules. Creating camelCase and PascalCase.",
 			"rule-insert -i [index]":             "Transforms input into insert rules starting at index.",
 			"rule-overwrite -i [index]":          "Transforms input into overwrite rules starting at index.",
 			"rule-toggle -i [index]":             "Transforms input into toggle rules starting at index.",

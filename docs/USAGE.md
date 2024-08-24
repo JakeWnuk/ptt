@@ -135,24 +135,25 @@ These flags work with files and directories.
 
 #### Transformations:
 The following transformations can be used with the `-t` flag:
-- `append`: Transforms input into append rules.
-- `append-remove`: Transforms input into append-remove rules
-- `prepend`: Transforms input into prepend rules.
-- `prepend-remove`: Transforms input into prepend-remove rules.
-- `insert`: Transforms input into insert rules starting at index.
-- `overwrite`: Transforms input into overwrite rules starting at index.
-- `toggle`: Transforms input into toggle rules starting at index.
+- `rule-append`: Transforms input into append rules.
+- `rule-append-remove`: Transforms input into append-remove rules
+- `rule-prepend`: Transforms input into prepend rules.
+- `rule-prepend-remove`: Transforms input into prepend-remove rules.
+- `rule-prepend-toggle`: Transforms input into prepend-toggle rules.
+- `rule-insert`: Transforms input into insert rules starting at index.
+- `rule-overwrite`: Transforms input into overwrite rules starting at index.
+- `rule-toggle`: Transforms input into toggle rules starting at index.
 - `encode`: Transforms input by HTML and Unicode escape encoding.
 - `decode`: Transforms input by HTML and Unicode escape decoding.
 - `hex`: Transforms input by encoding strings into $HEX[...] format.
 - `dehex`: Transforms input by decoding $HEX[...] formatted
 - `mask`: Transforms input by masking characters with provided mask.
-- `remove`: Transforms input by removing characters with provided mask characters.
+- `mask-remove`: Transforms input by removing characters with provided mask characters.
 - `substring`: Transforms input by extracting substrings starting at index and ending at index.
 - `mask-retain`: Transforms input by creating masks that still retain strings from file.
 - `mask-match`: Transforms input by keeping only strings with matching masks from a mask file
-- `swap`: Transforms input by swapping tokens with exact matches from a ':' separated file.
-- `pop`: Transforms input by generating tokens from popping strings at character boundaries.
+- `mask-swap`: Transforms input by swapping tokens with exact matches from a ':' separated file.
+- `mask-pop`: Transforms input by generating tokens from popping strings at character boundaries.
 - `mask-swap`: Transforms input by swapping tokens from a partial mask file and a input file.
 - `passphrase`: Transforms input by randomly generating passphrases with a given number of words and separators from a file.
 
@@ -388,6 +389,7 @@ rules. There are several types of rules that can be created using PTT:
 - `Append Remove Rules`: Remove characters from the end of the password before appending a string.
 - `Prepend Rules`: Prepend a string to the beginning of the password.
 - `Prepend Remove Rules`: Remove characters from the beginning of the password before prepending a string.
+- `Prepend Toggle Rules`: Toggle the case of the password where a string is prepended.
 - `Toggle Rules`: Toggle the case of the password.
 - `Insert Rules`: Insert a string at a specific position in the password.
 - `Overwrite Rules`: Overwrite a string at a specific position in the password.
@@ -404,7 +406,7 @@ Append rules are used to append a string to the end of the password. The syntax 
 ptt -f <input_file> -t append
 ```
 
-The append mode also has two additional options:
+The append mode also has additional options:
 - `append-remove`: Remove characters from the end of the password before appending a string.
 
 The syntax for an append-remove rule is as follows:
@@ -424,6 +426,13 @@ The prepend mode also has two additional options:
 The syntax for a prepend-remove rule is as follows:
 ```
 ptt -f <input_file> -t prepend-remove
+```
+
+- `prepend-toggle`: Toggle the case of the password where a string is  prepended. Creating camel case passwords.
+
+The syntax for a prepend-toggle rule is as follows:
+```
+ptt -f <input_file> -t prepend-toggle
 ```
 
 ### Toggle Rules
