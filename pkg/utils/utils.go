@@ -142,12 +142,13 @@ func LoadStdinToMap(scanner models.Scanner) (map[string]int, error) {
 // Args:
 //
 //	urls ([]string): The URLs to read
+//	parsingMode (int): Change parsing mode for URL input. [0 = Strict, 1 = Permissive, 2 = Maximum] [0-2].
 //
 // Returns:
 //
 //	map[string]int: A map of words from the URLs
 //	error: An error if one occurred
-func ReadURLsToMap(urls []string) (map[string]int, error) {
+func ReadURLsToMap(urls []string, parsingMode int) (map[string]int, error) {
 	wordMap := make(map[string]int)
 	var wg sync.WaitGroup
 
@@ -161,7 +162,7 @@ func ReadURLsToMap(urls []string) (map[string]int, error) {
 
 	for _, url := range urls {
 		wg.Add(1)
-		go ProcessURL(url, ch, &wg)
+		go ProcessURL(url, ch, &wg, parsingMode)
 	}
 
 	wg.Wait()
@@ -199,11 +200,13 @@ func CombineMaps(maps ...map[string]int) map[string]int {
 //	url (string): The URL to read
 //	ch (chan<- string): The channel to send the sentences to
 //	wg (*sync.WaitGroup): The WaitGroup to signal when done
+//	parsingMode (int): Change parsing mode for URL input. [0 = Strict,
+//	1 = Permissive, 2 = Maximum] [0-2].
 //
 // Returns:
 //
 //	None
-func ProcessURL(url string, ch chan<- string, wg *sync.WaitGroup) {
+func ProcessURL(url string, ch chan<- string, wg *sync.WaitGroup, parsingMode int) {
 	const maxRetries = 4
 	defer wg.Done()
 
@@ -266,14 +269,16 @@ func ProcessURL(url string, ch chan<- string, wg *sync.WaitGroup) {
 
 	// Iterate over the lines and split them
 	for _, line := range lines {
-		textMatch, _ := regexp.MatchString(`[^a-zA-Z0-9.,;:!?'"\- ]`, line)
-		if strings.Contains(contentType, "text/html") {
-			if textMatch {
-				continue
-			}
-		} else {
-			if !textMatch {
-				continue
+		if parsingMode == 0 {
+			textMatch, _ := regexp.MatchString(`[^a-zA-Z0-9.,;:!?'"\- ]`, line)
+			if strings.Contains(contentType, "text/html") {
+				if textMatch {
+					continue
+				}
+			} else {
+				if !textMatch {
+					continue
+				}
 			}
 		}
 

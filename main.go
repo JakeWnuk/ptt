@@ -92,6 +92,7 @@ func main() {
 	jsonOutput := flag.String("o", "", "Output to JSON file in addition to stdout.")
 	bypassMap := flag.Bool("b", false, "Bypass map creation and use stdout as primary output.")
 	debugMode := flag.Int("d", 0, "Enable debug mode with verbosity levels [0-2].")
+	URLParsingMode := flag.Int("p", 0, "Change parsing mode for URL input. [0 = Strict, 1 = Permissive, 2 = Maximum] [0-2].")
 	passPhraseWords := flag.Int("w", 0, "Number of words to generate for passphrases if applicable.")
 	flag.Var(&retain, "k", "Only keep items in a file.")
 	flag.Var(&remove, "r", "Only keep items not in a file.")
@@ -115,7 +116,7 @@ func main() {
 	readFilesMap := utils.ReadFilesToMap(fs, readFiles)
 	transformationFilesMap := utils.ReadFilesToMap(fs, transformationFiles)
 	transformationTemplateArray := utils.ReadJSONToArray(fs, templateFiles)
-	readURLsMap, err := utils.ReadURLsToMap(readURLs)
+	readURLsMap, err := utils.ReadURLsToMap(readURLs, *URLParsingMode)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "[!] Error reading URLs: %s\n", err)
 		return
