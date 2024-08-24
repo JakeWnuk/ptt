@@ -56,13 +56,11 @@ read from multiple sources at the same time. The tool reads all input to
 a single data object and then processes the data object with the specified
 transformations.
 
-The tool can support multibyte characters in all transformations and does *not*
-convert `$HEX[...]` formatted strings to their original characters before use
-in a transformation.
-
-The output always contains no duplicates and is sorted by frequency of
+The output contains no duplicates and is sorted by frequency of
 occurrence. The output can be shown as is, with frequency counts, as a simple
-statistics report, or as a verbose statistics report.
+statistics report, or as a verbose statistics report. The tool also supports template files,
+loading directories and files, chaining input from multiple sessions, JSON output,
+debugging levels, and other quality of life features.
 
 ### Installation
 
@@ -89,8 +87,8 @@ git clone https://github.com/JakeWnuk/ptt && cd ptt && docker build -t ptt . && 
 ### Usage
 
 The tool can read input from standard input, files, or URLs and can read from
-multiple sources at the same time. The tool can also read additional files in a
-similar manner for some other options.
+multiple sources at the same time. The tool can also read additional files for
+some transformation modes.
 
 There are some additional notes when importing data:
 - Check for hidden characters in files that may cause issues. `Dos2unix` can be used to remove these characters.
