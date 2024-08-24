@@ -86,7 +86,7 @@ func TestRetainRemove(t *testing.T) {
 
 	// Run test cases
 	for _, test := range tests {
-		result, _ := RetainRemove(test.input, test.retain, test.remove)
+		result, _ := RetainRemove(test.input, test.retain, test.remove, 0)
 		if utils.CheckAreMapsEqual(result, test.output) == false {
 			t.Errorf("RetainRemove() failed - expected: %v, got: %v", test.output, result)
 		}

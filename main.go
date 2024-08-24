@@ -174,7 +174,7 @@ func main() {
 
 	// Process retain and remove maps if provided
 	if len(retainMap) > 0 || len(removeMap) > 0 {
-		primaryMap, err = format.RetainRemove(primaryMap, retainMap, removeMap)
+		primaryMap, err = format.RetainRemove(primaryMap, retainMap, removeMap, *debugMode)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "[!] Error processing retain and remove flags: %s\n", err)
 			return

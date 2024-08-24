@@ -435,13 +435,26 @@ func SaveArrayToJSON(path string, freq map[string]int) error {
 //	text (map[string]int): The text to process
 //	retainMap (map[string]int): A map of words to retain
 //	removeMap (map[string]int): A map of words to remove
+//	debugInt (int): Represents the level of verbosity for debug output
 //
 // Returns:
 //
 //	(map[string]int): A new map of words that have been retained and removed
 //	(error): An error if the text map is empty
-func RetainRemove(textMap map[string]int, retainMap map[string]int, removeMap map[string]int) (map[string]int, error) {
+func RetainRemove(textMap map[string]int, retainMap map[string]int, removeMap map[string]int, debugInt int) (map[string]int, error) {
 	result := make(map[string]int)
+
+	if debugInt == 1 {
+		fmt.Fprintf(os.Stderr, "[?] RetainRemove:\n")
+		fmt.Fprintf(os.Stderr, "Text Map Length: %d\n", len(textMap))
+		fmt.Fprintf(os.Stderr, "Retain Map Length: %d\n", len(retainMap))
+		fmt.Fprintf(os.Stderr, "Remove Map Length: %d\n", len(removeMap))
+	} else if debugInt >= 2 {
+		fmt.Fprintf(os.Stderr, "[?] RetainRemove:\n")
+		fmt.Fprintf(os.Stderr, "Text Map: %v\n", textMap)
+		fmt.Fprintf(os.Stderr, "Retain Map: %v\n", retainMap)
+		fmt.Fprintf(os.Stderr, "Remove Map: %v\n", removeMap)
+	}
 
 	// If the retain and remove maps are empty, return the textMap as is
 	if len(retainMap) == 0 && len(removeMap) == 0 {
