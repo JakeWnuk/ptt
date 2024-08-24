@@ -426,7 +426,7 @@ The syntax for a prepend-remove rule is as follows:
 ptt -f <input_file> -t rule-prepend-remove
 ```
 
-- `prepend-toggle`: Toggle the case of the password where a string is  prepended. Creating camel case passwords.
+- `prepend-toggle`: Toggle the case of the password where a string is  prepended. Creating camel and pascal case passwords.
 
 The syntax for a prepend-toggle rule is as follows:
 ```
@@ -494,7 +494,7 @@ ptt -f <input-file> -t swap -tf <replacement-file>
 ```
 The replacement file should contain the strings to be transformed as `PRIOR:POST`
 pairs. The replacements will be applied to the all instance in each line but
-only one swap is applied at once. This mode is ideal for subsituting words or characters in a string.
+only one swap is applied at once. This mode is ideal for substituting words or characters in a string.
 
 ### Replacing Text and Characters
 The `replace` module replaces text and characters in a string. This mode replaces all strings with all matches from a ':' separated file. The syntax is as follows:
