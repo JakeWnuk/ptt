@@ -66,6 +66,8 @@ These modify or filter the transformation mode.
         Maximum number of items to display in verbose statistics output. (default 25)
   -o string
         Output to JSON file in addition to stdout.
+  -p int
+        Change parsing mode for URL input. [0 = Strict, 1 = Permissive, 2 = Maximum] [0-2].
   -r value
         Only keep items not in a file.
   -rm string
