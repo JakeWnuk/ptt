@@ -2,10 +2,12 @@
 package utils
 
 import (
+	"bufio"
 	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -42,19 +44,12 @@ func ReadFilesToMap(fs models.FileSystem, filenames []string) map[string]int {
 	for i < len(filenames) {
 		filename := filenames[i]
 		if IsFileSystemDirectory(filename) {
-			err := filepath.Walk(filename, func(path string, info os.FileInfo, err error) error {
-				if err != nil {
-					return err
-				}
-				if !info.IsDir() {
-					filenames = append(filenames, path)
-				}
-				return nil
-			})
+			files, err := GetFilesInDirectory(filename)
 			if err != nil {
-				fmt.Fprintf(os.Stderr, "[!] Error walking the path %v: %v\n", filename, err)
+				fmt.Fprintf(os.Stderr, "[!] Error reading the directory %v: %v\n", filename, err)
 				os.Exit(1)
 			}
+			filenames = append(filenames, files...)
 		} else {
 			data, err := fs.ReadFile(filename)
 			if err != nil {
@@ -137,11 +132,10 @@ func LoadStdinToMap(scanner models.Scanner) (map[string]int, error) {
 }
 
 // ReadURLsToMap reads the contents of the multiple URLs and returns a map of words
-// from the URLs
+// from the URLs. Supports files or directories containing URLs.
 //
 // Args:
 //
-//	fs (FileSystem): The filesystem to read the files from (used for testing)
 //	urls ([]string): The URLs to read
 //	parsingMode (int): Change parsing mode for URL input. [0 = Strict, 1 = Permissive, 2 = Maximum] [0-2].
 //	debugMode (int): A flag to print debug information
@@ -150,7 +144,7 @@ func LoadStdinToMap(scanner models.Scanner) (map[string]int, error) {
 //
 //	map[string]int: A map of words from the URLs
 //	error: An error if one occurred
-func ReadURLsToMap(fs models.FileSystem, urls []string, parsingMode int, debugMode int) (map[string]int, error) {
+func ReadURLsToMap(urls []string, parsingMode int, debugMode int) (map[string]int, error) {
 	wordMap := make(map[string]int)
 	var wg sync.WaitGroup
 
@@ -163,8 +157,24 @@ func ReadURLsToMap(fs models.FileSystem, urls []string, parsingMode int, debugMo
 	}()
 
 	for _, url := range urls {
-		wg.Add(1)
-		go ProcessURL(url, ch, &wg, parsingMode, debugMode)
+		if IsValidURL(url) {
+			wg.Add(1)
+			go ProcessURL(url, ch, &wg, parsingMode, debugMode)
+		} else if IsFileSystemDirectory(url) {
+			files, err := GetFilesInDirectory(url)
+			if err != nil {
+				return nil, err
+			}
+			for _, file := range files {
+				wg.Add(1)
+				go ProcessURLFile(file, ch, &wg, parsingMode, debugMode)
+			}
+		} else if IsValidFile(url) {
+			wg.Add(1)
+			go ProcessURLFile(url, ch, &wg, parsingMode, debugMode)
+		} else {
+			return nil, fmt.Errorf("invalid input: %s", url)
+		}
 	}
 
 	wg.Wait()
@@ -497,6 +507,43 @@ func ReadJSONToArray(fs models.FileSystem, filenames []string) []models.Template
 	}
 
 	return combinedTemplate
+}
+
+// ProcessURLFile reads the contents of a file containing URLs and sends each
+// URL to the channel
+//
+// Args:
+// filePath (string): The path to the file containing URLs
+// ch (chan<- string): The channel to send the URLs to
+// wg (*sync.WaitGroup): The WaitGroup to signal when done
+// parsingMode (int): Change parsing mode for URL input. [0 = Strict,
+// 1 = Permissive, 2 = Maximum] [0-2].
+// debugMode (int): A flag to print debug information
+//
+// Returns:
+// None
+func ProcessURLFile(filePath string, ch chan<- string, wg *sync.WaitGroup, parsingMode int, debugMode int) {
+	defer wg.Done()
+
+	file, err := os.Open(filePath)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "[!] Error opening file %v: %v\n", filePath, err)
+		return
+	}
+	defer file.Close()
+
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		line := scanner.Text()
+		if IsValidURL(line) {
+			wg.Add(1)
+			go ProcessURL(line, ch, wg, parsingMode, debugMode)
+		}
+	}
+
+	if err := scanner.Err(); err != nil {
+		fmt.Fprintf(os.Stderr, "[!] Error reading file %v: %v\n", filePath, err)
+	}
 }
 
 // ----------------------------------------------------------------------------
@@ -884,4 +931,55 @@ func IsFileSystemDirectory(path string) bool {
 		return false
 	}
 	return fileInfo.IsDir()
+}
+
+// IsValidURL checks if a string is a valid URL by parsing the string and
+// checking if the scheme and host are not empty
+//
+// Args:
+// str (string): The URL to check
+//
+// Returns:
+// bool: True if the URL is valid, false otherwise
+func IsValidURL(str string) bool {
+	u, err := url.Parse(str)
+	return err == nil && u.Scheme != "" && u.Host != ""
+}
+
+// GetFilesInDirectory returns a slice of files in a directory
+// by reading the directory and appending the files to a slice
+// if they are not directories
+//
+// Args:
+// dir (string): The directory to read
+//
+// Returns:
+// []string: A slice of files in the directory
+func GetFilesInDirectory(dir string) ([]string, error) {
+	var files []string
+	items, err := os.ReadDir(dir)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, item := range items {
+		if !item.IsDir() {
+			files = append(files, filepath.Join(dir, item.Name()))
+		}
+	}
+
+	return files, nil
+}
+
+// IsValidFile checks if a file exists and is not a directory
+// by checking if the file exists
+//
+// Args:
+// path (string): The path to the file
+//
+// Returns:
+// bool: True if the file is valid, false otherwise
+func IsValidFile(path string) bool {
+	info, err := os.Stat(path)
+	return err == nil && !info.IsDir()
 }

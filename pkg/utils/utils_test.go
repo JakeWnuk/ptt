@@ -37,6 +37,11 @@ import (
 // - ReadURLsToMap() (Loading and Processing Functions)
 // - ProcessURL() (Loading and Processing Functions)
 // - IsFileSystemDirectory() (Validation Functions)
+// - ProcessURLFile() (Loading and Processing Functions)
+// - IsValidURL() (Validation Functions)
+// - GetFilesInDirectory() (Loading and Processing Functions)
+// - IsValidFile() (Validation Functions)
+// - GenerateNGrams() (Transformation Functions)
 
 // Unit Test for ReadFilesToMap()
 func TestReadFilesToMap(t *testing.T) {
