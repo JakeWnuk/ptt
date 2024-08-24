@@ -194,15 +194,25 @@ func ReadURLsToMap(urls []string, parsingMode int, debugMode int) (map[string]in
 // Returns:
 // map[string]int: A new map combining the values of the input maps
 func CombineMaps(maps ...map[string]int) map[string]int {
-	result := make(map[string]int)
+	var result sync.Map
 
 	for _, m := range maps {
 		for k, v := range m {
-			result[k] += v
+			if val, ok := result.Load(k); ok {
+				result.Store(k, val.(int)+v)
+			} else {
+				result.Store(k, v)
+			}
 		}
 	}
 
-	return result
+	finalResult := make(map[string]int)
+	result.Range(func(k, v interface{}) bool {
+		finalResult[k.(string)] = v.(int)
+		return true
+	})
+
+	return finalResult
 }
 
 // ProcessURL reads the contents of a URL and sends each sentence to the channel
