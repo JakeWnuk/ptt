@@ -92,10 +92,11 @@ some transformation modes.
 
 There are some additional notes when importing data:
 - Check for hidden characters in files that may cause issues. `Dos2unix` can be used to remove these characters.
-- When reading from standard input, the tool can detect chaining `ptt` commands
-  when the `-v` flag is used. This can be used to pipe multiple commands together.
+- When reading from standard input, the tool can detect chaining `ptt`
+  commands when the `-v` flag is used. This can be used to pipe multiple commands together without losing frequency data.
 - When reading from files, the tool can detect when `ptt` JSON output is used as input and will parse the JSON data.
-- The `-b` flag can be used to bypass map creation and use stdout as primary output. This can be useful for working with large datasets. If the `-b` flag is used, the final output will be empty and all filtering and duplication removal will be disabled.
+- The `-b` flag can be used to bypass map creation and use stdout as primary output. This can be useful for working with large datasets.
+    - If the `-b` flag is used, the final output will be empty and all filtering and duplication removal will be disabled.
 - The `-d [0-2]` flag can be used to enable debug output. This will show the data
   object after all transformations have been applied. There are two (2) levels
   of debug output that can be used.
@@ -181,9 +182,9 @@ The following transformations can be used with the `-t` flag:
 - `ptt -k keep.txt`: Keep only items in a file.
 - `ptt -r remove.txt`: Keep only items not in a file.
 - `ptt -k keep.txt -r remove.txt`: Keep only items in a file and not in another.
-- `ppt -l 8`: Keep only items equal to a length.
-- `ppt -l 8-12`: Keep only items within a range of lengths.
-- `ptt -m 10`: Keep only items with a minimum frequency.
+- `ppt -l 8`: Only allow items equal to a length for input.
+- `ppt -l 8-12`: Keep only items within a range of lengths for input.
+- `ptt -m 10`: Keep only items with a minimum frequency from output.
 
 #### Debug Formats:
 - `ptt -d 1`: Enable debug mode with verbosity level 1.
@@ -308,11 +309,6 @@ yahoo [8942]===============
 1985  [8513]==============
 ```
 
-### Contributing
-Contributions are welcome and encouraged. Please open an issue or pull request
-if you have any suggestions or improvements. Please follow the code of conduct
-when contributing to this project.
-
 ### License
 This project is licensed under the MIT License - see the LICENSE file for details.
 
@@ -356,7 +352,7 @@ output.
 Masks can be matched to a given string to determine if the string matches the
 mask. The syntax to match a mask is as follows:
 ```
-ptt -f <input_file> -t match -tf <mask_file>
+ptt -f <input_file> -t mask-match -tf <mask_file>
 ```
 Where `<mask_file>` is the file containing the mask to match. The mask file
 should only contain valid masks. The output will be all of the strings that
@@ -366,7 +362,7 @@ match the masks.
 Characters can be removed from a string by a mask. The syntax to remove
 characters by mask is as follows:
 ```
-ptt -f <input_file> -t remove -rm <mask_characters>
+ptt -f <input_file> -t mask-remove -rm <mask_characters>
 ```
 Where `<mask_characters>` is the mask to remove from the string. The output will
 be the string with the characters removed.
@@ -375,7 +371,7 @@ be the string with the characters removed.
 Retain masks can be created to retain only certain keywords in a string. The
 syntax to create a retain mask is as follows:
 ```
-ptt -f <input_file> -t retain -rm <mask_characters> -tf <keep_file>
+ptt -f <input_file> -t mask-retain -rm <mask_characters> -tf <keep_file>
 ```
 Where `<mask_characters>` is the mask to retain and `<keep_file>` is the file
 containing the keywords to retain. The output will be the mask with only the
@@ -405,7 +401,7 @@ transformation can be used at a time.
 ### Append Rules
 Append rules are used to append a string to the end of the password. The syntax for an append rule is as follows:
 ```
-ptt -f <input_file> -t append
+ptt -f <input_file> -t rule-append
 ```
 
 The append mode also has additional options:
@@ -413,13 +409,13 @@ The append mode also has additional options:
 
 The syntax for an append-remove rule is as follows:
 ```
-ptt -f <input_file> -t append-remove
+ptt -f <input_file> -t rule-append-remove
 ```
 
 ### Prepend Rules
 Prepend rules are used to prepend a string to the beginning of the password. The syntax for a prepend rule is as follows:
 ```
-ptt -f <input_file> -t prepend
+ptt -f <input_file> -t rule-prepend
 ```
 
 The prepend mode also has two additional options:
@@ -427,20 +423,20 @@ The prepend mode also has two additional options:
 
 The syntax for a prepend-remove rule is as follows:
 ```
-ptt -f <input_file> -t prepend-remove
+ptt -f <input_file> -t rule-prepend-remove
 ```
 
 - `prepend-toggle`: Toggle the case of the password where a string is  prepended. Creating camel case passwords.
 
 The syntax for a prepend-toggle rule is as follows:
 ```
-ptt -f <input_file> -t prepend-toggle
+ptt -f <input_file> -t rule-prepend-toggle
 ```
 
 ### Toggle Rules
 Toggle rules are used to toggle the case of the password. The syntax for a toggle rule is as follows:
 ```
-ptt -f <input_file> -t toggle -i <index>
+ptt -f <input_file> -t rule-toggle -i <index>
 ```
 Where `<index>` is the starting index of the toggle pattern. If no index is provided,
 the toggle pattern will start at the beginning of the password. The `<index>`
@@ -450,7 +446,7 @@ print output for the toggle transformation starting from index 1 to 5.
 ### Insert Rules
 Insert rules are used to insert a string at a specific position in the password. The syntax for an insert rule is as follows:
 ```
-ptt -f <input_file> -t insert -i <index>
+ptt -f <input_file> -t rule-insert -i <index>
 ```
 Where `<index>` is the position where the string will be inserted. If no index is provided,
 the string will be inserted at the beginning of the password. The `<index>`
@@ -460,7 +456,7 @@ print output for the insert transformation starting from index 1 to 5.
 ### Overwrite Rules
 Overwrite rules are used to overwrite a string at a specific position in the password. The syntax for an overwrite rule is as follows:
 ```
-ptt -f <input_file> -t overwrite -i <index>
+ptt -f <input_file> -t rule-overwrite -i <index>
 ```
 Where `<index>` is the position where the string will be overwritten. If no index is provided,
 the string will be overwritten at the beginning of the password. The `<index>`
@@ -514,7 +510,7 @@ a string.
 The `pop` module generates tokens by popping strings at character boundaries.
 The syntax is as follows:
 ```
-ptt -f <input-file> -t pop -rm <mask-characters>
+ptt -f <input-file> -t mask-pop -rm <mask-characters>
 ```
 Where `<mask_characters>` can be any of the following:
 - `u`: Uppercase characters
@@ -535,7 +531,7 @@ syntax is as follows:
 ptt -f <input-file> -t mask-swap -tf <replacement-file>
 ```
 > [!NOTE]
-> The input for `mask-swap` is partial masks from `retain`! This is different from most other modes.
+> The input for `mask-swap` is partial masks from `mask-retain`! This is different from most other modes.
 
 The replacement file does not need to be in any specific format. The
 replacements will be applied to the first instance in each line. The
