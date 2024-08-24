@@ -123,6 +123,7 @@ These flags work with files and directories.
 - `-m`: Minimum numerical frequency to include in output.
 - `-n`: Maximum number of items to display in verbose statistics output. (default 25)
 - `-o`: Output to JSON file in addition to stdout.
+- `-p`: Change parsing mode for URL input. [0 = Strict, 1 = Permissive, 2 = Maximum].
 - `-r`: Only keep items not in a file.
 - `-rm`: Replacement mask for transformations if applicable. (default "uldsb")
 - `-t`: Transformation to apply to input.
@@ -165,6 +166,14 @@ The following transformations can be used with the `-t` flag:
 - `ptt -u https://example.com/input.txt`: Read input from a URL.
 - `ptt -f input2.txt -f input3.txt -f input4.txt`: Read additional files for input.
 - `cat input2.txt | ptt -f input3.txt -u https://example.com/input4.txt`: Read input from standard input and additional files and URLs.
+
+[!NOTE]
+The `-p` flag can be used to change the parsing mode for URLs. The default mode
+is `0` and will use a narrow character set to parse text from URLs. The `1`
+mode will use a larger character set to parse text from URLs and include
+additonal parsing by default. The `2` mode will use the same character set as
+`1` but will also include additional parsing options for maximum parsing
+including n-grams and other parsing options.
 
 #### Transformation Formats:
 - `ptt -t [transformation]`: Apply a transformation to input.

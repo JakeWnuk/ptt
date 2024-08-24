@@ -141,14 +141,16 @@ func LoadStdinToMap(scanner models.Scanner) (map[string]int, error) {
 //
 // Args:
 //
+//	fs (FileSystem): The filesystem to read the files from (used for testing)
 //	urls ([]string): The URLs to read
 //	parsingMode (int): Change parsing mode for URL input. [0 = Strict, 1 = Permissive, 2 = Maximum] [0-2].
+//	debugMode (int): A flag to print debug information
 //
 // Returns:
 //
 //	map[string]int: A map of words from the URLs
 //	error: An error if one occurred
-func ReadURLsToMap(urls []string, parsingMode int) (map[string]int, error) {
+func ReadURLsToMap(fs models.FileSystem, urls []string, parsingMode int, debugMode int) (map[string]int, error) {
 	wordMap := make(map[string]int)
 	var wg sync.WaitGroup
 
@@ -162,7 +164,7 @@ func ReadURLsToMap(urls []string, parsingMode int) (map[string]int, error) {
 
 	for _, url := range urls {
 		wg.Add(1)
-		go ProcessURL(url, ch, &wg, parsingMode)
+		go ProcessURL(url, ch, &wg, parsingMode, debugMode)
 	}
 
 	wg.Wait()
@@ -202,11 +204,12 @@ func CombineMaps(maps ...map[string]int) map[string]int {
 //	wg (*sync.WaitGroup): The WaitGroup to signal when done
 //	parsingMode (int): Change parsing mode for URL input. [0 = Strict,
 //	1 = Permissive, 2 = Maximum] [0-2].
+//	debugMode (int): A flag to print debug information
 //
 // Returns:
 //
 //	None
-func ProcessURL(url string, ch chan<- string, wg *sync.WaitGroup, parsingMode int) {
+func ProcessURL(url string, ch chan<- string, wg *sync.WaitGroup, parsingMode int, debugMode int) {
 	const maxRetries = 4
 	defer wg.Done()
 
@@ -267,10 +270,42 @@ func ProcessURL(url string, ch chan<- string, wg *sync.WaitGroup, parsingMode in
 		}
 	}
 
+	if debugMode == 1 {
+		fmt.Fprintf(os.Stderr, "[?] URL: %s\n", url)
+		fmt.Fprintf(os.Stderr, "[?] Content-Type: %s\n", contentType)
+		fmt.Fprintf(os.Stderr, "[?] Parsing Mode: %d\n", parsingMode)
+		if resp.StatusCode != http.StatusOK {
+			fmt.Fprintf(os.Stderr, "[!] Error fetching URL %s\n", url)
+		}
+	} else if debugMode == 2 {
+		fmt.Fprintf(os.Stderr, "[?] URL: %s\n", url)
+		fmt.Fprintf(os.Stderr, "[?] Content-Type: %s\n", contentType)
+		fmt.Fprintf(os.Stderr, "[?] Parsing Mode: %d\n", parsingMode)
+		if resp.StatusCode != http.StatusOK {
+			fmt.Fprintf(os.Stderr, "[?] Error fetching URL %s\n", url)
+		}
+		fmt.Fprintf(os.Stderr, "[?] Line Count: %d\n", len(lines))
+		fmt.Fprintf(os.Stderr, "[?] Sample Lines:\n")
+		for i := 0; i < 5; i++ {
+			fmt.Fprintf(os.Stderr, "%s\n", lines[i])
+		}
+	}
+
 	// Iterate over the lines and split them
 	for _, line := range lines {
 		if parsingMode == 0 {
-			textMatch, _ := regexp.MatchString(`[^a-zA-Z0-9.,;:!?'"\- ]`, line)
+			textMatch, _ := regexp.MatchString(`[^a-zA-Z0-9.,;:!? ]`, line)
+			if strings.Contains(contentType, "text/html") {
+				if textMatch {
+					continue
+				}
+			} else {
+				if !textMatch {
+					continue
+				}
+			}
+		} else if parsingMode >= 1 {
+			textMatch, _ := regexp.MatchString(`[^a-zA-Z0-9.,;:!?'"\- \/+_#@"\[\]]`, line)
 			if strings.Contains(contentType, "text/html") {
 				if textMatch {
 					continue
@@ -284,16 +319,89 @@ func ProcessURL(url string, ch chan<- string, wg *sync.WaitGroup, parsingMode in
 
 		sentences := strings.Split(line, ".")
 		for _, sentence := range sentences {
-			sentence = strings.TrimSpace(sentence)
 
-			phrases := strings.Split(sentence, ",")
-			for _, phrase := range phrases {
-				if phrase != "" {
-					ch <- phrase
+			if parsingMode >= 1 {
+				phrases := strings.Split(sentence, ",")
+				for _, phrase := range phrases {
+					if phrase != "" {
+						phrase = strings.TrimSpace(phrase)
+						ch <- phrase
+					}
+				}
+
+				phrases = strings.Split(sentence, ";")
+				for _, phrase := range phrases {
+					if phrase != "" {
+						phrase = strings.TrimSpace(phrase)
+						ch <- phrase
+					}
+				}
+
+				phrases = strings.Split(sentence, ":")
+				for _, phrase := range phrases {
+					if phrase != "" {
+						phrase = strings.TrimSpace(phrase)
+						ch <- phrase
+					}
+				}
+
+				phrases = strings.Split(sentence, "!")
+				for _, phrase := range phrases {
+					if phrase != "" {
+						phrase = strings.TrimSpace(phrase)
+						ch <- phrase
+					}
+				}
+
+				phrases = strings.Split(sentence, "?")
+				for _, phrase := range phrases {
+					if phrase != "" {
+						phrase = strings.TrimSpace(phrase)
+						ch <- phrase
+					}
+				}
+			}
+
+			if parsingMode >= 2 {
+				phrases := strings.Split(sentence, " ")
+				for _, phrase := range phrases {
+					if phrase != "" {
+						phrase = strings.TrimSpace(phrase)
+						ch <- phrase
+					}
+				}
+
+				phrases = strings.Split(sentence, "-")
+				for _, phrase := range phrases {
+					if phrase != "" {
+						phrase = strings.TrimSpace(phrase)
+						ch <- phrase
+					}
+				}
+
+				phrases = strings.Split(sentence, "'")
+				for _, phrase := range phrases {
+					if phrase != "" {
+						phrase = strings.TrimSpace(phrase)
+						ch <- phrase
+					}
+				}
+
+				twoGrams := GenerateNGrams(sentence, 2)
+				threeGrams := GenerateNGrams(sentence, 3)
+				fourGrams := GenerateNGrams(sentence, 4)
+				fiveGrams := GenerateNGrams(sentence, 5)
+				allNGrams := append(twoGrams, append(threeGrams, append(fourGrams, fiveGrams...)...)...)
+				for _, nGram := range allNGrams {
+					if nGram != "" {
+						nGram = strings.TrimSpace(nGram)
+						ch <- nGram
+					}
 				}
 			}
 
 			if sentence != "" {
+				sentence = strings.TrimSpace(sentence)
 				ch <- sentence
 			}
 		}
@@ -652,6 +760,27 @@ func SubstringMap(sMap map[string]int, sIndex int, eIndex int, bypass bool, debu
 		newMap[s[sIndex:maxLen]]++
 	}
 	return newMap
+}
+
+// GenerateNGrams generates n-grams from a string of text
+// and returns a slice of n-grams
+//
+// Args:
+// text (string): The text to generate n-grams from
+// n (int): The number of words in each n-gram
+//
+// Returns:
+// []string: A slice of n-grams
+func GenerateNGrams(text string, n int) []string {
+	words := strings.Fields(text)
+	var nGrams []string
+
+	for i := 0; i <= len(words)-n; i++ {
+		nGram := strings.Join(words[i:i+n], " ")
+		nGrams = append(nGrams, nGram)
+	}
+
+	return nGrams
 }
 
 // ----------------------------------------------------------------------------

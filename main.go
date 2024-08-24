@@ -116,7 +116,7 @@ func main() {
 	readFilesMap := utils.ReadFilesToMap(fs, readFiles)
 	transformationFilesMap := utils.ReadFilesToMap(fs, transformationFiles)
 	transformationTemplateArray := utils.ReadJSONToArray(fs, templateFiles)
-	readURLsMap, err := utils.ReadURLsToMap(readURLs, *URLParsingMode)
+	readURLsMap, err := utils.ReadURLsToMap(fs, readURLs, *URLParsingMode, *debugMode)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "[!] Error reading URLs: %s\n", err)
 		return
