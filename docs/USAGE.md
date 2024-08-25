@@ -7,8 +7,7 @@
 2. [Installation](#installation)
 3. [Usage](#usage)
 4. [Examples](#examples)
-5. [Contributing](#contributing)
-6. [License](#license)
+5. [License](#license)
 
 #### Mask Creation Guide
 1. [Mask Creation Introduction](#mask-creation-introduction)
