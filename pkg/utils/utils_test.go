@@ -24,24 +24,24 @@ import (
 // - ReplaceSubstring()
 // - ReplaceAllSubstring()
 // - SubstringMap()
+// - GenerateNGrams()
 //
 // ** Validation Functions **
 // - CheckASCIIString()
 // - CheckHexString()
 // - CheckAreMapsEqual()
 // - CheckAreArraysEqual()
+// - IsValidURL()
 //
 // ----------------------------------------------------------------------------
 // Functions without Unit Tests
 // ----------------------------------------------------------------------------
 // - ReadURLsToMap() (Loading and Processing Functions)
 // - ProcessURL() (Loading and Processing Functions)
-// - IsFileSystemDirectory() (Validation Functions)
 // - ProcessURLFile() (Loading and Processing Functions)
-// - IsValidURL() (Validation Functions)
 // - GetFilesInDirectory() (Loading and Processing Functions)
 // - IsValidFile() (Validation Functions)
-// - GenerateNGrams() (Transformation Functions)
+// - IsFileSystemDirectory() (Validation Functions)
 
 // Unit Test for ReadFilesToMap()
 func TestReadFilesToMap(t *testing.T) {
@@ -622,6 +622,71 @@ func TestCheckAreArraysEqual(t *testing.T) {
 		given := CheckAreArraysEqual(input1, input2)
 		if given != output {
 			t.Errorf("CheckAreArraysEqual(%v, %v) = %v; want %v", input1, input2, given, output)
+		}
+	}
+}
+
+// Unit Test for GenerateNGrams()
+func TestGenerateNGrams(t *testing.T) {
+
+	// Define a test case struct
+	type TestCase struct {
+		Input1 string
+		Input2 int
+		Output []string
+	}
+
+	type TestCases []TestCase
+
+	// Define test cases
+	testCases := TestCases{
+		{"I love you", 2, []string{"I love", "love you"}},
+		{"I <3 you", 2, []string{"I <3", "<3 you"}},
+		{"I 爱 you", 2, []string{"I 爱", "爱 you"}},
+		{"I love you very much", 3, []string{"I love you", "love you very", "you very much"}},
+	}
+
+	// Run test cases
+	for _, testCase := range testCases {
+		input1 := testCase.Input1
+		input2 := testCase.Input2
+		output := testCase.Output
+
+		given := GenerateNGrams(input1, input2)
+		if CheckAreArraysEqual(given, output) == false {
+			t.Errorf("GenerateNGrams(%v, %v) = %v; want %v", input1, input2, given, output)
+		}
+	}
+}
+
+// Unit Test for IsValidURL()
+func TestIsValidURL(t *testing.T) {
+
+	// Define a test case struct
+	type TestCase struct {
+		Input  string
+		Output bool
+	}
+
+	type TestCases []TestCase
+
+	// Define test cases
+	testCases := TestCases{
+		{"https://www.google.com", true},
+		{"http://www.google.com", true},
+		{"www.google.com", false},
+		{"google.com", false},
+		{"google", false},
+	}
+
+	// Run test cases
+	for _, testCase := range testCases {
+		input := testCase.Input
+		output := testCase.Output
+
+		given := IsValidURL(input)
+		if given != output {
+			t.Errorf("IsValidURL(%v) = %v; want %v", input, given, output)
 		}
 	}
 }
