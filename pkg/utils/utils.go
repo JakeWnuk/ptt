@@ -2,10 +2,12 @@
 package utils
 
 import (
+	"bufio"
 	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -42,19 +44,12 @@ func ReadFilesToMap(fs models.FileSystem, filenames []string) map[string]int {
 	for i < len(filenames) {
 		filename := filenames[i]
 		if IsFileSystemDirectory(filename) {
-			err := filepath.Walk(filename, func(path string, info os.FileInfo, err error) error {
-				if err != nil {
-					return err
-				}
-				if !info.IsDir() {
-					filenames = append(filenames, path)
-				}
-				return nil
-			})
+			files, err := GetFilesInDirectory(filename)
 			if err != nil {
-				fmt.Fprintf(os.Stderr, "[!] Error walking the path %v: %v\n", filename, err)
+				fmt.Fprintf(os.Stderr, "[!] Error reading the directory %v: %v\n", filename, err)
 				os.Exit(1)
 			}
+			filenames = append(filenames, files...)
 		} else {
 			data, err := fs.ReadFile(filename)
 			if err != nil {
@@ -98,7 +93,7 @@ func LoadStdinToMap(scanner models.Scanner) (map[string]int, error) {
 	m := make(map[string]int)
 	pttInput := false
 	line0 := false
-	reDetect := regexp.MustCompile(`^\d+\s(\d+|\w+)`)
+	reDetect := regexp.MustCompile(`^\d+\s(\w+|\W+)$`)
 	reParse := regexp.MustCompile(`^\d+`)
 
 	for scanner.Scan() {
@@ -137,17 +132,19 @@ func LoadStdinToMap(scanner models.Scanner) (map[string]int, error) {
 }
 
 // ReadURLsToMap reads the contents of the multiple URLs and returns a map of words
-// from the URLs
+// from the URLs. Supports files or directories containing URLs.
 //
 // Args:
 //
 //	urls ([]string): The URLs to read
+//	parsingMode (int): Change parsing mode for URL input. [0 = Strict, 1 = Permissive, 2 = Maximum] [0-2].
+//	debugMode (int): A flag to print debug information
 //
 // Returns:
 //
 //	map[string]int: A map of words from the URLs
 //	error: An error if one occurred
-func ReadURLsToMap(urls []string) (map[string]int, error) {
+func ReadURLsToMap(urls []string, parsingMode int, debugMode int) (map[string]int, error) {
 	wordMap := make(map[string]int)
 	var wg sync.WaitGroup
 
@@ -160,8 +157,24 @@ func ReadURLsToMap(urls []string) (map[string]int, error) {
 	}()
 
 	for _, url := range urls {
-		wg.Add(1)
-		go ProcessURL(url, ch, &wg)
+		if IsValidURL(url) {
+			wg.Add(1)
+			go ProcessURL(url, ch, &wg, parsingMode, debugMode)
+		} else if IsFileSystemDirectory(url) {
+			files, err := GetFilesInDirectory(url)
+			if err != nil {
+				return nil, err
+			}
+			for _, file := range files {
+				wg.Add(1)
+				go ProcessURLFile(file, ch, &wg, parsingMode, debugMode)
+			}
+		} else if IsValidFile(url) {
+			wg.Add(1)
+			go ProcessURLFile(url, ch, &wg, parsingMode, debugMode)
+		} else {
+			return nil, fmt.Errorf("invalid input: %s", url)
+		}
 	}
 
 	wg.Wait()
@@ -181,15 +194,25 @@ func ReadURLsToMap(urls []string) (map[string]int, error) {
 // Returns:
 // map[string]int: A new map combining the values of the input maps
 func CombineMaps(maps ...map[string]int) map[string]int {
-	result := make(map[string]int)
+	var result sync.Map
 
 	for _, m := range maps {
 		for k, v := range m {
-			result[k] += v
+			if val, ok := result.Load(k); ok {
+				result.Store(k, val.(int)+v)
+			} else {
+				result.Store(k, v)
+			}
 		}
 	}
 
-	return result
+	finalResult := make(map[string]int)
+	result.Range(func(k, v interface{}) bool {
+		finalResult[k.(string)] = v.(int)
+		return true
+	})
+
+	return finalResult
 }
 
 // ProcessURL reads the contents of a URL and sends each sentence to the channel
@@ -199,11 +222,14 @@ func CombineMaps(maps ...map[string]int) map[string]int {
 //	url (string): The URL to read
 //	ch (chan<- string): The channel to send the sentences to
 //	wg (*sync.WaitGroup): The WaitGroup to signal when done
+//	parsingMode (int): Change parsing mode for URL input. [0 = Strict,
+//	1 = Permissive, 2 = Maximum] [0-2].
+//	debugMode (int): A flag to print debug information
 //
 // Returns:
 //
 //	None
-func ProcessURL(url string, ch chan<- string, wg *sync.WaitGroup) {
+func ProcessURL(url string, ch chan<- string, wg *sync.WaitGroup, parsingMode int, debugMode int) {
 	const maxRetries = 4
 	defer wg.Done()
 
@@ -264,31 +290,138 @@ func ProcessURL(url string, ch chan<- string, wg *sync.WaitGroup) {
 		}
 	}
 
+	if debugMode == 1 {
+		fmt.Fprintf(os.Stderr, "[?] URL: %s\n", url)
+		fmt.Fprintf(os.Stderr, "[?] Content-Type: %s\n", contentType)
+		fmt.Fprintf(os.Stderr, "[?] Parsing Mode: %d\n", parsingMode)
+		if resp.StatusCode != http.StatusOK {
+			fmt.Fprintf(os.Stderr, "[!] Error fetching URL %s\n", url)
+		}
+	} else if debugMode == 2 {
+		fmt.Fprintf(os.Stderr, "[?] URL: %s\n", url)
+		fmt.Fprintf(os.Stderr, "[?] Content-Type: %s\n", contentType)
+		fmt.Fprintf(os.Stderr, "[?] Parsing Mode: %d\n", parsingMode)
+		if resp.StatusCode != http.StatusOK {
+			fmt.Fprintf(os.Stderr, "[?] Error fetching URL %s\n", url)
+		}
+		fmt.Fprintf(os.Stderr, "[?] Line Count: %d\n", len(lines))
+		fmt.Fprintf(os.Stderr, "[?] Sample Lines:\n")
+		for i := 0; i < 5; i++ {
+			fmt.Fprintf(os.Stderr, "%s\n", lines[i])
+		}
+	}
+
 	// Iterate over the lines and split them
 	for _, line := range lines {
-		textMatch, _ := regexp.MatchString(`[^a-zA-Z0-9.,;:!?'"\- ]`, line)
-		if strings.Contains(contentType, "text/html") {
-			if textMatch {
-				continue
+		if parsingMode == 0 {
+			textMatch, _ := regexp.MatchString(`[^a-zA-Z0-9.,;:!? ]`, line)
+			if strings.Contains(contentType, "text/html") {
+				if textMatch {
+					continue
+				}
+			} else {
+				if !textMatch {
+					continue
+				}
 			}
-		} else {
-			if !textMatch {
-				continue
+		} else if parsingMode >= 1 {
+			textMatch, _ := regexp.MatchString(`[^a-zA-Z0-9.,;:!?'"\- \/+_#@"\[\]]`, line)
+			if strings.Contains(contentType, "text/html") {
+				if textMatch {
+					continue
+				}
+			} else {
+				if !textMatch {
+					continue
+				}
 			}
 		}
 
 		sentences := strings.Split(line, ".")
 		for _, sentence := range sentences {
-			sentence = strings.TrimSpace(sentence)
 
-			phrases := strings.Split(sentence, ",")
-			for _, phrase := range phrases {
-				if phrase != "" {
-					ch <- phrase
+			if parsingMode >= 1 {
+				phrases := strings.Split(sentence, ",")
+				for _, phrase := range phrases {
+					if phrase != "" {
+						phrase = strings.TrimSpace(phrase)
+						ch <- phrase
+					}
+				}
+
+				phrases = strings.Split(sentence, ";")
+				for _, phrase := range phrases {
+					if phrase != "" {
+						phrase = strings.TrimSpace(phrase)
+						ch <- phrase
+					}
+				}
+
+				phrases = strings.Split(sentence, ":")
+				for _, phrase := range phrases {
+					if phrase != "" {
+						phrase = strings.TrimSpace(phrase)
+						ch <- phrase
+					}
+				}
+
+				phrases = strings.Split(sentence, "!")
+				for _, phrase := range phrases {
+					if phrase != "" {
+						phrase = strings.TrimSpace(phrase)
+						ch <- phrase
+					}
+				}
+
+				phrases = strings.Split(sentence, "?")
+				for _, phrase := range phrases {
+					if phrase != "" {
+						phrase = strings.TrimSpace(phrase)
+						ch <- phrase
+					}
+				}
+			}
+
+			if parsingMode >= 2 {
+				phrases := strings.Split(sentence, " ")
+				for _, phrase := range phrases {
+					if phrase != "" {
+						phrase = strings.TrimSpace(phrase)
+						ch <- phrase
+					}
+				}
+
+				phrases = strings.Split(sentence, "-")
+				for _, phrase := range phrases {
+					if phrase != "" {
+						phrase = strings.TrimSpace(phrase)
+						ch <- phrase
+					}
+				}
+
+				phrases = strings.Split(sentence, "'")
+				for _, phrase := range phrases {
+					if phrase != "" {
+						phrase = strings.TrimSpace(phrase)
+						ch <- phrase
+					}
+				}
+
+				twoGrams := GenerateNGrams(sentence, 2)
+				threeGrams := GenerateNGrams(sentence, 3)
+				fourGrams := GenerateNGrams(sentence, 4)
+				fiveGrams := GenerateNGrams(sentence, 5)
+				allNGrams := append(twoGrams, append(threeGrams, append(fourGrams, fiveGrams...)...)...)
+				for _, nGram := range allNGrams {
+					if nGram != "" {
+						nGram = strings.TrimSpace(nGram)
+						ch <- nGram
+					}
 				}
 			}
 
 			if sentence != "" {
+				sentence = strings.TrimSpace(sentence)
 				ch <- sentence
 			}
 		}
@@ -384,6 +517,43 @@ func ReadJSONToArray(fs models.FileSystem, filenames []string) []models.Template
 	}
 
 	return combinedTemplate
+}
+
+// ProcessURLFile reads the contents of a file containing URLs and sends each
+// URL to the channel
+//
+// Args:
+// filePath (string): The path to the file containing URLs
+// ch (chan<- string): The channel to send the URLs to
+// wg (*sync.WaitGroup): The WaitGroup to signal when done
+// parsingMode (int): Change parsing mode for URL input. [0 = Strict,
+// 1 = Permissive, 2 = Maximum] [0-2].
+// debugMode (int): A flag to print debug information
+//
+// Returns:
+// None
+func ProcessURLFile(filePath string, ch chan<- string, wg *sync.WaitGroup, parsingMode int, debugMode int) {
+	defer wg.Done()
+
+	file, err := os.Open(filePath)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "[!] Error opening file %v: %v\n", filePath, err)
+		return
+	}
+	defer file.Close()
+
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		line := scanner.Text()
+		if IsValidURL(line) {
+			wg.Add(1)
+			go ProcessURL(line, ch, wg, parsingMode, debugMode)
+		}
+	}
+
+	if err := scanner.Err(); err != nil {
+		fmt.Fprintf(os.Stderr, "[!] Error reading file %v: %v\n", filePath, err)
+	}
 }
 
 // ----------------------------------------------------------------------------
@@ -649,6 +819,27 @@ func SubstringMap(sMap map[string]int, sIndex int, eIndex int, bypass bool, debu
 	return newMap
 }
 
+// GenerateNGrams generates n-grams from a string of text
+// and returns a slice of n-grams
+//
+// Args:
+// text (string): The text to generate n-grams from
+// n (int): The number of words in each n-gram
+//
+// Returns:
+// []string: A slice of n-grams
+func GenerateNGrams(text string, n int) []string {
+	words := strings.Fields(text)
+	var nGrams []string
+
+	for i := 0; i <= len(words)-n; i++ {
+		nGram := strings.Join(words[i:i+n], " ")
+		nGrams = append(nGrams, nGram)
+	}
+
+	return nGrams
+}
+
 // ----------------------------------------------------------------------------
 // Validation Functions
 // ----------------------------------------------------------------------------
@@ -750,4 +941,55 @@ func IsFileSystemDirectory(path string) bool {
 		return false
 	}
 	return fileInfo.IsDir()
+}
+
+// IsValidURL checks if a string is a valid URL by parsing the string and
+// checking if the scheme and host are not empty
+//
+// Args:
+// str (string): The URL to check
+//
+// Returns:
+// bool: True if the URL is valid, false otherwise
+func IsValidURL(str string) bool {
+	u, err := url.Parse(str)
+	return err == nil && u.Scheme != "" && u.Host != ""
+}
+
+// GetFilesInDirectory returns a slice of files in a directory
+// by reading the directory and appending the files to a slice
+// if they are not directories
+//
+// Args:
+// dir (string): The directory to read
+//
+// Returns:
+// []string: A slice of files in the directory
+func GetFilesInDirectory(dir string) ([]string, error) {
+	var files []string
+	items, err := os.ReadDir(dir)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, item := range items {
+		if !item.IsDir() {
+			files = append(files, filepath.Join(dir, item.Name()))
+		}
+	}
+
+	return files, nil
+}
+
+// IsValidFile checks if a file exists and is not a directory
+// by checking if the file exists
+//
+// Args:
+// path (string): The path to the file
+//
+// Returns:
+// bool: True if the file is valid, false otherwise
+func IsValidFile(path string) bool {
+	info, err := os.Stat(path)
+	return err == nil && !info.IsDir()
 }

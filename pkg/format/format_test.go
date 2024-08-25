@@ -86,7 +86,7 @@ func TestRetainRemove(t *testing.T) {
 
 	// Run test cases
 	for _, test := range tests {
-		result, _ := RetainRemove(test.input, test.retain, test.remove)
+		result, _ := RetainRemove(test.input, test.retain, test.remove, 0)
 		if utils.CheckAreMapsEqual(result, test.output) == false {
 			t.Errorf("RetainRemove() failed - expected: %v, got: %v", test.output, result)
 		}
@@ -166,7 +166,7 @@ func TestEncodeInputMap(t *testing.T) {
 
 	// Define a test case
 	tests := testCases{
-		{map[string]int{"a&a": 1, "a'a": 3, "a&':,.<>": 4}, map[string]int{"a%26%27%3A%2C.%3C%3E": 4, "a%26a": 1, "a%27a": 3, "a&#39;a": 3, "a&amp;&#39;:,.&lt;&gt;": 4, "a&amp;a": 1}},
+		{map[string]int{"a&a": 1, "a'a": 3, "a&':,.<>": 4}, map[string]int{"a&#39;a": 3, "a&amp;&#39;:,.&lt;&gt;": 4, "a&amp;a": 1}},
 	}
 
 	// Run test cases
@@ -186,28 +186,25 @@ func TestEncodeString(t *testing.T) {
 		input   string
 		output1 string
 		output2 string
-		output3 string
 	}
 
 	type testCases []testCase
 
 	// Define a test case
 	tests := testCases{
-		{"a&a", "a%26a", "a&amp;a", ""},
-		{"a'a", "a%27a", "a&#39;a", ""},
-		{"a&':,.<>", "a%26%27%3A%2C.%3C%3E", "a&amp;&#39;:,.&lt;&gt;", ""},
+		{"a&a", "a&amp;a", ""},
+		{"a'a", "a&#39;a", ""},
+		{"a&':,.<>", "a&amp;&#39;:,.&lt;&gt;", ""},
 	}
 
 	// Run test cases
 	for _, test := range tests {
-		result1, result2, result3 := EncodeString(test.input)
+		result1, result2 := EncodeString(test.input)
 
 		if result1 != test.output1 {
 			t.Errorf("EncodeString() failed - expected: %v, got: %v", test.output1, result1)
 		} else if result2 != test.output2 {
 			t.Errorf("EncodeString() failed - expected: %v, got: %v", test.output2, result2)
-		} else if result3 != test.output3 {
-			t.Errorf("EncodeString() failed - expected: %v, got: %v", test.output3, result3)
 		}
 
 	}
@@ -226,8 +223,8 @@ func TestDecodeInputMap(t *testing.T) {
 
 	// Define a test case
 	tests := testCases{
-		{map[string]int{"a%26%27%3A%2C.%3C%3E": 4, "a%26a": 1, "a%27a": 3, "a&#39;a": 3, "a&amp;&#39;:,.&lt;&gt;": 4, "a&amp;a": 1}, map[string]int{"a&a": 1, "a'a": 3, "a&':,.<>": 4}},
-		{map[string]int{"a%26a": 1, "a%27a": 3, "a&#39;a": 3}, map[string]int{"a&a": 1, "a'a": 3}},
+		{map[string]int{"a&#39;a": 3, "a&amp;&#39;:,.&lt;&gt;": 4, "a&amp;a": 1}, map[string]int{"a&a": 1, "a'a": 3, "a&':,.<>": 4}},
+		{map[string]int{"a&#39;a": 3}, map[string]int{"a'a": 3}},
 		// The following test works but is not correct because the output is
 		// wrong. The correct output should be "a爱test". This works in
 		// production tests but not in the unit tests.
@@ -251,34 +248,28 @@ func TestDecodeString(t *testing.T) {
 		input   string
 		output1 string
 		output2 string
-		output3 string
 	}
 
 	type testCases []testCase
 
 	// Define a test case
 	tests := testCases{
-		{"a&amp;&#39;", "", "a&'", ""},
-		{"a%26a", "a&a", "", ""},
-		{"a%27a", "a'a", "", ""},
-		{"a&amp;&#39;:,.&lt;&gt;", "", "a&':,.<>", ""},
-		{"a%26%27%3A%2C.%3C%3E", "a&':,.<>", "", ""},
+		{"a&amp;&#39;", "a&'", ""},
+		{"a&amp;&#39;:,.&lt;&gt;", "a&':,.<>", ""},
 		// The following test works but is not correct because the output is
 		// wrong. The correct output should be "a爱test". This works in
 		// production tests but not in the unit tests.
-		{"a\u7231test", "", "", ""},
+		{"a\u7231test", "", ""},
 	}
 
 	// Run test cases
 	for _, test := range tests {
-		result1, result2, result3 := DecodeString(test.input)
+		result1, result2 := DecodeString(test.input)
 
 		if result1 != test.output1 {
 			t.Errorf("DecodeString() failed - expected: %v, got: %v", test.output1, result1)
 		} else if result2 != test.output2 {
 			t.Errorf("DecodeString() failed - expected: %v, got: %v", test.output2, result2)
-		} else if result3 != test.output3 {
-			t.Errorf("DecodeString() failed - expected: %v, got: %v", test.output3, result3)
 		}
 
 	}

@@ -180,7 +180,7 @@ func AppendRules(items map[string]int, operation string, bypass bool, debug bool
 	returnMap = make(map[string]int)
 	switch operation {
 	// remove will remove characters then append
-	case "append-remove", "ar":
+	case "rule-append-remove", "append-remove":
 		for key, value := range items {
 			rule := CharToRule(key, "$")
 			remove := LenToRule(key, "]")
@@ -198,28 +198,6 @@ func AppendRules(items map[string]int, operation string, bypass bool, debug bool
 				returnMap[appendRemoveRule] = value
 			} else if appendRemoveRule != "" && bypass {
 				fmt.Println(appendRemoveRule)
-			}
-		}
-		return returnMap
-	// shift will shift characters back to front then append
-	case "append-shift", "as":
-		for key, value := range items {
-			rule := CharToRule(key, "$")
-			shift := LenToRule(key, "}")
-			appendShiftRule := FormatCharToRuleOutput(shift, rule)
-
-			if debug {
-				fmt.Fprintf(os.Stderr, "[?] AppendRules (shift):\n")
-				fmt.Fprintf(os.Stderr, "Key: %s\n", key)
-				fmt.Fprintf(os.Stderr, "Rule: %s\n", rule)
-				fmt.Fprintf(os.Stderr, "Shift: %s\n", shift)
-				fmt.Fprintf(os.Stderr, "AppendShiftRule: %s\n", appendShiftRule)
-			}
-
-			if appendShiftRule != "" && !bypass {
-				returnMap[appendShiftRule] = value
-			} else if appendShiftRule != "" && bypass {
-				fmt.Println(appendShiftRule)
 			}
 		}
 		return returnMap
@@ -261,7 +239,7 @@ func PrependRules(items map[string]int, operation string, bypass bool, debug boo
 	returnMap = make(map[string]int)
 	switch operation {
 	// remove will remove characters then prepend
-	case "prepend-remove", "pr":
+	case "rule-prepend-remove", "prepend-remove":
 		for key, value := range items {
 			rule := CharToRule(utils.ReverseString(key), "^")
 			remove := LenToRule(key, "[")
@@ -282,25 +260,24 @@ func PrependRules(items map[string]int, operation string, bypass bool, debug boo
 			}
 		}
 		return returnMap
-	// shift will shift characters front to back then prepend
-	case "prepend-shift", "ps":
+	case "rule-prepend-toggle", "prepend-toggle":
 		for key, value := range items {
 			rule := CharToRule(utils.ReverseString(key), "^")
-			shift := LenToRule(key, "{")
-			prependShiftRule := FormatCharToRuleOutput(shift, rule)
+			toggle := StringToToggleRule("A", "T", len(key))
+			prependToggleRule := FormatCharToRuleOutput(rule, toggle)
 
 			if debug {
-				fmt.Fprintf(os.Stderr, "[?] PrependRules (shift):\n")
+				fmt.Fprintf(os.Stderr, "[?] PrependRules (toggle):\n")
 				fmt.Fprintf(os.Stderr, "Key: %s\n", key)
 				fmt.Fprintf(os.Stderr, "Rule: %s\n", rule)
-				fmt.Fprintf(os.Stderr, "Shift: %s\n", shift)
-				fmt.Fprintf(os.Stderr, "PrependShiftRule: %s\n", prependShiftRule)
+				fmt.Fprintf(os.Stderr, "Toggle: %s\n", toggle)
+				fmt.Fprintf(os.Stderr, "PrependToggleRule: %s\n", prependToggleRule)
 			}
 
-			if prependShiftRule != "" && !bypass {
-				returnMap[prependShiftRule] = value
-			} else if prependShiftRule != "" && bypass {
-				fmt.Println(prependShiftRule)
+			if prependToggleRule != "" && !bypass {
+				returnMap[prependToggleRule] = value
+			} else if prependToggleRule != "" && bypass {
+				fmt.Println(prependToggleRule)
 			}
 		}
 		return returnMap

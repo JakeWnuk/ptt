@@ -1,5 +1,5 @@
 # Password Transformation Tool (PTT) Usage Guide
-## Version 0.2.5
+## Version 0.3.0
 
 ### Table of Contents
 #### Getting Started
@@ -7,8 +7,7 @@
 2. [Installation](#installation)
 3. [Usage](#usage)
 4. [Examples](#examples)
-5. [Contributing](#contributing)
-6. [License](#license)
+5. [License](#license)
 
 #### Mask Creation Guide
 1. [Mask Creation Introduction](#mask-creation-introduction)
@@ -56,13 +55,11 @@ read from multiple sources at the same time. The tool reads all input to
 a single data object and then processes the data object with the specified
 transformations.
 
-The tool can support multibyte characters in all transformations and does *not*
-convert `$HEX[...]` formatted strings to their original characters before use
-in a transformation.
-
-The output always contains no duplicates and is sorted by frequency of
+The output contains no duplicates and is sorted by frequency of
 occurrence. The output can be shown as is, with frequency counts, as a simple
-statistics report, or as a verbose statistics report.
+statistics report, or as a verbose statistics report. The tool also supports template files,
+loading directories and files, chaining input from multiple sessions, JSON output,
+debugging levels, and other quality of life features.
 
 ### Installation
 
@@ -89,15 +86,16 @@ git clone https://github.com/JakeWnuk/ptt && cd ptt && docker build -t ptt . && 
 ### Usage
 
 The tool can read input from standard input, files, or URLs and can read from
-multiple sources at the same time. The tool can also read additional files in a
-similar manner for some other options.
+multiple sources at the same time. The tool can also read additional files for
+some transformation modes.
 
 There are some additional notes when importing data:
 - Check for hidden characters in files that may cause issues. `Dos2unix` can be used to remove these characters.
-- When reading from standard input, the tool can detect chaining `ptt` commands
-  when the `-v` flag is used. This can be used to pipe multiple commands together.
+- When reading from standard input, the tool can detect chaining `ptt`
+  commands when the `-v` flag is used. This can be used to pipe multiple commands together without losing frequency data.
 - When reading from files, the tool can detect when `ptt` JSON output is used as input and will parse the JSON data.
-- The `-b` flag can be used to bypass map creation and use stdout as primary output. This can be useful for working with large datasets. If the `-b` flag is used, the final output will be empty and all filtering and duplication removal will be disabled.
+- The `-b` flag can be used to bypass map creation and use stdout as primary output. This can be useful for working with large datasets.
+    - If the `-b` flag is used, the final output will be empty and all filtering and duplication removal will be disabled.
 - The `-d [0-2]` flag can be used to enable debug output. This will show the data
   object after all transformations have been applied. There are two (2) levels
   of debug output that can be used.
@@ -117,12 +115,13 @@ These flags work with files and directories.
 - `-b`: Bypass map creation and use stdout as primary output.
 - `-d`: Enable debug mode with verbosity levels [0-2].
 - `-f`: Read additional files for input.
-- `-i`: Starting index for transformations if applicable. Accepts ranges separated by '-'. (default 0)
+- `-i`: Starting index for transformations if applicable. Accepts ranges separated by '-'.
 - `-k`: Only keep items in a file.
-- `-l`: Keeps output equal to or within a range of lengths. Accepts ranges separated by '-'. (default 0)
+- `-l`: Length of input to accept into transformation. Accepts ranges separated by '-'.
 - `-m`: Minimum numerical frequency to include in output.
 - `-n`: Maximum number of items to display in verbose statistics output. (default 25)
 - `-o`: Output to JSON file in addition to stdout.
+- `-p`: Change parsing mode for URL input. [0 = Strict, 1 = Permissive, 2 = Maximum].
 - `-r`: Only keep items not in a file.
 - `-rm`: Replacement mask for transformations if applicable. (default "uldsb")
 - `-t`: Transformation to apply to input.
@@ -135,54 +134,27 @@ These flags work with files and directories.
 
 #### Transformations:
 The following transformations can be used with the `-t` flag:
-- `append`: Transforms input into append rules.
-- `append-remove`: Transforms input into append-remove rules
-- `append-shift`: Transforms input into append-shift rules.
-- `prepend`: Transforms input into prepend rules.
-- `prepend-remove`: Transforms input into prepend-remove rules.
-- `prepend-shift`: Transforms input into prepend-shift rules.
-- `insert`: Transforms input into insert rules starting at index.
-- `overwrite`: Transforms input into overwrite rules starting at index.
-- `toggle`: Transforms input into toggle rules starting at index.
-- `encode`: Transforms input by URL, HTML, and Unicode escape encoding.
-- `decode`: Transforms input by URL, HTML, and Unicode escape decoding.
+- `rule-append`: Transforms input into append rules.
+- `rule-append-remove`: Transforms input into append-remove rules
+- `rule-prepend`: Transforms input into prepend rules.
+- `rule-prepend-remove`: Transforms input into prepend-remove rules.
+- `rule-prepend-toggle`: Transforms input into prepend-toggle rules.
+- `rule-insert`: Transforms input into insert rules starting at index.
+- `rule-overwrite`: Transforms input into overwrite rules starting at index.
+- `rule-toggle`: Transforms input into toggle rules starting at index.
+- `encode`: Transforms input by HTML and Unicode escape encoding.
+- `decode`: Transforms input by HTML and Unicode escape decoding.
 - `hex`: Transforms input by encoding strings into $HEX[...] format.
 - `dehex`: Transforms input by decoding $HEX[...] formatted
 - `mask`: Transforms input by masking characters with provided mask.
-- `remove`: Transforms input by removing characters with provided mask characters.
+- `mask-remove`: Transforms input by removing characters with provided mask characters.
 - `substring`: Transforms input by extracting substrings starting at index and ending at index.
 - `mask-retain`: Transforms input by creating masks that still retain strings from file.
 - `mask-match`: Transforms input by keeping only strings with matching masks from a mask file
-- `swap`: Transforms input by swapping tokens with exact matches from a ':' separated file.
-- `pop`: Transforms input by generating tokens from popping strings at character boundaries.
+- `mask-swap`: Transforms input by swapping tokens with exact matches from a ':' separated file.
+- `mask-pop`: Transforms input by generating tokens from popping strings at character boundaries.
 - `mask-swap`: Transforms input by swapping tokens from a partial mask file and a input file.
 - `passphrase`: Transforms input by randomly generating passphrases with a given number of words and separators from a file.
-
-The modes also have aliases that can be used with the `-t` flag instead of the
-keywords above:
-- `append`: `a`
-- `append-remove`: `ar`
-- `append-shift`: `as`
-- `prepend`: `p`
-- `prepend-remove`: `pr`
-- `prepend-shift`: `ps`
-- `insert`: `i`
-- `overwrite`: `o`
-- `toggle`: `t`
-- `encode`: `e`
-- `decode`: `de`
-- `hex`: `h`, `rehex`
-- `dehex`: `dh`, `unhex`
-- `mask`: `m`, `partial-mask`, `partial`
-- `remove`: `rm`, `remove-all`, `delete`, `delete-all`
-- `replace`: `rp`, `rep`
-- `substring`: `sub`, `sb`
-- `retain`: `r`, `retain-mask`,
-- `match`: `mt`, `match-mask`
-- `swap`: `sw`, `swp`
-- `pop`: `po`, `split`, `boundary-split`, `boundary-pop`, `pop-split`, `split-pop`
-- `mask-swap`: `ms`, `shuf`, `shuffle`, `token-swap`
-- `passphrase`: `pp`, `phrase`
 
 ### Examples
 
@@ -192,6 +164,9 @@ keywords above:
 - `ptt -u https://example.com/input.txt`: Read input from a URL.
 - `ptt -f input2.txt -f input3.txt -f input4.txt`: Read additional files for input.
 - `cat input2.txt | ptt -f input3.txt -u https://example.com/input4.txt`: Read input from standard input and additional files and URLs.
+
+>[!NOTE]
+>The `-p` flag can be used to change the parsing mode for URLs. The default mode is `0` and will use a narrow character set to parse text from URLs. The `1` mode will use a larger character set to parse text from URLs and include additonal parsing by default. The `2` mode will use the same character set as `1` but will also include additional parsing options for maximum parsing including n-grams and other parsing options.
 
 #### Transformation Formats:
 - `ptt -t [transformation]`: Apply a transformation to input.
@@ -206,9 +181,9 @@ keywords above:
 - `ptt -k keep.txt`: Keep only items in a file.
 - `ptt -r remove.txt`: Keep only items not in a file.
 - `ptt -k keep.txt -r remove.txt`: Keep only items in a file and not in another.
-- `ppt -l 8`: Keep only items equal to a length.
-- `ppt -l 8-12`: Keep only items within a range of lengths.
-- `ptt -m 10`: Keep only items with a minimum frequency.
+- `ppt -l 8`: Only allow items equal to a length for input.
+- `ppt -l 8-12`: Keep only items within a range of lengths for input.
+- `ptt -m 10`: Keep only items with a minimum frequency from output.
 
 #### Debug Formats:
 - `ptt -d 1`: Enable debug mode with verbosity level 1.
@@ -333,11 +308,6 @@ yahoo [8942]===============
 1985  [8513]==============
 ```
 
-### Contributing
-Contributions are welcome and encouraged. Please open an issue or pull request
-if you have any suggestions or improvements. Please follow the code of conduct
-when contributing to this project.
-
 ### License
 This project is licensed under the MIT License - see the LICENSE file for details.
 
@@ -381,7 +351,7 @@ output.
 Masks can be matched to a given string to determine if the string matches the
 mask. The syntax to match a mask is as follows:
 ```
-ptt -f <input_file> -t match -tf <mask_file>
+ptt -f <input_file> -t mask-match -tf <mask_file>
 ```
 Where `<mask_file>` is the file containing the mask to match. The mask file
 should only contain valid masks. The output will be all of the strings that
@@ -391,7 +361,7 @@ match the masks.
 Characters can be removed from a string by a mask. The syntax to remove
 characters by mask is as follows:
 ```
-ptt -f <input_file> -t remove -rm <mask_characters>
+ptt -f <input_file> -t mask-remove -rm <mask_characters>
 ```
 Where `<mask_characters>` is the mask to remove from the string. The output will
 be the string with the characters removed.
@@ -400,7 +370,7 @@ be the string with the characters removed.
 Retain masks can be created to retain only certain keywords in a string. The
 syntax to create a retain mask is as follows:
 ```
-ptt -f <input_file> -t retain -rm <mask_characters> -tf <keep_file>
+ptt -f <input_file> -t mask-retain -rm <mask_characters> -tf <keep_file>
 ```
 Where `<mask_characters>` is the mask to retain and `<keep_file>` is the file
 containing the keywords to retain. The output will be the mask with only the
@@ -414,10 +384,9 @@ rules. There are several types of rules that can be created using PTT:
 
 - `Append Rules`: Append a string to the end of the password.
 - `Append Remove Rules`: Remove characters from the end of the password before appending a string.
-- `Append Shift Rules`: Shift the characters of the password to the right before appending a string.
 - `Prepend Rules`: Prepend a string to the beginning of the password.
 - `Prepend Remove Rules`: Remove characters from the beginning of the password before prepending a string.
-- `Prepend Shift Rules`: Shift the characters of the password to the left before prepending a string.
+- `Prepend Toggle Rules`: Toggle the case of the password where a string is prepended.
 - `Toggle Rules`: Toggle the case of the password.
 - `Insert Rules`: Insert a string at a specific position in the password.
 - `Overwrite Rules`: Overwrite a string at a specific position in the password.
@@ -431,47 +400,42 @@ transformation can be used at a time.
 ### Append Rules
 Append rules are used to append a string to the end of the password. The syntax for an append rule is as follows:
 ```
-ptt -f <input_file> -t append
+ptt -f <input_file> -t rule-append
 ```
 
-The append mode also has two additional options:
+The append mode also has additional options:
 - `append-remove`: Remove characters from the end of the password before appending a string.
-- `append-shift`: Shift the characters of the password to the right before appending a string.
 
 The syntax for an append-remove rule is as follows:
 ```
-ptt -f <input_file> -t append-remove
-```
-
-The syntax for an append-shift rule is as follows:
-```
-ptt -f <input_file> -t append-shift
+ptt -f <input_file> -t rule-append-remove
 ```
 
 ### Prepend Rules
 Prepend rules are used to prepend a string to the beginning of the password. The syntax for a prepend rule is as follows:
 ```
-ptt -f <input_file> -t prepend
+ptt -f <input_file> -t rule-prepend
 ```
 
 The prepend mode also has two additional options:
 - `prepend-remove`: Remove characters from the beginning of the password before prepending a string.
-- `prepend-shift`: Shift the characters of the password to the left before prepending a string.
 
 The syntax for a prepend-remove rule is as follows:
 ```
-ptt -f <input_file> -t prepend-remove
+ptt -f <input_file> -t rule-prepend-remove
 ```
 
-The syntax for a prepend-shift rule is as follows:
+- `prepend-toggle`: Toggle the case of the password where a string is  prepended. Creating camel and pascal case passwords.
+
+The syntax for a prepend-toggle rule is as follows:
 ```
-ptt -f <input_file> -t prepend-shift
+ptt -f <input_file> -t rule-prepend-toggle
 ```
 
 ### Toggle Rules
 Toggle rules are used to toggle the case of the password. The syntax for a toggle rule is as follows:
 ```
-ptt -f <input_file> -t toggle -i <index>
+ptt -f <input_file> -t rule-toggle -i <index>
 ```
 Where `<index>` is the starting index of the toggle pattern. If no index is provided,
 the toggle pattern will start at the beginning of the password. The `<index>`
@@ -481,7 +445,7 @@ print output for the toggle transformation starting from index 1 to 5.
 ### Insert Rules
 Insert rules are used to insert a string at a specific position in the password. The syntax for an insert rule is as follows:
 ```
-ptt -f <input_file> -t insert -i <index>
+ptt -f <input_file> -t rule-insert -i <index>
 ```
 Where `<index>` is the position where the string will be inserted. If no index is provided,
 the string will be inserted at the beginning of the password. The `<index>`
@@ -491,7 +455,7 @@ print output for the insert transformation starting from index 1 to 5.
 ### Overwrite Rules
 Overwrite rules are used to overwrite a string at a specific position in the password. The syntax for an overwrite rule is as follows:
 ```
-ptt -f <input_file> -t overwrite -i <index>
+ptt -f <input_file> -t rule-overwrite -i <index>
 ```
 Where `<index>` is the position where the string will be overwritten. If no index is provided,
 the string will be overwritten at the beginning of the password. The `<index>`
@@ -529,7 +493,7 @@ ptt -f <input-file> -t swap -tf <replacement-file>
 ```
 The replacement file should contain the strings to be transformed as `PRIOR:POST`
 pairs. The replacements will be applied to the all instance in each line but
-only one swap is applied at once. This mode is ideal for subsituting words or characters in a string.
+only one swap is applied at once. This mode is ideal for substituting words or characters in a string.
 
 ### Replacing Text and Characters
 The `replace` module replaces text and characters in a string. This mode replaces all strings with all matches from a ':' separated file. The syntax is as follows:
@@ -545,7 +509,7 @@ a string.
 The `pop` module generates tokens by popping strings at character boundaries.
 The syntax is as follows:
 ```
-ptt -f <input-file> -t pop -rm <mask-characters>
+ptt -f <input-file> -t mask-pop -rm <mask-characters>
 ```
 Where `<mask_characters>` can be any of the following:
 - `u`: Uppercase characters
@@ -566,7 +530,7 @@ syntax is as follows:
 ptt -f <input-file> -t mask-swap -tf <replacement-file>
 ```
 > [!NOTE]
-> The input for `mask-swap` is partial masks from `retain`! This is different from most other modes.
+> The input for `mask-swap` is partial masks from `mask-retain`! This is different from most other modes.
 
 The replacement file does not need to be in any specific format. The
 replacements will be applied to the first instance in each line. The
@@ -600,7 +564,7 @@ of passphrases generated.
 This document describes the ways to use PTT to create miscellaneous transformations.
 There are several types that can be created using PTT:
 
-- `Encoding and Decoding`: This transforms input to and from URL, HTML, and Unicode escaped strings.
+- `Encoding and Decoding`: This transforms input to and from HTML and Unicode escaped strings.
 - `Hex and Dehex`: This transforms input to and from `$HEX[....]` strings.
 - `Substrings`: This extracts substrings from the input based on position.
 
@@ -611,7 +575,7 @@ transformation can be used at a time.
 > Ensure input is provided in the correct format and does not contain hidden characters. `Dos2Unix` can be used to convert the file to proper format if needed.
 
 ### Encoding and Decoding
-This mode allows encoding and decoding of input to and from URL, HTML, and Unicode escaped strings.
+This mode allows encoding and decoding of input to and from HTML and Unicode escaped strings.
 The syntax is as follows:
 ```
 ptt -f <input_file> -t encode
@@ -624,7 +588,6 @@ The following table shows the supported transformations:
 
 | Transformation | Description | Input Example | Output Example |
 | --- | --- | --- | --- |
-| `url` | URL encoding | `https://www.example.com` | `https%3A%2F%2Fwww.example.com` |
 | `html` | HTML encoding | `<html>` | `&lt;html&gt;` |
 | `unicode` | Unicode encoding | `Hello😎` | `Hello\u1f60e` |
 
