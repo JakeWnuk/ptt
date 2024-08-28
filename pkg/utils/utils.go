@@ -252,7 +252,7 @@ func ProcessURL(url string, ch chan<- string, wg *sync.WaitGroup, parsingMode in
 	defer wg.Done()
 
 	var resp *http.Response
-	throttleInterval := 10
+	throttleInterval := 30
 	throttleBodyDetected := false
 	body := []byte{}
 	source := rand.NewSource(time.Now().UnixNano())
@@ -274,7 +274,7 @@ func ProcessURL(url string, ch chan<- string, wg *sync.WaitGroup, parsingMode in
 	}
 
 	if sleepOnStart {
-		time.Sleep(time.Second * time.Duration(throttleInterval) * time.Duration(r.Float64()))
+		time.Sleep(time.Second * time.Duration(throttleInterval) * time.Duration(r.Intn(10)))
 	}
 
 	for attempts := 0; attempts <= maxRetries; attempts++ {
@@ -315,7 +315,7 @@ func ProcessURL(url string, ch chan<- string, wg *sync.WaitGroup, parsingMode in
 
 		fmt.Fprintf(os.Stderr, "[+] Response Code: %s. Content-Type: %s. Throttle Body Detected: %t.\n", resp.Status, resp.Header.Get("Content-Type"), throttleBodyDetected)
 		if resp.StatusCode == http.StatusTooManyRequests || throttleBodyDetected {
-			time.Sleep(time.Second * time.Duration(throttleInterval))
+			time.Sleep(time.Second * time.Duration(throttleInterval) * time.Duration(r.Intn(10)))
 			continue
 		}
 
