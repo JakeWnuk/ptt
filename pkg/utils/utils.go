@@ -287,7 +287,9 @@ func ProcessURL(url string, ch chan<- string, wg *sync.WaitGroup, parsingMode in
 		req.Header.Set("User-Agent", randomUserAgent)
 		resp, err = client.Do(req)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "[!] Error fetching URL %s\n", url)
+			if debugMode >= 1 {
+				fmt.Fprintf(os.Stderr, "[!] Error fetching URL %s\n", url)
+			}
 			continue
 		}
 		defer resp.Body.Close()
@@ -311,8 +313,10 @@ func ProcessURL(url string, ch chan<- string, wg *sync.WaitGroup, parsingMode in
 	var err error
 	body, err = io.ReadAll(resp.Body)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "[!] Error reading response body from URL %s\n", url)
-		os.Exit(1)
+		if debugMode >= 1 {
+			fmt.Fprintf(os.Stderr, "[!] Error reading response body from URL %s\n", url)
+		}
+		return
 	}
 	text := string(body)
 	text = html.UnescapeString(text)
@@ -325,7 +329,7 @@ func ProcessURL(url string, ch chan<- string, wg *sync.WaitGroup, parsingMode in
 		doc, err := html.Parse(strings.NewReader(text))
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "[!] Error parsing HTML from URL %s\n", url)
-			os.Exit(1)
+			return
 		}
 
 		// Traverse the HTML tree and extract the text
@@ -350,16 +354,10 @@ func ProcessURL(url string, ch chan<- string, wg *sync.WaitGroup, parsingMode in
 		fmt.Fprintf(os.Stderr, "[?] URL: %s\n", url)
 		fmt.Fprintf(os.Stderr, "[?] Content-Type: %s\n", contentType)
 		fmt.Fprintf(os.Stderr, "[?] Parsing Mode: %d\n", parsingMode)
-		if resp.StatusCode != http.StatusOK {
-			fmt.Fprintf(os.Stderr, "[!] Error fetching URL %s\n", url)
-		}
 	} else if debugMode == 2 {
 		fmt.Fprintf(os.Stderr, "[?] URL: %s\n", url)
 		fmt.Fprintf(os.Stderr, "[?] Content-Type: %s\n", contentType)
 		fmt.Fprintf(os.Stderr, "[?] Parsing Mode: %d\n", parsingMode)
-		if resp.StatusCode != http.StatusOK {
-			fmt.Fprintf(os.Stderr, "[?] Error fetching URL %s\n", url)
-		}
 		fmt.Fprintf(os.Stderr, "[?] Line Count: %d\n", len(lines))
 		fmt.Fprintf(os.Stderr, "[?] Sample Lines:\n")
 		for i := 0; i < 5; i++ {
