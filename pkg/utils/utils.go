@@ -316,7 +316,7 @@ func ProcessURL(url string, ch chan<- string, wg *sync.WaitGroup, parsingMode in
 		if debugMode >= 1 {
 			fmt.Fprintf(os.Stderr, "[!] Error reading response body from URL %s\n", url)
 		}
-		return
+		os.Exit(1)
 	}
 	text := string(body)
 	text = html.UnescapeString(text)
@@ -329,7 +329,7 @@ func ProcessURL(url string, ch chan<- string, wg *sync.WaitGroup, parsingMode in
 		doc, err := html.Parse(strings.NewReader(text))
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "[!] Error parsing HTML from URL %s\n", url)
-			return
+			os.Exit(1)
 		}
 
 		// Traverse the HTML tree and extract the text
