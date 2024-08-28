@@ -253,7 +253,6 @@ func ProcessURL(url string, ch chan<- string, wg *sync.WaitGroup, parsingMode in
 
 	var resp *http.Response
 	throttleInterval := 30
-	throttleBodyDetected := false
 	body := []byte{}
 	source := rand.NewSource(time.Now().UnixNano())
 	r := rand.New(source)
@@ -278,7 +277,6 @@ func ProcessURL(url string, ch chan<- string, wg *sync.WaitGroup, parsingMode in
 	}
 
 	for attempts := 0; attempts <= maxRetries; attempts++ {
-		fmt.Fprintf(os.Stderr, "[+] Requesting %s. Attempt [%d/%d].\n", url, attempts, maxRetries)
 
 		// Set a random user agent
 		randomUserAgent := userAgents[r.Intn(len(userAgents))]
@@ -301,7 +299,7 @@ func ProcessURL(url string, ch chan<- string, wg *sync.WaitGroup, parsingMode in
 			throttleInterval++
 		}
 
-		fmt.Fprintf(os.Stderr, "[+] Response Code: %s. Content-Type: %s. Throttle Body Detected: %t.\n", resp.Status, resp.Header.Get("Content-Type"), throttleBodyDetected)
+		fmt.Fprintf(os.Stderr, "[+] Requested %s. Attempt [%d/%d]. Response Code: %s. Content-Type: %s. \n", url, attempts, maxRetries, resp.Status, resp.Header.Get("Content-Type"))
 		if resp.StatusCode == http.StatusTooManyRequests {
 			time.Sleep(time.Second * time.Duration(throttleInterval) * time.Duration(r.Intn(10)))
 			continue
