@@ -253,10 +253,9 @@ func ProcessURL(url string, ch chan<- string, wg *sync.WaitGroup, parsingMode in
 
 	var resp *http.Response
 	throttleInterval := 30
-	body := []byte{}
 	source := rand.NewSource(time.Now().UnixNano())
 	r := rand.New(source)
-	const maxRetries = 4
+	const maxRetries = 3
 	userAgents := []string{
 		"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3",
 		"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0.3 Safari/605.1.15",
@@ -287,11 +286,19 @@ func ProcessURL(url string, ch chan<- string, wg *sync.WaitGroup, parsingMode in
 		req.Header.Set("User-Agent", randomUserAgent)
 		resp, err = client.Do(req)
 		if err != nil {
-			if debugMode >= 1 {
+			if debugMode >= 2 {
 				fmt.Fprintf(os.Stderr, "[!] Error fetching URL %s\n", url)
 			}
 			continue
 		}
+
+		if resp == nil {
+			if debugMode >= 2 {
+				fmt.Fprintf(os.Stderr, "[!] Error no response from URL %s\n", url)
+			}
+			continue
+		}
+
 		defer resp.Body.Close()
 
 		// Check the response code for throttling
@@ -307,16 +314,38 @@ func ProcessURL(url string, ch chan<- string, wg *sync.WaitGroup, parsingMode in
 			continue
 		}
 
+		if resp.StatusCode != http.StatusOK {
+			if resp.StatusCode == http.StatusServiceUnavailable || resp.StatusCode == http.StatusUnauthorized || resp.StatusCode == http.StatusForbidden {
+				attempts = maxRetries + 1
+
+				if debugMode >= 2 {
+					fmt.Fprintf(os.Stderr, "[!] Error fetching URL service unavailable, unauthorized, or forbidden %s\n", url)
+				}
+				continue
+			}
+
+			if debugMode >= 2 {
+				fmt.Fprintf(os.Stderr, "[!] Error unexpected response code %s. retrying... %s\n", resp.Status, url)
+			}
+			continue
+		}
+
 		break
 	}
 
-	var err error
-	body, err = io.ReadAll(resp.Body)
+	if resp == nil {
+		if debugMode >= 1 {
+			fmt.Fprintf(os.Stderr, "[!] Error no response from URL %s\n", url)
+		}
+		return
+	}
+
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		if debugMode >= 1 {
 			fmt.Fprintf(os.Stderr, "[!] Error reading response body from URL %s\n", url)
 		}
-		os.Exit(1)
+		return
 	}
 	text := string(body)
 	text = html.UnescapeString(text)
@@ -328,8 +357,10 @@ func ProcessURL(url string, ch chan<- string, wg *sync.WaitGroup, parsingMode in
 		// Parse the HTML
 		doc, err := html.Parse(strings.NewReader(text))
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "[!] Error parsing HTML from URL %s\n", url)
-			os.Exit(1)
+			if debugMode >= 1 {
+				fmt.Fprintf(os.Stderr, "[!] Error parsing HTML from URL %s\n", url)
+			}
+			return
 		}
 
 		// Traverse the HTML tree and extract the text
