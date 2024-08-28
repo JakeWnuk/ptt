@@ -157,12 +157,28 @@ func ReadURLsToMap(urls []string, parsingMode int, debugMode int) (map[string]in
 		}
 	}()
 
-	for _, url := range urls {
-		if IsValidURL(url) {
+	prevURL := ""
+	sleepOnStart := false
+	for _, iURL := range urls {
+		if IsValidURL(iURL) {
+
+			parsedURL, err := url.Parse(iURL)
+			if err != nil {
+				fmt.Println("Error parsing URL:", err)
+				continue
+			}
+			if parsedURL.Host == prevURL {
+				sleepOnStart = true
+			} else {
+				sleepOnStart = false
+			}
+			prevURL = parsedURL.Host
+
 			wg.Add(1)
-			go ProcessURL(url, ch, &wg, parsingMode, debugMode)
-		} else if IsFileSystemDirectory(url) {
-			files, err := GetFilesInDirectory(url)
+			go ProcessURL(iURL, ch, &wg, parsingMode, debugMode, sleepOnStart)
+
+		} else if IsFileSystemDirectory(iURL) {
+			files, err := GetFilesInDirectory(iURL)
 			if err != nil {
 				return nil, err
 			}
@@ -170,11 +186,12 @@ func ReadURLsToMap(urls []string, parsingMode int, debugMode int) (map[string]in
 				wg.Add(1)
 				go ProcessURLFile(file, ch, &wg, parsingMode, debugMode)
 			}
-		} else if IsValidFile(url) {
+		} else if IsValidFile(iURL) {
 			wg.Add(1)
-			go ProcessURLFile(url, ch, &wg, parsingMode, debugMode)
+			go ProcessURLFile(iURL, ch, &wg, parsingMode, debugMode)
 		} else {
-			return nil, fmt.Errorf("invalid input: %s", url)
+			fmt.Fprintf(os.Stderr, "[!] Rejected URL or file: %s\n", iURL)
+			return nil, fmt.Errorf("invalid input: %s", iURL)
 		}
 	}
 
@@ -226,18 +243,21 @@ func CombineMaps(maps ...map[string]int) map[string]int {
 //	parsingMode (int): Change parsing mode for URL input. [0 = Strict,
 //	1 = Permissive, 2 = Maximum] [0-2].
 //	debugMode (int): A flag to print debug information
+//	sleepOnStart (bool): A flag to sleep before starting the request
 //
 // Returns:
 //
 //	None
-func ProcessURL(url string, ch chan<- string, wg *sync.WaitGroup, parsingMode int, debugMode int) {
-	const maxRetries = 3
+func ProcessURL(url string, ch chan<- string, wg *sync.WaitGroup, parsingMode int, debugMode int, sleepOnStart bool) {
 	defer wg.Done()
 
 	var resp *http.Response
-	throttleInterval := 5
+	throttleInterval := 10
 	throttleBodyDetected := false
 	body := []byte{}
+	source := rand.NewSource(time.Now().UnixNano())
+	r := rand.New(source)
+	const maxRetries = 4
 	userAgents := []string{
 		"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3",
 		"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0.3 Safari/605.1.15",
@@ -253,12 +273,14 @@ func ProcessURL(url string, ch chan<- string, wg *sync.WaitGroup, parsingMode in
 		"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0.3 Safari/605.1.15",
 	}
 
+	if sleepOnStart {
+		time.Sleep(time.Second * time.Duration(throttleInterval) * time.Duration(r.Float64()))
+	}
+
 	for attempts := 0; attempts <= maxRetries; attempts++ {
 		fmt.Fprintf(os.Stderr, "[+] Requesting %s. Attempt [%d/%d].\n", url, attempts, maxRetries)
 
 		// Set a random user agent
-		source := rand.NewSource(time.Now().UnixNano())
-		r := rand.New(source)
 		randomUserAgent := userAgents[r.Intn(len(userAgents))]
 
 		// Fetch the URL
@@ -276,24 +298,23 @@ func ProcessURL(url string, ch chan<- string, wg *sync.WaitGroup, parsingMode in
 		if resp.StatusCode == http.StatusTooManyRequests {
 			fmt.Fprintf(os.Stderr, "[!] Throttling detected. Waiting %d seconds before retrying.\n", throttleInterval)
 			time.Sleep(time.Second * time.Duration(throttleInterval))
-			throttleInterval += 1
+			throttleInterval++
 		}
 
 		// Check the response body for throttling
-		regexThrottle := regexp.MustCompile(`(rate limit|too many requests|try again later|error|blocked|throttle|throttling|captcha|403|429|503|a lot of requests|exceeded|limit|unusual|unusual traffic|unusual activity|unusual behavior|unusual request|unusual request)`)
+		regexThrottle := regexp.MustCompile(`(rate limit|too many requests|try again later|a lot of requests|async requests|excessive requests)`)
 		body, err = io.ReadAll(resp.Body)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "[!] Error reading response body from URL %s\n", url)
 			continue
 		}
 		if regexThrottle.MatchString(string(body)) {
-			throttleInterval += 1
+			throttleInterval++
 			throttleBodyDetected = true
-			continue
 		}
 
 		fmt.Fprintf(os.Stderr, "[+] Response Code: %s. Content-Type: %s. Throttle Body Detected: %t.\n", resp.Status, resp.Header.Get("Content-Type"), throttleBodyDetected)
-		if resp.StatusCode != http.StatusOK {
+		if resp.StatusCode == http.StatusTooManyRequests || throttleBodyDetected {
 			time.Sleep(time.Second * time.Duration(throttleInterval))
 			continue
 		}
@@ -467,6 +488,9 @@ func ProcessURL(url string, ch chan<- string, wg *sync.WaitGroup, parsingMode in
 						noComma := strings.TrimRight(nGram, ",")
 						ch <- noComma
 
+						frontParse := strings.TrimLeft(nGram, ", ")
+						ch <- frontParse
+
 						noSpace := strings.ReplaceAll(nGram, " ", "")
 						ch <- noSpace
 
@@ -588,6 +612,8 @@ func ReadJSONToArray(fs models.FileSystem, filenames []string) []models.Template
 // None
 func ProcessURLFile(filePath string, ch chan<- string, wg *sync.WaitGroup, parsingMode int, debugMode int) {
 	defer wg.Done()
+	sleepOnStart := false
+	prevURL := ""
 
 	file, err := os.Open(filePath)
 	if err != nil {
@@ -600,8 +626,23 @@ func ProcessURLFile(filePath string, ch chan<- string, wg *sync.WaitGroup, parsi
 	for scanner.Scan() {
 		line := scanner.Text()
 		if IsValidURL(line) {
+
+			parsedURL, err := url.Parse(line)
+			if err != nil {
+				fmt.Println("Error parsing URL:", err)
+				continue
+			}
+			if parsedURL.Host == prevURL {
+				sleepOnStart = true
+			} else {
+				sleepOnStart = false
+			}
+			prevURL = parsedURL.Host
+
 			wg.Add(1)
-			go ProcessURL(line, ch, wg, parsingMode, debugMode)
+			go ProcessURL(line, ch, wg, parsingMode, debugMode, sleepOnStart)
+		} else {
+			fmt.Fprintf(os.Stderr, "[!] Rejected URL: %s\n", line)
 		}
 	}
 
@@ -997,8 +1038,7 @@ func IsFileSystemDirectory(path string) bool {
 	return fileInfo.IsDir()
 }
 
-// IsValidURL checks if a string is a valid URL by parsing the string and
-// checking if the scheme and host are not empty
+// IsValidURL checks if a string is a valid URL by parsing the string
 //
 // Args:
 // str (string): The URL to check
@@ -1006,8 +1046,16 @@ func IsFileSystemDirectory(path string) bool {
 // Returns:
 // bool: True if the URL is valid, false otherwise
 func IsValidURL(str string) bool {
-	u, err := url.Parse(str)
-	return err == nil && u.Scheme != "" && u.Host != ""
+	_, err := url.Parse(str)
+	if err != nil {
+		return false
+	}
+
+	if !strings.Contains(str, "http://") && !strings.Contains(str, "https://") {
+		return false
+	}
+
+	return true
 }
 
 // GetFilesInDirectory returns a slice of files in a directory
