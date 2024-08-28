@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"math/rand"
 	"net/http"
 	"net/url"
 	"os"
@@ -230,34 +231,76 @@ func CombineMaps(maps ...map[string]int) map[string]int {
 //
 //	None
 func ProcessURL(url string, ch chan<- string, wg *sync.WaitGroup, parsingMode int, debugMode int) {
-	const maxRetries = 4
+	const maxRetries = 3
 	defer wg.Done()
 
-	var err error
 	var resp *http.Response
-	for attempts := 0; attempts <= maxRetries; attempts++ {
+	throttleInterval := 5
+	throttleBodyDetected := false
+	body := []byte{}
+	userAgents := []string{
+		"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3",
+		"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0.3 Safari/605.1.15",
+		"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36",
+		"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
+		"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.135 Safari/537.36",
+		"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.96 Safari/537.36",
+		"Mozilla/5.0 (iPhone; CPU iPhone OS 14_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0 Mobile/15A372 Safari/604.1",
+		"Mozilla/5.0 (iPad; CPU OS 14_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0 Mobile/15A5341f Safari/604.1",
+		"Mozilla/5.0 (Linux; Android 11; Pixel 4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.181 Mobile Safari/537.36",
+		"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:89.0) Gecko/20100101 Firefox/89.0",
+		"Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:89.0) Gecko/20100101 Firefox/89.0",
+		"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0.3 Safari/605.1.15",
+	}
 
-		resp, err = http.Get(url)
+	for attempts := 0; attempts <= maxRetries; attempts++ {
+		fmt.Fprintf(os.Stderr, "[+] Requesting %s. Attempt [%d/%d].\n", url, attempts, maxRetries)
+
+		// Set a random user agent
+		source := rand.NewSource(time.Now().UnixNano())
+		r := rand.New(source)
+		randomUserAgent := userAgents[r.Intn(len(userAgents))]
+
+		// Fetch the URL
+		client := &http.Client{}
+		req, err := http.NewRequest("GET", url, nil)
+		req.Header.Set("User-Agent", randomUserAgent)
+		resp, err = client.Do(req)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "[!] Error fetching URL %s\n", url)
 			continue
 		}
 		defer resp.Body.Close()
 
+		// Check the response code for throttling
+		if resp.StatusCode == http.StatusTooManyRequests {
+			fmt.Fprintf(os.Stderr, "[!] Throttling detected. Waiting %d seconds before retrying.\n", throttleInterval)
+			time.Sleep(time.Second * time.Duration(throttleInterval))
+			throttleInterval += 1
+		}
+
+		// Check the response body for throttling
+		regexThrottle := regexp.MustCompile(`(rate limit|too many requests|try again later|error|blocked|throttle|throttling|captcha|403|429|503|a lot of requests|exceeded|limit|unusual|unusual traffic|unusual activity|unusual behavior|unusual request|unusual request)`)
+		body, err = io.ReadAll(resp.Body)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "[!] Error reading response body from URL %s\n", url)
+			continue
+		}
+		if regexThrottle.MatchString(string(body)) {
+			throttleInterval += 1
+			throttleBodyDetected = true
+			continue
+		}
+
+		fmt.Fprintf(os.Stderr, "[+] Response Code: %s. Content-Type: %s. Throttle Body Detected: %t.\n", resp.Status, resp.Header.Get("Content-Type"), throttleBodyDetected)
 		if resp.StatusCode != http.StatusOK {
-			time.Sleep(time.Second)
+			time.Sleep(time.Second * time.Duration(throttleInterval))
 			continue
 		}
 
 		break
 	}
 
-	// Read Body
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "[!] Error reading response body from URL %s\n", url)
-		os.Exit(1)
-	}
 	text := string(body)
 	text = html.UnescapeString(text)
 	var lines []string
@@ -411,11 +454,22 @@ func ProcessURL(url string, ch chan<- string, wg *sync.WaitGroup, parsingMode in
 				threeGrams := GenerateNGrams(sentence, 3)
 				fourGrams := GenerateNGrams(sentence, 4)
 				fiveGrams := GenerateNGrams(sentence, 5)
-				allNGrams := append(twoGrams, append(threeGrams, append(fourGrams, fiveGrams...)...)...)
+				sixGrams := GenerateNGrams(sentence, 6)
+				allNGrams := append(twoGrams, append(threeGrams, append(fourGrams, append(fiveGrams, sixGrams...)...)...)...)
 				for _, nGram := range allNGrams {
 					if nGram != "" {
 						nGram = strings.TrimSpace(nGram)
 						ch <- nGram
+
+						noDot := strings.TrimRight(nGram, ".")
+						ch <- noDot
+
+						noComma := strings.TrimRight(nGram, ",")
+						ch <- noComma
+
+						noSpace := strings.ReplaceAll(nGram, " ", "")
+						ch <- noSpace
+
 					}
 				}
 			}
@@ -533,7 +587,8 @@ func ReadJSONToArray(fs models.FileSystem, filenames []string) []models.Template
 // Returns:
 // None
 func ProcessURLFile(filePath string, ch chan<- string, wg *sync.WaitGroup, parsingMode int, debugMode int) {
-	defer wg.Done()
+	maxGoroutines := 5
+	guard := make(chan struct{}, maxGoroutines)
 
 	file, err := os.Open(filePath)
 	if err != nil {
@@ -543,17 +598,24 @@ func ProcessURLFile(filePath string, ch chan<- string, wg *sync.WaitGroup, parsi
 	defer file.Close()
 
 	scanner := bufio.NewScanner(file)
-	for scanner.Scan() {
-		line := scanner.Text()
-		if IsValidURL(line) {
-			wg.Add(1)
-			go ProcessURL(line, ch, wg, parsingMode, debugMode)
-		}
-	}
-
 	if err := scanner.Err(); err != nil {
 		fmt.Fprintf(os.Stderr, "[!] Error reading file %v: %v\n", filePath, err)
 	}
+
+	for scanner.Scan() {
+		line := scanner.Text()
+		if IsValidURL(line) {
+			guard <- struct{}{}
+			wg.Add(1)
+			go func(url string) {
+				defer wg.Done()
+				defer func() { <-guard }()
+				ProcessURL(url, ch, wg, parsingMode, debugMode)
+			}(line)
+		}
+	}
+
+	wg.Wait()
 }
 
 // ----------------------------------------------------------------------------
