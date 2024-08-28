@@ -314,8 +314,8 @@ func ProcessURL(url string, ch chan<- string, wg *sync.WaitGroup, parsingMode in
 			continue
 		}
 
-		if resp.StatusCode != http.StatusOK {
-			if resp.StatusCode == http.StatusServiceUnavailable || resp.StatusCode == http.StatusUnauthorized || resp.StatusCode == http.StatusForbidden {
+		if resp.StatusCode != http.StatusOK || resp.StatusCode != http.StatusNotFound {
+			if resp.StatusCode == http.StatusServiceUnavailable || resp.StatusCode == http.StatusUnauthorized || resp.StatusCode == http.StatusForbidden || resp.StatusCode == http.StatusBadRequest || resp.StatusCode == http.StatusMethodNotAllowed {
 				attempts = maxRetries + 1
 
 				if debugMode >= 2 {
