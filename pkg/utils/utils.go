@@ -587,8 +587,7 @@ func ReadJSONToArray(fs models.FileSystem, filenames []string) []models.Template
 // Returns:
 // None
 func ProcessURLFile(filePath string, ch chan<- string, wg *sync.WaitGroup, parsingMode int, debugMode int) {
-	maxGoroutines := 5
-	guard := make(chan struct{}, maxGoroutines)
+	defer wg.Done()
 
 	file, err := os.Open(filePath)
 	if err != nil {
@@ -598,24 +597,17 @@ func ProcessURLFile(filePath string, ch chan<- string, wg *sync.WaitGroup, parsi
 	defer file.Close()
 
 	scanner := bufio.NewScanner(file)
-	if err := scanner.Err(); err != nil {
-		fmt.Fprintf(os.Stderr, "[!] Error reading file %v: %v\n", filePath, err)
-	}
-
 	for scanner.Scan() {
 		line := scanner.Text()
 		if IsValidURL(line) {
-			guard <- struct{}{}
 			wg.Add(1)
-			go func(url string) {
-				defer wg.Done()
-				defer func() { <-guard }()
-				ProcessURL(url, ch, wg, parsingMode, debugMode)
-			}(line)
+			go ProcessURL(line, ch, wg, parsingMode, debugMode)
 		}
 	}
 
-	wg.Wait()
+	if err := scanner.Err(); err != nil {
+		fmt.Fprintf(os.Stderr, "[!] Error reading file %v: %v\n", filePath, err)
+	}
 }
 
 // ----------------------------------------------------------------------------
