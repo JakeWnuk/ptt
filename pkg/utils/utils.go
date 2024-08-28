@@ -466,7 +466,8 @@ func ProcessURL(url string, ch chan<- string, wg *sync.WaitGroup, parsingMode in
 				fourGrams := GenerateNGrams(sentence, 4)
 				fiveGrams := GenerateNGrams(sentence, 5)
 				sixGrams := GenerateNGrams(sentence, 6)
-				allNGrams := append(twoGrams, append(threeGrams, append(fourGrams, append(fiveGrams, sixGrams...)...)...)...)
+				sevenGrams := GenerateNGrams(sentence, 7)
+				allNGrams := append(twoGrams, append(threeGrams, append(fourGrams, append(fiveGrams, append(sixGrams, sevenGrams...)...)...)...)...)
 				for _, nGram := range allNGrams {
 					if nGram != "" {
 						nGram = strings.TrimSpace(nGram)
