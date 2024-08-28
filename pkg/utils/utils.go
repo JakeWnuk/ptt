@@ -301,20 +301,8 @@ func ProcessURL(url string, ch chan<- string, wg *sync.WaitGroup, parsingMode in
 			throttleInterval++
 		}
 
-		// Check the response body for throttling
-		regexThrottle := regexp.MustCompile(`(rate limit|too many requests|try again later|a lot of requests|async requests|excessive requests)`)
-		body, err = io.ReadAll(resp.Body)
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "[!] Error reading response body from URL %s\n", url)
-			continue
-		}
-		if regexThrottle.MatchString(string(body)) {
-			throttleInterval++
-			throttleBodyDetected = true
-		}
-
 		fmt.Fprintf(os.Stderr, "[+] Response Code: %s. Content-Type: %s. Throttle Body Detected: %t.\n", resp.Status, resp.Header.Get("Content-Type"), throttleBodyDetected)
-		if resp.StatusCode == http.StatusTooManyRequests || throttleBodyDetected {
+		if resp.StatusCode == http.StatusTooManyRequests {
 			time.Sleep(time.Second * time.Duration(throttleInterval) * time.Duration(r.Intn(10)))
 			continue
 		}
@@ -322,6 +310,12 @@ func ProcessURL(url string, ch chan<- string, wg *sync.WaitGroup, parsingMode in
 		break
 	}
 
+	var err error
+	body, err = io.ReadAll(resp.Body)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "[!] Error reading response body from URL %s\n", url)
+		os.Exit(1)
+	}
 	text := string(body)
 	text = html.UnescapeString(text)
 	var lines []string
