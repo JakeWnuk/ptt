@@ -289,14 +289,14 @@ func ProcessURL(url string, ch chan<- string, wg *sync.WaitGroup, parsingMode in
 			if debugMode >= 2 {
 				fmt.Fprintf(os.Stderr, "[!] Error fetching URL %s\n", url)
 			}
-			continue
+			return
 		}
 
 		if resp == nil {
 			if debugMode >= 2 {
 				fmt.Fprintf(os.Stderr, "[!] Error no response from URL %s\n", url)
 			}
-			continue
+			return
 		}
 
 		defer resp.Body.Close()
@@ -315,17 +315,17 @@ func ProcessURL(url string, ch chan<- string, wg *sync.WaitGroup, parsingMode in
 		}
 
 		if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusNotFound {
-			if resp.StatusCode == http.StatusServiceUnavailable || resp.StatusCode == http.StatusUnauthorized || resp.StatusCode == http.StatusForbidden || resp.StatusCode == http.StatusBadRequest || resp.StatusCode == http.StatusMethodNotAllowed {
-				attempts = maxRetries + 1
+			// end the loop if the code is 300, 301, 302, 303, 307, 308, 400, 401, 403, 405, 500, 503
+			if resp.StatusCode == http.StatusMovedPermanently || resp.StatusCode == http.StatusFound || resp.StatusCode == http.StatusSeeOther || resp.StatusCode == http.StatusTemporaryRedirect || resp.StatusCode == http.StatusPermanentRedirect || resp.StatusCode == http.StatusBadRequest || resp.StatusCode == http.StatusUnauthorized || resp.StatusCode == http.StatusForbidden || resp.StatusCode == http.StatusMethodNotAllowed || resp.StatusCode == http.StatusInternalServerError || resp.StatusCode == http.StatusServiceUnavailable {
 
 				if debugMode >= 2 {
-					fmt.Fprintf(os.Stderr, "[!] Error fetching URL service unavailable, unauthorized, or forbidden %s\n", url)
+					fmt.Fprintf(os.Stderr, "[!] Error fetching URL service returned %s. Removing target. %s\n", resp.Status, url)
 				}
-				continue
+				return
 			}
 
 			if debugMode >= 2 {
-				fmt.Fprintf(os.Stderr, "[!] Error unexpected response code %s. retrying... %s\n", resp.Status, url)
+				fmt.Fprintf(os.Stderr, "[!] Error unexpected response code %s. Retrying... %s\n", resp.Status, url)
 			}
 			continue
 		}
