@@ -40,7 +40,7 @@ git clone https://github.com/JakeWnuk/ptt && cd ptt && docker build -t ptt . && 
 
 ### Usage:
 ```
-Usage of Password Transformation Tool (ptt) version (0.3.0):
+Usage of Password Transformation Tool (ptt) version (0.3.1):
 
 ptt [options] [...]
 Accepts standard input and/or additonal arguments.
@@ -60,7 +60,7 @@ These modify or filter the transformation mode.
   -k value
         Only keep items in a file.
   -l value
-        Length of input to accept into transformation. Accepts ranges separated by '-'.
+        Only output items of a certain length (does not adjust for rules). Accepts ranges separated by '-'.
   -m int
         Minimum numerical frequency to include in output.
   -n int

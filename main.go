@@ -100,7 +100,7 @@ func main() {
 	flag.Var(&transformationFiles, "tf", "Read additional files for transformations if applicable.")
 	flag.Var(&templateFiles, "tp", "Read a template file for multiple transformations and operations.")
 	flag.Var(&intRange, "i", "Starting index for transformations if applicable. Accepts ranges separated by '-'.")
-	flag.Var(&lenRange, "l", "Length of input to accept into transformation. Accepts ranges separated by '-'.")
+	flag.Var(&lenRange, "l", "Only output items of a certain length (does not adjust for rules). Accepts ranges separated by '-'.")
 	flag.Var(&readURLs, "u", "Read additional URLs for input.")
 	flag.Parse()
 
@@ -142,11 +142,6 @@ func main() {
 		primaryMap = utils.CombineMaps(primaryMap, readFilesMap, readURLsMap)
 	}
 
-	// Remove items outside of length range if provided
-	if lenRange.Start > 0 || lenRange.End > 0 {
-		primaryMap = format.RemoveLengthRange(primaryMap, lenRange.Start, lenRange.End)
-	}
-
 	// Apply transformation if provided
 	if *transformation != "" && templateFiles == nil {
 		primaryMap = transform.TransformationController(primaryMap, *transformation, intRange.Start, intRange.End, *verbose, *replacementMask, transformationFilesMap, *bypassMap, *debugMode, *passPhraseWords)
@@ -174,6 +169,16 @@ func main() {
 		return
 	}
 
+	// Remove items under minimum frequency if provided
+	if *minimum > 0 {
+		primaryMap = format.RemoveMinimumFrequency(primaryMap, *minimum)
+	}
+
+	// Remove items outside of length range if provided
+	if lenRange.Start > 0 || lenRange.End > 0 {
+		primaryMap = format.RemoveLengthRange(primaryMap, lenRange.Start, lenRange.End)
+	}
+
 	// Process retain and remove maps if provided
 	if len(retainMap) > 0 || len(removeMap) > 0 {
 		primaryMap, err = format.RetainRemove(primaryMap, retainMap, removeMap, *debugMode)
@@ -181,11 +186,6 @@ func main() {
 			fmt.Fprintf(os.Stderr, "[!] Error processing retain and remove flags: %s\n", err)
 			return
 		}
-	}
-
-	// Remove items under minimum frequency if provided
-	if *minimum > 0 {
-		primaryMap = format.RemoveMinimumFrequency(primaryMap, *minimum)
 	}
 
 	// Print output to stdout
