@@ -109,6 +109,11 @@ func main() {
 		fmt.Fprintf(os.Stderr, "[*] Bypassing map creation and using stdout as primary output. Options are disabled.\n")
 	}
 
+	// Print debug information if requested
+	if *debugMode > 0 {
+		fmt.Fprintf(os.Stderr, "[*] Debug mode enabled with verbosity level %d.\n", *debugMode)
+	}
+
 	// Parse any retain, remove, or transformation file arguments
 	fs := &models.RealFileSystem{}
 	retainMap := utils.ReadFilesToMap(fs, retain)
@@ -169,14 +174,29 @@ func main() {
 		return
 	}
 
+	// Print remove frequency if provided
+	if *minimum > 0 {
+		fmt.Fprintf(os.Stderr, "[*] Removing items with frequency less than %d.\n", *minimum)
+	}
+
 	// Remove items under minimum frequency if provided
 	if *minimum > 0 {
 		primaryMap = format.RemoveMinimumFrequency(primaryMap, *minimum)
 	}
 
+	// Print length range if provided
+	if lenRange.Start > 0 || lenRange.End > 0 {
+		fmt.Fprintf(os.Stderr, "[*] Only outputting items between %d and %d characters.\n", lenRange.Start, lenRange.End)
+	}
+
 	// Remove items outside of length range if provided
 	if lenRange.Start > 0 || lenRange.End > 0 {
 		primaryMap = format.RemoveLengthRange(primaryMap, lenRange.Start, lenRange.End)
+	}
+
+	// Print retained and removed items if provided
+	if len(retainMap) > 0 || len(removeMap) > 0 {
+		fmt.Fprintf(os.Stderr, "[*] Retain/remove flags provided. Retaining %d and removing %d items.\n", len(retainMap), len(removeMap))
 	}
 
 	// Process retain and remove maps if provided
@@ -195,6 +215,11 @@ func main() {
 		format.PrintStatsToSTDOUT(primaryMap, *verbose3, *verboseStatsMax)
 	} else {
 		format.PrintArrayToSTDOUT(primaryMap, *verbose)
+	}
+
+	// Print output location if provided
+	if *jsonOutput != "" {
+		fmt.Fprintf(os.Stderr, "[*] Saving output to JSON file: %s\n", *jsonOutput)
 	}
 
 	// Save output to JSON if provided
