@@ -40,7 +40,7 @@ git clone https://github.com/JakeWnuk/ptt && cd ptt && docker build -t ptt . && 
 
 ### Usage:
 ```
-Usage of Password Transformation Tool (ptt) version (0.3.1):
+Usage of Password Transformation Tool (ptt) version (0.3.2):
 
 ptt [options] [...]
 Accepts standard input and/or additonal arguments.
@@ -114,7 +114,7 @@ These create or alter based on the selected mode.
         Transforms input by swapping tokens from a partial mask file and a input file.
   -t passphrase -w [words] -tf [file]
         Transforms input by randomly generating passphrases with a given number of words and separators from a file.
-  -t replace -tf [file]
+  -t replace-all -tf [file]
         Transforms input by replacing all strings with all matches from a ':' separated file.
   -t rule-append
         Transforms input into append rules.
@@ -134,7 +134,7 @@ These create or alter based on the selected mode.
         Transforms input into toggle rules starting at index.
   -t substring -i [index]
         Transforms input by extracting substrings starting at index and ending at index.
-  -t swap -tf [file]
-        Transforms input by swapping tokens with exact matches from a ':' separated file.
+  -t swap-single -tf [file]
+        Transforms input by swapping tokens once per string per replacement with exact matches from a ':' separated file.
 -------------------------------------------------------------------------------------------------------------
 ```

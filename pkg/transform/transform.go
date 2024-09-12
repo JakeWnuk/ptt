@@ -99,7 +99,7 @@ func TransformationController(input map[string]int, mode string, startingIndex i
 			os.Exit(1)
 		}
 		output = mask.MakeMatchedMaskedMap(input, replacementMask, transformationFilesMap, bypass, functionDebug)
-	case "swap":
+	case "swap", "swap-single":
 		if len(transformationFilesMap) == 0 {
 			fmt.Fprintf(os.Stderr, "[!] Swap operations require use of one or more -tf flags to specify one or more files\n")
 			fmt.Fprintf(os.Stderr, "[!] This transformation mode requires a ':' separated list of keys to swap\n")
@@ -123,7 +123,7 @@ func TransformationController(input map[string]int, mode string, startingIndex i
 		output = MakePassphraseMap(input, transformationFilesMap, bypass, functionDebug, passphraseWords)
 	case "substring":
 		output = utils.SubstringMap(input, startingIndex, endingIndex, bypass, functionDebug)
-	case "replace":
+	case "replace-all", "replace":
 		if len(transformationFilesMap) == 0 {
 			fmt.Fprintf(os.Stderr, "[!] Replace operations require use of one or more -tf flags to specify one or more files\n")
 			os.Exit(1)
