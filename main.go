@@ -15,7 +15,7 @@ import (
 	"github.com/jakewnuk/ptt/pkg/utils"
 )
 
-var version = "0.3.1"
+var version = "0.3.2"
 var wg sync.WaitGroup
 var mutex = &sync.Mutex{}
 var retain models.FileArgumentFlag
@@ -60,11 +60,11 @@ func main() {
 			"mask-retain -rm [uldsb] -tf [file]": "Transforms input by creating masks that still retain strings from file.",
 			"mask-pop -rm [uldsbt]":              "Transforms input by generating tokens from popping strings at character boundaries.",
 			"mask-match -tf [file]":              "Transforms input by keeping only strings with matching masks from a mask file.",
-			"swap -tf [file]":                    "Transforms input by swapping tokens with exact matches from a ':' separated file.",
+			"swap-single -tf [file]":             "Transforms input by swapping tokens once per string per replacement with exact matches from a ':' separated file.",
 			"mask-swap -tf [file]":               "Transforms input by swapping tokens from a partial mask file and a input file.",
 			"passphrase -w [words] -tf [file]":   "Transforms input by randomly generating passphrases with a given number of words and separators from a file.",
 			"substring -i [index]":               "Transforms input by extracting substrings starting at index and ending at index.",
-			"replace -tf [file]":                 "Transforms input by replacing all strings with all matches from a ':' separated file.",
+			"replace-all -tf [file]":             "Transforms input by replacing all strings with all matches from a ':' separated file.",
 		}
 
 		// Sort and print transformation modes
@@ -86,7 +86,7 @@ func main() {
 	verbose2 := flag.Bool("vv", false, "Show statistics output when possible.")
 	verbose3 := flag.Bool("vvv", false, "Show verbose statistics output when possible.")
 	minimum := flag.Int("m", 0, "Minimum numerical frequency to include in output.")
-	verboseStatsMax := flag.Int("n", 25, "Maximum number of items to display in verbose statistics output.")
+	outputVerboseMax := flag.Int("n", 0, "Maximum number of items to return in output.")
 	transformation := flag.String("t", "", "Transformation to apply to input.")
 	replacementMask := flag.String("rm", "uldsbt", "Replacement mask for transformations if applicable.")
 	jsonOutput := flag.String("o", "", "Output to JSON file in addition to stdout.")
@@ -107,6 +107,11 @@ func main() {
 	// Bypass map creation if requested
 	if *bypassMap {
 		fmt.Fprintf(os.Stderr, "[*] Bypassing map creation and using stdout as primary output. Options are disabled.\n")
+	}
+
+	// Print debug information if requested
+	if *debugMode > 0 {
+		fmt.Fprintf(os.Stderr, "[*] Debug mode enabled with verbosity level %d.\n", *debugMode)
 	}
 
 	// Parse any retain, remove, or transformation file arguments
@@ -169,14 +174,29 @@ func main() {
 		return
 	}
 
+	// Print remove frequency if provided
+	if *minimum > 0 {
+		fmt.Fprintf(os.Stderr, "[*] Removing items with frequency less than %d.\n", *minimum)
+	}
+
 	// Remove items under minimum frequency if provided
 	if *minimum > 0 {
 		primaryMap = format.RemoveMinimumFrequency(primaryMap, *minimum)
 	}
 
+	// Print length range if provided
+	if lenRange.Start > 0 || lenRange.End > 0 {
+		fmt.Fprintf(os.Stderr, "[*] Only outputting items between %d and %d characters.\n", lenRange.Start, lenRange.End)
+	}
+
 	// Remove items outside of length range if provided
 	if lenRange.Start > 0 || lenRange.End > 0 {
 		primaryMap = format.RemoveLengthRange(primaryMap, lenRange.Start, lenRange.End)
+	}
+
+	// Print retained and removed items if provided
+	if len(retainMap) > 0 || len(removeMap) > 0 {
+		fmt.Fprintf(os.Stderr, "[*] Retain/remove flags provided. Retaining %d and removing %d items.\n", len(retainMap), len(removeMap))
 	}
 
 	// Process retain and remove maps if provided
@@ -188,13 +208,23 @@ func main() {
 		}
 	}
 
+	// if -n is providied, filter ALL results to only that top amount
+	if *outputVerboseMax > 0 {
+		primaryMap = format.FilterTopN(primaryMap, *outputVerboseMax)
+	}
+
 	// Print output to stdout
 	if *verbose3 {
-		format.PrintStatsToSTDOUT(primaryMap, *verbose3, *verboseStatsMax)
+		format.PrintStatsToSTDOUT(primaryMap, *verbose3, *outputVerboseMax)
 	} else if *verbose2 {
-		format.PrintStatsToSTDOUT(primaryMap, *verbose3, *verboseStatsMax)
+		format.PrintStatsToSTDOUT(primaryMap, *verbose3, *outputVerboseMax)
 	} else {
 		format.PrintArrayToSTDOUT(primaryMap, *verbose)
+	}
+
+	// Print output location if provided
+	if *jsonOutput != "" {
+		fmt.Fprintf(os.Stderr, "[*] Saving output to JSON file: %s\n", *jsonOutput)
 	}
 
 	// Save output to JSON if provided

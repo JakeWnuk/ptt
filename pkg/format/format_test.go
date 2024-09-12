@@ -13,6 +13,7 @@ import (
 // - RetainRemove()
 // - RemoveMinimumFrequency()
 // - RemoveLengthRange()
+// - FilterTopN()
 //
 // ** Encoding Functions **
 // - EncodeInputMap()
@@ -149,6 +150,35 @@ func TestRemoveLengthRange(t *testing.T) {
 		result := RemoveLengthRange(test.input, test.min, test.max)
 		if utils.CheckAreMapsEqual(result, test.output) == false {
 			t.Errorf("RemoveLengthRange() failed - expected: %v, got: %v", test.output, result)
+		}
+	}
+}
+
+// Unit Test for FilterTopN()
+func TestFilterTopN(t *testing.T) {
+
+	// Define a test case struct
+	type testCase struct {
+		input  map[string]int
+		top    int
+		output map[string]int
+	}
+
+	type testCases []testCase
+
+	// Define a test case
+	tests := testCases{
+		{map[string]int{"a": 1, "b": 2, "c": 3, "d": 4}, 2, map[string]int{"c": 3, "d": 4}},
+		{map[string]int{"a": 1, "b": 2, "c": 3, "d": 4}, 3, map[string]int{"b": 2, "c": 3, "d": 4}},
+		{map[string]int{"a": 1, "b": 2, "c": 3, "d": 4}, 4, map[string]int{"a": 1, "b": 2, "c": 3, "d": 4}},
+		{map[string]int{"a": 1, "b": 2, "c": 3, "d": 4}, 5, map[string]int{"a": 1, "b": 2, "c": 3, "d": 4}},
+	}
+
+	// Run test cases
+	for _, test := range tests {
+		result := FilterTopN(test.input, test.top)
+		if utils.CheckAreMapsEqual(result, test.output) == false {
+			t.Errorf("FilterTopN() failed - expected: %v, got: %v", test.output, result)
 		}
 	}
 }

@@ -77,6 +77,10 @@ func PrintStatsToSTDOUT(freq map[string]int, verbose bool, max int) {
 	sort.Sort(sort.Reverse(p))
 	sort.Sort(sort.Reverse(normalizedP))
 
+	if max == 0 {
+		max = 25
+	}
+
 	if max > len(p) {
 		max = len(p)
 	}
@@ -524,6 +528,33 @@ func RemoveLengthRange(freq map[string]int, start int, end int) map[string]int {
 				newFreq[key] = value
 			}
 		}
+	}
+	return newFreq
+}
+
+// FilterTopN removes all but the top N items from a map of item frequencies
+// and returns a new map
+//
+// Args:
+// freq (map[string]int): A map of item frequencies
+// n (int): The number of items to retain
+//
+// Returns:
+// map[string]int: A new map of the top N item frequencies
+func FilterTopN(freq map[string]int, n int) map[string]int {
+	newFreq := make(map[string]int)
+	p := make(models.PairList, len(freq))
+	i := 0
+	for k, v := range freq {
+		p[i] = models.Pair{k, v}
+		i++
+	}
+	sort.Sort(sort.Reverse(p))
+	if n > len(p) {
+		n = len(p)
+	}
+	for i := 0; i < n; i++ {
+		newFreq[p[i].Key] = p[i].Value
 	}
 	return newFreq
 }

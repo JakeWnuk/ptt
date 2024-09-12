@@ -119,11 +119,11 @@ These flags work with files and directories.
 - `-k`: Only keep items in a file.
 - `-l`: Only output items of a certain length (does not adjust for rules). Accepts ranges separated by '-'.
 - `-m`: Minimum numerical frequency to include in output.
-- `-n`: Maximum number of items to display in verbose statistics output. (default 25)
+- `-n`: Maximum number of items to return in output.
 - `-o`: Output to JSON file in addition to stdout.
 - `-p`: Change parsing mode for URL input. [0 = Strict, 1 = Permissive, 2 = Maximum].
 - `-r`: Only keep items not in a file.
-- `-rm`: Replacement mask for transformations if applicable. (default "uldsb")
+- `-rm`: Replacement mask for transformations if applicable. (default "uldsbt")
 - `-t`: Transformation to apply to input.
 - `-tf`: Read additional files for transformations if applicable.
 - `-tp`: Read a template file for multiple transformations and operations.
@@ -134,27 +134,52 @@ These flags work with files and directories.
 
 #### Transformations:
 The following transformations can be used with the `-t` flag:
-- `rule-append`: Transforms input into append rules.
-- `rule-append-remove`: Transforms input into append-remove rules
-- `rule-prepend`: Transforms input into prepend rules.
-- `rule-prepend-remove`: Transforms input into prepend-remove rules.
-- `rule-prepend-toggle`: Transforms input into prepend-toggle rules.
-- `rule-insert`: Transforms input into insert rules starting at index.
-- `rule-overwrite`: Transforms input into overwrite rules starting at index.
-- `rule-toggle`: Transforms input into toggle rules starting at index.
-- `encode`: Transforms input by HTML and Unicode escape encoding.
-- `decode`: Transforms input by HTML and Unicode escape decoding.
-- `hex`: Transforms input by encoding strings into $HEX[...] format.
-- `dehex`: Transforms input by decoding $HEX[...] formatted
-- `mask`: Transforms input by masking characters with provided mask.
-- `mask-remove`: Transforms input by removing characters with provided mask characters.
-- `substring`: Transforms input by extracting substrings starting at index and ending at index.
-- `mask-retain`: Transforms input by creating masks that still retain strings from file.
-- `mask-match`: Transforms input by keeping only strings with matching masks from a mask file
-- `mask-swap`: Transforms input by swapping tokens with exact matches from a ':' separated file.
-- `mask-pop`: Transforms input by generating tokens from popping strings at character boundaries.
-- `mask-swap`: Transforms input by swapping tokens from a partial mask file and a input file.
-- `passphrase`: Transforms input by randomly generating passphrases with a given number of words and separators from a file.
+```
+  -t decode
+        Transforms input by HTML and Unicode escape decoding.
+  -t dehex
+        Transforms input by decoding $HEX[...] formatted strings.
+  -t encode
+        Transforms input by HTML and Unicode escape encoding.
+  -t hex
+        Transforms input by encoding strings into $HEX[...] format.
+  -t mask -rm [uldsb] -v
+        Transforms input by masking characters with provided mask.
+  -t mask-match -tf [file]
+        Transforms input by keeping only strings with matching masks from a mask file.
+  -t mask-pop -rm [uldsbt]
+        Transforms input by generating tokens from popping strings at character boundaries.
+  -t mask-remove -rm [uldsb]
+        Transforms input by removing characters with provided mask characters.
+  -t mask-retain -rm [uldsb] -tf [file]
+        Transforms input by creating masks that still retain strings from file.
+  -t mask-swap -tf [file]
+        Transforms input by swapping tokens from a partial mask file and a input file.
+  -t passphrase -w [words] -tf [file]
+        Transforms input by randomly generating passphrases with a given number of words and separators from a file.
+  -t replace-all -tf [file]
+        Transforms input by replacing all strings with all matches from a ':' separated file.
+  -t rule-append
+        Transforms input into append rules.
+  -t rule-append-remove
+        Transforms input into append-remove rules.
+  -t rule-insert -i [index]
+        Transforms input into insert rules starting at index.
+  -t rule-overwrite -i [index]
+        Transforms input into overwrite rules starting at index.
+  -t rule-prepend
+        Transforms input into prepend rules.
+  -t rule-prepend-remove
+        Transforms input into prepend-remove rules.
+  -t rule-prepend-toggle
+        Transforms input into prepend-toggle rules. Creating camelCase and PascalCase.
+  -t rule-toggle -i [index]
+        Transforms input into toggle rules starting at index.
+  -t substring -i [index]
+        Transforms input by extracting substrings starting at index and ending at index.
+  -t swap-single -tf [file]
+        Transforms input by swapping tokens once per string per replacement with exact matches from a ':' separated file.
+```
 
 ### Examples
 
@@ -469,7 +494,7 @@ This document describes the ways to use PTT to create password cracking
 wordlists. There are several ways to generate wordlists using PTT:
 
 - `Direct Swapping`: Swapping characters directly with a `:` separated file.
-   This is implemented in the `swap` module.
+   This is implemented in the `swap-single` module.
 - `Replacing Text and Characters`: Replacing text and characters in a string.
   This is implemented in the `replace` module
 - `Token Popping`: Generates tokens by popping strings at character boundaries.
@@ -486,19 +511,19 @@ transformation can be used at a time.
 > Ensure input is provided in the correct format and does not contain hidden characters. `Dos2Unix` can be used to convert the file to proper format if needed.
 
 ### Direct Swapping
-The `swap` module swaps characters directly with a `:` separated file. The
+The `swap-single` module swaps characters directly with a `:` separated file. The
 syntax is as follows:
 ```
-ptt -f <input-file> -t swap -tf <replacement-file>
+ptt -f <input-file> -t swap-single -tf <replacement-file>
 ```
 The replacement file should contain the strings to be transformed as `PRIOR:POST`
 pairs. The replacements will be applied to the all instance in each line but
 only one swap is applied at once. This mode is ideal for substituting words or characters in a string.
 
 ### Replacing Text and Characters
-The `replace` module replaces text and characters in a string. This mode replaces all strings with all matches from a ':' separated file. The syntax is as follows:
+The `replace-all` module replaces text and characters in a string. This mode replaces all strings with all matches from a ':' separated file. The syntax is as follows:
 ```
-ptt -f <input-file> -t replace -tf <replacement-file>
+ptt -f <input-file> -t replace-all -tf <replacement-file>
 ```
 The replacement file should contain the strings to be transformed as
 `PRIOR:POST` pairs. The replacements will be applied to all instances in each

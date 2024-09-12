@@ -352,7 +352,9 @@ func MakeMatchedMaskedMap(input map[string]int, replacementMask string, maskMap 
 				}
 			}
 		case true:
-			fmt.Println(newKey)
+			if _, exists := maskMap[newKey]; exists {
+				fmt.Println(key)
+			}
 		}
 	}
 	return maskedMap
