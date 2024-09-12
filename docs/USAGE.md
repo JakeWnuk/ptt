@@ -119,7 +119,7 @@ These flags work with files and directories.
 - `-k`: Only keep items in a file.
 - `-l`: Only output items of a certain length (does not adjust for rules). Accepts ranges separated by '-'.
 - `-m`: Minimum numerical frequency to include in output.
-- `-n`: Maximum number of items to display in verbose statistics output. (default 25)
+- `-n`: Maximum number of items to return in output.
 - `-o`: Output to JSON file in addition to stdout.
 - `-p`: Change parsing mode for URL input. [0 = Strict, 1 = Permissive, 2 = Maximum].
 - `-r`: Only keep items not in a file.

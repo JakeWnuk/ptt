@@ -64,7 +64,7 @@ These modify or filter the transformation mode.
   -m int
         Minimum numerical frequency to include in output.
   -n int
-        Maximum number of items to display in verbose statistics output. (default 25)
+        Maximum number of items to return in output. 
   -o string
         Output to JSON file in addition to stdout.
   -p int

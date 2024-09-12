@@ -86,7 +86,7 @@ func main() {
 	verbose2 := flag.Bool("vv", false, "Show statistics output when possible.")
 	verbose3 := flag.Bool("vvv", false, "Show verbose statistics output when possible.")
 	minimum := flag.Int("m", 0, "Minimum numerical frequency to include in output.")
-	verboseStatsMax := flag.Int("n", 25, "Maximum number of items to display in verbose statistics output.")
+	outputVerboseMax := flag.Int("n", 0, "Maximum number of items to return in output.")
 	transformation := flag.String("t", "", "Transformation to apply to input.")
 	replacementMask := flag.String("rm", "uldsbt", "Replacement mask for transformations if applicable.")
 	jsonOutput := flag.String("o", "", "Output to JSON file in addition to stdout.")
@@ -208,11 +208,16 @@ func main() {
 		}
 	}
 
+	// if -n is providied, filter ALL results to only that top amount
+	if *outputVerboseMax > 0 {
+		primaryMap = format.FilterTopN(primaryMap, *outputVerboseMax)
+	}
+
 	// Print output to stdout
 	if *verbose3 {
-		format.PrintStatsToSTDOUT(primaryMap, *verbose3, *verboseStatsMax)
+		format.PrintStatsToSTDOUT(primaryMap, *verbose3, *outputVerboseMax)
 	} else if *verbose2 {
-		format.PrintStatsToSTDOUT(primaryMap, *verbose3, *verboseStatsMax)
+		format.PrintStatsToSTDOUT(primaryMap, *verbose3, *outputVerboseMax)
 	} else {
 		format.PrintArrayToSTDOUT(primaryMap, *verbose)
 	}
