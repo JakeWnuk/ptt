@@ -122,7 +122,7 @@ func FormatCharToRuleOutput(strs ...string) (output string) {
 		output = output[:len(output)-1] + ":"
 	}
 
-	if output != "" && len(output) <= 93 {
+	if output != "" && len(output) < 93 {
 		return strings.TrimSpace(output)
 	}
 
@@ -157,7 +157,7 @@ func FormatCharToIteratingRuleOutput(index int, strs ...string) (output string) 
 		}
 	}
 
-	if output != "" && len(output) <= 93 {
+	if output != "" && len(output) < 93 {
 		return strings.TrimSpace(output)
 	}
 
