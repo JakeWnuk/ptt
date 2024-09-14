@@ -40,6 +40,8 @@ import (
 //	(map[string]int): A map of words from the files
 func ReadFilesToMap(fs models.FileSystem, filenames []string) map[string]int {
 	wordMap := make(map[string]int)
+	// 5 GB read buffer
+	chunkSize := int64(5 * 1024 * 1024 * 1024)
 
 	i := 0
 	for i < len(filenames) {
@@ -52,21 +54,40 @@ func ReadFilesToMap(fs models.FileSystem, filenames []string) map[string]int {
 			}
 			filenames = append(filenames, files...)
 		} else {
-			data, err := fs.ReadFile(filename)
+			file, err := fs.Open(filename)
 			if err != nil {
-				fmt.Fprintf(os.Stderr, "[!] Error reading file %s\n", filename)
+				fmt.Fprintf(os.Stderr, "[!] Error opening file %s\n", filename)
 				os.Exit(1)
 			}
+			defer file.Close()
 
-			err = json.Unmarshal(data, &wordMap)
-			if err == nil {
-				fmt.Fprintf(os.Stderr, "[*] Detected ptt JSON output. Importing...\n")
-				continue
-			}
+			buffer := make([]byte, chunkSize)
+			for {
+				bytesRead, err := file.Read(buffer)
+				if err != nil && err != io.EOF {
+					fmt.Fprintf(os.Stderr, "[!] Error reading file %s\n", filename)
+					os.Exit(1)
+				}
+				if bytesRead == 0 {
+					break
+				}
 
-			fileWords := strings.Split(string(data), "\n")
-			for _, word := range fileWords {
-				wordMap[word]++
+				data := buffer[:bytesRead]
+
+				err = json.Unmarshal(data, &wordMap)
+				if err == nil {
+					fmt.Fprintf(os.Stderr, "[*] Detected ptt JSON output. Importing...\n")
+					continue
+				}
+
+				fileWords := strings.Split(string(data), "\n")
+				for _, word := range fileWords {
+					wordMap[word]++
+				}
+
+				if err == io.EOF {
+					break
+				}
 			}
 		}
 		i++
