@@ -1,5 +1,5 @@
 # Password Transformation Tool (PTT) Usage Guide
-## Version 0.3.0
+## Version 0.3.3
 
 ### Table of Contents
 #### Getting Started
@@ -37,6 +37,7 @@
 2. [Encoding and Decoding](#encoding-and-decoding)
 3. [Hex and Dehex](#hex-and-dehex)
 4. [Substrings](#substrings)
+5. [Regram](#regram)
 
 ## Getting Started
 
@@ -112,25 +113,46 @@ their collective values combined. The rest of the flags can only be used once.
 These flags work with files and directories.
 
 #### Options:
-- `-b`: Bypass map creation and use stdout as primary output.
-- `-d`: Enable debug mode with verbosity levels [0-2].
-- `-f`: Read additional files for input.
-- `-i`: Starting index for transformations if applicable. Accepts ranges separated by '-'.
-- `-k`: Only keep items in a file.
-- `-l`: Only output items of a certain length (does not adjust for rules). Accepts ranges separated by '-'.
-- `-m`: Minimum numerical frequency to include in output.
-- `-n`: Maximum number of items to return in output.
-- `-o`: Output to JSON file in addition to stdout.
-- `-p`: Change parsing mode for URL input. [0 = Strict, 1 = Permissive, 2 = Maximum].
-- `-r`: Only keep items not in a file.
-- `-rm`: Replacement mask for transformations if applicable. (default "uldsbt")
-- `-t`: Transformation to apply to input.
-- `-tf`: Read additional files for transformations if applicable.
-- `-tp`: Read a template file for multiple transformations and operations.
-- `-u`: Read additional URLs for input.
-- `-v`: Show verbose output when possible.
-- `-vv`: Show statistics output when possible.
-- `-vvv`: Show verbose statistics output when possible.
+```
+  -b    Bypass map creation and use stdout as primary output.
+  -d int
+        Enable debug mode with verbosity levels [0-2].
+  -f value
+        Read additional files for input.
+  -i value
+        Starting index for transformations if applicable. Accepts ranges separated by '-'.
+  -k value
+        Only keep items in a file.
+  -l value
+        Only output items of a certain length (does not adjust for rules). Accepts ranges separated by '-'.
+  -m int
+        Minimum numerical frequency to include in output.
+  -n int
+        Maximum number of items to return in output.
+  -o string
+        Output to JSON file in addition to stdout.
+  -p int
+        Change parsing mode for URL input. [0 = Strict, 1 = Permissive, 2 = Maximum] [0-2].
+  -r value
+        Only keep items not in a file.
+  -rm string
+        Replacement mask for transformations if applicable. (default "uldsbt")
+  -t string
+        Transformation to apply to input.
+  -tf value
+        Read additional files for transformations if applicable.
+  -tp value
+        Read a template file for multiple transformations and operations.
+  -u value
+        Read additional URLs for input.
+  -v    Show verbose output when possible.
+  -vv
+        Show statistics output when possible.
+  -vvv
+        Show verbose statistics output when possible.
+  -w int
+        Number of words to use for a transformation if applicable.
+```
 
 #### Transformations:
 The following transformations can be used with the `-t` flag:
@@ -157,6 +179,8 @@ The following transformations can be used with the `-t` flag:
         Transforms input by swapping tokens from a partial mask file and a input file.
   -t passphrase -w [words] -tf [file]
         Transforms input by randomly generating passphrases with a given number of words and separators from a file.
+  -t regram -w [words]
+        Transforms input by 'regramming' sentences into new n-grams with a given number of words.
   -t replace-all -tf [file]
         Transforms input by replacing all strings with all matches from a ':' separated file.
   -t rule-append
@@ -649,4 +673,15 @@ changed to the length of the input.
 
 This transformation can be used to extract specific parts of the input for
 further processing.
+
+### Regram
+This mode allows 'regramming' sentences into new n-grams with a given number of words. The syntax is as follows:
+```
+ptt -f <input_file> -t regram -w <word_count>
+```
+The `regram` transformation will generate new n-grams from the input by
+combining words from the input. The number of words to use in the n-gram is
+specified by the `-w` flag. The output will be the new n-grams generated from
+the input.
+
 

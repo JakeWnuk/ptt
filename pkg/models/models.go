@@ -3,6 +3,7 @@ package models
 
 import (
 	"fmt"
+	"io"
 	"os"
 	"strings"
 )
@@ -97,11 +98,47 @@ func (p PairList) Swap(i, j int)      { p[i], p[j] = p[j], p[i] }
 // or from a mock file system for testing
 type FileSystem interface {
 	ReadFile(filename string) ([]byte, error)
+	Open(filename string) (File, error)
+}
+
+// File is an interface that represents a file
+type File interface {
+	Read(p []byte) (n int, err error)
+	Close() error
 }
 
 // MockFileSystem is used to read files from the mock file system
 type MockFileSystem struct {
 	Files map[string][]byte
+}
+
+// MockFile represents a mock file
+type MockFile struct {
+	Data   []byte
+	Offset int64
+}
+
+// Read reads data from the mock file
+func (m *MockFile) Read(p []byte) (n int, err error) {
+	if m.Offset >= int64(len(m.Data)) {
+		return 0, io.EOF
+	}
+	n = copy(p, m.Data[m.Offset:])
+	m.Offset += int64(n)
+	return n, nil
+}
+
+// Close closes the mock file (no-op for mock)
+func (m *MockFile) Close() error {
+	return nil
+}
+
+// Open opens a mock file and returns a File interface
+func (m *MockFileSystem) Open(filename string) (File, error) {
+	if data, ok := m.Files[filename]; ok {
+		return &MockFile{Data: data}, nil
+	}
+	return nil, fmt.Errorf("file not found: %s", filename)
 }
 
 // ReadFile Implements the ReadFile method of the FileSystem interface for the MockFileSystem
@@ -118,6 +155,11 @@ type RealFileSystem struct{}
 // ReadFile is used to read a file from the real file system
 func (r *RealFileSystem) ReadFile(filename string) ([]byte, error) {
 	return os.ReadFile(filename)
+}
+
+// Open opens a file and returns a File interface
+func (fs RealFileSystem) Open(filename string) (File, error) {
+	return os.Open(filename)
 }
 
 // Scanner is an interface that is used to read lines from a file

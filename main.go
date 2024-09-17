@@ -15,7 +15,7 @@ import (
 	"github.com/jakewnuk/ptt/pkg/utils"
 )
 
-var version = "0.3.2"
+var version = "0.3.3"
 var wg sync.WaitGroup
 var mutex = &sync.Mutex{}
 var retain models.FileArgumentFlag
@@ -65,6 +65,7 @@ func main() {
 			"passphrase -w [words] -tf [file]":   "Transforms input by randomly generating passphrases with a given number of words and separators from a file.",
 			"substring -i [index]":               "Transforms input by extracting substrings starting at index and ending at index.",
 			"replace-all -tf [file]":             "Transforms input by replacing all strings with all matches from a ':' separated file.",
+			"regram -w [words]":                  "Transforms input by 'regramming' sentences into new n-grams with a given number of words.",
 		}
 
 		// Sort and print transformation modes
@@ -93,7 +94,7 @@ func main() {
 	bypassMap := flag.Bool("b", false, "Bypass map creation and use stdout as primary output.")
 	debugMode := flag.Int("d", 0, "Enable debug mode with verbosity levels [0-2].")
 	URLParsingMode := flag.Int("p", 0, "Change parsing mode for URL input. [0 = Strict, 1 = Permissive, 2 = Maximum] [0-2].")
-	passPhraseWords := flag.Int("w", 0, "Number of words to generate for passphrases if applicable.")
+	passPhraseWords := flag.Int("w", 0, "Number of words to use for a transformation if applicable.")
 	flag.Var(&retain, "k", "Only keep items in a file.")
 	flag.Var(&remove, "r", "Only keep items not in a file.")
 	flag.Var(&readFiles, "f", "Read additional files for input.")
