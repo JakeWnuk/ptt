@@ -40,7 +40,7 @@ git clone https://github.com/JakeWnuk/ptt && cd ptt && docker build -t ptt . && 
 
 ### Usage:
 ```
-Usage of Password Transformation Tool (ptt) version (0.3.2):
+Usage of Password Transformation Tool (ptt) version (0.3.3):
 
 ptt [options] [...]
 Accepts standard input and/or additonal arguments.
@@ -64,7 +64,7 @@ These modify or filter the transformation mode.
   -m int
         Minimum numerical frequency to include in output.
   -n int
-        Maximum number of items to return in output. 
+        Maximum number of items to return in output.
   -o string
         Output to JSON file in addition to stdout.
   -p int
@@ -87,7 +87,7 @@ These modify or filter the transformation mode.
   -vvv
         Show verbose statistics output when possible.
   -w int
-        Number of words to generate for passphrases if applicable.
+        Number of words to use for a transformation if applicable.
 -------------------------------------------------------------------------------------------------------------
 Transformation Modes:
 These create or alter based on the selected mode.
@@ -114,6 +114,8 @@ These create or alter based on the selected mode.
         Transforms input by swapping tokens from a partial mask file and a input file.
   -t passphrase -w [words] -tf [file]
         Transforms input by randomly generating passphrases with a given number of words and separators from a file.
+  -t regram -w [words]
+        Transforms input by 'regramming' sentences into new n-grams with a given number of words.
   -t replace-all -tf [file]
         Transforms input by replacing all strings with all matches from a ':' separated file.
   -t rule-append

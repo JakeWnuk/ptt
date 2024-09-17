@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"math/rand"
 	"os"
+	"strings"
 
 	"github.com/jakewnuk/ptt/pkg/format"
 	"github.com/jakewnuk/ptt/pkg/mask"
@@ -129,6 +130,12 @@ func TransformationController(input map[string]int, mode string, startingIndex i
 			os.Exit(1)
 		}
 		output = ReplaceAllKeysInMap(input, transformationFilesMap, bypass, functionDebug)
+	case "regram":
+		if passphraseWords == 0 {
+			fmt.Fprintf(os.Stderr, "[!] Regram operations require use of the -w flag to specify the number of words to use\n")
+			os.Exit(1)
+		}
+		output = GenerateNGramMap(input, passphraseWords, bypass, functionDebug)
 	default:
 		output = input
 	}
@@ -307,4 +314,49 @@ func GeneratePassphrase(passWords map[string]int, transformationFilesMap map[str
 	}
 
 	return newKeyPhrase
+}
+
+// GenerateNGramMap takes a map of keys and values and generates a new map
+// using the utils.GenerateNGrams function and combines the results. This
+// function is used to generate n-grams from the input map for the regram
+// transformation mode.
+//
+// Args:
+//
+//	input (map[string]int): The original map to generate n-grams from
+//	ngramSize (int): The size of the n-grams to generate
+//	bypass (bool): If true, the map is not used for output or filtering
+//	debug (bool): If true, print additional debug information to stderr
+//
+// Returns:
+//
+//	(map[string]int): A new map with the n-grams generated
+func GenerateNGramMap(input map[string]int, ngramSize int, bypass bool, debug bool) map[string]int {
+	newMap := make(map[string]int)
+	for key, value := range input {
+		newKeyArray := utils.GenerateNGrams(key, ngramSize)
+		for _, newKey := range newKeyArray {
+
+			if debug {
+				fmt.Fprintf(os.Stderr, "Key: %s\n", key)
+				fmt.Fprintf(os.Stderr, "New Key: %s\n", newKey)
+			}
+
+			newKey = strings.TrimSpace(newKey)
+			newKey = strings.TrimLeft(newKey, ",")
+			newKey = strings.TrimRight(newKey, ",")
+			newKey = strings.TrimLeft(newKey, " ")
+
+			if !bypass {
+				if newMap[newKey] == 0 {
+					newMap[newKey] = value
+				} else {
+					newMap[newKey] += value
+				}
+			} else {
+				fmt.Println(newKey)
+			}
+		}
+	}
+	return newMap
 }
