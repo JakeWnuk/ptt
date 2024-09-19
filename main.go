@@ -107,7 +107,7 @@ func main() {
 
 	// Bypass map creation if requested
 	if *bypassMap {
-		fmt.Fprintf(os.Stderr, "[*] Bypassing map creation and using stdout as primary output. Options are disabled.\n")
+		fmt.Fprintf(os.Stderr, "[*] Bypassing map creation and using standard output as primary output. Options are disabled.\n")
 	}
 
 	// Print debug information if requested
@@ -147,7 +147,7 @@ func main() {
 	if (stat.Mode() & os.ModeCharDevice) == 0 {
 		primaryMap, err = utils.LoadStdinToMap(bufio.NewScanner(os.Stdin))
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "[!] Error reading from stdin: %s.\n", err)
+			fmt.Fprintf(os.Stderr, "[!] Error reading from standard input: %s.\n", err)
 			return
 		}
 	}
@@ -161,6 +161,8 @@ func main() {
 	} else {
 		primaryMap = utils.CombineMaps(primaryMap, readFilesMap, readURLsMap)
 	}
+
+	fmt.Fprintf(os.Stderr, "[*] All content done loading.")
 
 	// Apply transformation if provided
 	if *transformation != "" && templateFiles == nil {
@@ -227,6 +229,8 @@ func main() {
 	if *outputVerboseMax > 0 {
 		primaryMap = format.FilterTopN(primaryMap, *outputVerboseMax)
 	}
+
+	fmt.Fprintf(os.Stderr, "[*] Task complete with %d unique results.\n", len(primaryMap))
 
 	// Print output to stdout
 	if *verbose3 {
