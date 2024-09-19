@@ -107,7 +107,7 @@ func main() {
 
 	// Bypass map creation if requested
 	if *bypassMap {
-		fmt.Fprintf(os.Stderr, "[*] Bypassing map creation and using stdout as primary output. Options are disabled.\n")
+		fmt.Fprintf(os.Stderr, "[*] Bypassing map creation and using standard output as primary output. Options are disabled.\n")
 	}
 
 	// Print debug information if requested
@@ -117,14 +117,28 @@ func main() {
 
 	// Parse any retain, remove, or transformation file arguments
 	fs := &models.RealFileSystem{}
-	retainMap := utils.ReadFilesToMap(fs, retain)
-	removeMap := utils.ReadFilesToMap(fs, remove)
-	readFilesMap := utils.ReadFilesToMap(fs, readFiles)
-	transformationFilesMap := utils.ReadFilesToMap(fs, transformationFiles)
+	var retainMap map[string]int
+	var removeMap map[string]int
+	var readFilesMap map[string]int
+	var transformationFilesMap map[string]int
+
+	if retain != nil {
+		retainMap = utils.ReadFilesToMap(fs, retain)
+	}
+	if remove != nil {
+		removeMap = utils.ReadFilesToMap(fs, remove)
+	}
+	if readFiles != nil {
+		readFilesMap = utils.ReadFilesToMap(fs, readFiles)
+	}
+	if transformationFiles != nil {
+		transformationFilesMap = utils.ReadFilesToMap(fs, transformationFiles)
+	}
+
 	transformationTemplateArray := utils.ReadJSONToArray(fs, templateFiles)
 	readURLsMap, err := utils.ReadURLsToMap(readURLs, *URLParsingMode, *debugMode)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "[!] Error reading URLs: %s\n", err)
+		fmt.Fprintf(os.Stderr, "[!] Error reading URLs: %s.\n", err)
 		return
 	}
 
@@ -133,7 +147,7 @@ func main() {
 	if (stat.Mode() & os.ModeCharDevice) == 0 {
 		primaryMap, err = utils.LoadStdinToMap(bufio.NewScanner(os.Stdin))
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "[!] Error reading from stdin: %s\n", err)
+			fmt.Fprintf(os.Stderr, "[!] Error reading from standard input: %s.\n", err)
 			return
 		}
 	}
@@ -147,6 +161,8 @@ func main() {
 	} else {
 		primaryMap = utils.CombineMaps(primaryMap, readFilesMap, readURLsMap)
 	}
+
+	fmt.Fprintf(os.Stderr, "[*] All content done loading.")
 
 	// Apply transformation if provided
 	if *transformation != "" && templateFiles == nil {
@@ -204,7 +220,7 @@ func main() {
 	if len(retainMap) > 0 || len(removeMap) > 0 {
 		primaryMap, err = format.RetainRemove(primaryMap, retainMap, removeMap, *debugMode)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "[!] Error processing retain and remove flags: %s\n", err)
+			fmt.Fprintf(os.Stderr, "[!] Error processing retain and remove flags: %s.\n", err)
 			return
 		}
 	}
@@ -213,6 +229,8 @@ func main() {
 	if *outputVerboseMax > 0 {
 		primaryMap = format.FilterTopN(primaryMap, *outputVerboseMax)
 	}
+
+	fmt.Fprintf(os.Stderr, "[*] Task complete with %d unique results.\n", len(primaryMap))
 
 	// Print output to stdout
 	if *verbose3 {
@@ -225,14 +243,14 @@ func main() {
 
 	// Print output location if provided
 	if *jsonOutput != "" {
-		fmt.Fprintf(os.Stderr, "[*] Saving output to JSON file: %s\n", *jsonOutput)
+		fmt.Fprintf(os.Stderr, "[*] Saving output to JSON file: %s.\n", *jsonOutput)
 	}
 
 	// Save output to JSON if provided
 	if *jsonOutput != "" {
 		err = format.SaveArrayToJSON(*jsonOutput, primaryMap)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "[!] Error saving output to JSON: %s\n", err)
+			fmt.Fprintf(os.Stderr, "[!] Error saving output to JSON: %s.\n", err)
 			return
 		}
 	}

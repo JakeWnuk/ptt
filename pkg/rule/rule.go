@@ -319,13 +319,13 @@ func InsertRules(items map[string]int, index string, end string, bypass bool, de
 	returnMap = make(map[string]int)
 	i, err := strconv.Atoi(index)
 	if err != nil {
-		fmt.Printf("Error: %s\n", err)
+		fmt.Printf("[!] Error: %s\n", err)
 		os.Exit(1)
 	}
 
 	e, err := strconv.Atoi(end)
 	if err != nil {
-		fmt.Printf("Error: %s\n", err)
+		fmt.Printf("[!] Error: %s\n", err)
 		os.Exit(1)
 	}
 
@@ -369,13 +369,13 @@ func OverwriteRules(items map[string]int, index string, end string, bypass bool,
 	returnMap = make(map[string]int)
 	i, err := strconv.Atoi(index)
 	if err != nil {
-		fmt.Printf("Error: %s\n", err)
+		fmt.Printf("[!] Error: %s\n", err)
 		os.Exit(1)
 	}
 
 	e, err := strconv.Atoi(end)
 	if err != nil {
-		fmt.Printf("Error: %s\n", err)
+		fmt.Printf("[!] Error: %s\n", err)
 		os.Exit(1)
 	}
 
@@ -419,13 +419,13 @@ func ToggleRules(items map[string]int, index string, end string, bypass bool, de
 	returnMap = make(map[string]int)
 	i, err := strconv.Atoi(index)
 	if err != nil {
-		fmt.Printf("Error: %s\n", err)
+		fmt.Printf("[!] Error: %s\n", err)
 		os.Exit(1)
 	}
 
 	e, err := strconv.Atoi(end)
 	if err != nil {
-		fmt.Printf("Error: %s\n", err)
+		fmt.Printf("[!] Error: %s\n", err)
 		os.Exit(1)
 	}
 

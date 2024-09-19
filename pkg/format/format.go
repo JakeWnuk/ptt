@@ -86,7 +86,7 @@ func PrintStatsToSTDOUT(freq map[string]int, verbose bool, max int) {
 	}
 
 	if len(p) == 0 {
-		fmt.Println("No items to print!")
+		fmt.Println("[!] No items to print!")
 		return
 	}
 
@@ -117,7 +117,7 @@ func PrintStatsToSTDOUT(freq map[string]int, verbose bool, max int) {
 	// Print the top items
 	for index, value := range p[0:max] {
 		if value.Value == 1 && index == 0 {
-			fmt.Println("No items with a frequency greater than 1!")
+			fmt.Println("[!] No items with a frequency greater than 1!")
 			break
 		}
 		padding := longest - len(value.Key)

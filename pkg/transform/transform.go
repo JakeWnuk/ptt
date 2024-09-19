@@ -46,14 +46,14 @@ func TransformationController(input map[string]int, mode string, startingIndex i
 
 	if debug > 0 {
 		fmt.Fprintf(os.Stderr, "[?] TransformationController: Starting debug mode:\n")
-		fmt.Fprintf(os.Stderr, "[?] TransformationController: Running in mode %s\n", mode)
-		fmt.Fprintf(os.Stderr, "[?] TransformationController: Starting index is %d\n", startingIndex)
-		fmt.Fprintf(os.Stderr, "[?] TransformationController: Ending index is %d\n", endingIndex)
-		fmt.Fprintf(os.Stderr, "[?] TransformationController: Replacement mask is %s\n", replacementMask)
-		fmt.Fprintf(os.Stderr, "[?] TransformationController: Bypass is %t\n", bypass)
-		fmt.Fprintf(os.Stderr, "[?] TransformationController: Verbose is %t\n", verbose)
-		fmt.Fprintf(os.Stderr, "[?] TransformationController: Transformation files map is %v\n", transformationFilesMap)
-		fmt.Fprintf(os.Stderr, "[?] TransformationController: Input map is %v\n", input)
+		fmt.Fprintf(os.Stderr, "[?] TransformationController: Running in mode %s.\n", mode)
+		fmt.Fprintf(os.Stderr, "[?] TransformationController: Starting index is %d.\n", startingIndex)
+		fmt.Fprintf(os.Stderr, "[?] TransformationController: Ending index is %d.\n", endingIndex)
+		fmt.Fprintf(os.Stderr, "[?] TransformationController: Replacement mask is %s.\n", replacementMask)
+		fmt.Fprintf(os.Stderr, "[?] TransformationController: Bypass is %t.\n", bypass)
+		fmt.Fprintf(os.Stderr, "[?] TransformationController: Verbose is %t.\n", verbose)
+		fmt.Fprintf(os.Stderr, "[?] TransformationController: Transformation files map is %v.\n", transformationFilesMap)
+		fmt.Fprintf(os.Stderr, "[?] TransformationController: Input map is %v.\n", input)
 		fmt.Fprintf(os.Stderr, "[?] TransformationController: Starting transformation...\n")
 	}
 
@@ -89,35 +89,36 @@ func TransformationController(input map[string]int, mode string, startingIndex i
 		output = mask.RemoveMaskedCharacters(input, replacementMask, bypass, functionDebug)
 	case "mask-retain", "retain":
 		if len(transformationFilesMap) == 0 {
-			fmt.Fprintf(os.Stderr, "[!] Retain masks require use of one or more -tf flags to specify one or more files\n")
+			fmt.Fprintf(os.Stderr, "[!] Retain masks require use of one or more -tf flags to specify one or more files.\n")
 			os.Exit(1)
 		}
 		output = mask.MakeRetainMaskedMap(input, replacementMask, transformationFilesMap, bypass, functionDebug)
 	case "mask-match", "match":
 		if len(transformationFilesMap) == 0 {
-			fmt.Fprintf(os.Stderr, "[!] Match masks require use of one or more -tf flags to specify one or more files\n")
+			fmt.Fprintf(os.Stderr, "[!] Match masks require use of one or more -tf flags to specify one or more files.\n")
 			os.Exit(1)
 		}
 		output = mask.MakeMatchedMaskedMap(input, replacementMask, transformationFilesMap, bypass, functionDebug)
 	case "swap", "swap-single":
+		fmt.Fprintf(os.Stderr, "[*] This transformation mode requires a ':' separated list of keys to swap.\n")
 		if len(transformationFilesMap) == 0 {
-			fmt.Fprintf(os.Stderr, "[!] Swap operations require use of one or more -tf flags to specify one or more files\n")
-			fmt.Fprintf(os.Stderr, "[!] This transformation mode requires a ':' separated list of keys to swap\n")
+			fmt.Fprintf(os.Stderr, "[!] Swap operations require use of one or more -tf flags to specify one or more files.\n")
 			os.Exit(1)
 		}
 		output = ReplaceKeysInMap(input, transformationFilesMap, bypass, functionDebug)
 	case "mask-pop", "pop":
 		output = mask.BoundarySplitPopMap(input, replacementMask, bypass, functionDebug)
 	case "mask-swap":
+		fmt.Fprintf(os.Stderr, "[*] This transformation mode requires a retain mask file to use for swapping.\n")
 		if len(transformationFilesMap) == 0 {
-			fmt.Fprintf(os.Stderr, "[!] Mask-swap operations require use of one or more -tf flags to specify one or more files")
-			fmt.Fprintf(os.Stderr, "[!] This transformation mode requres a retain mask file to use for swapping")
+			fmt.Fprintf(os.Stderr, "[!] Mask-swap operations require use of one or more -tf flags to specify one or more files.\n")
 			os.Exit(1)
 		}
 		output = mask.ShuffleMap(input, replacementMask, transformationFilesMap, bypass, functionDebug)
 	case "passphrase":
+		fmt.Fprintf(os.Stderr, "[*] This transformation mode expects space separated content.\n")
 		if passphraseWords == 0 {
-			fmt.Fprintf(os.Stderr, "[!] Passphrase operations require use of the -w flag to specify the number of words to use\n")
+			fmt.Fprintf(os.Stderr, "[!] Passphrase operations require use of the -w flag to specify the number of words to use.\n")
 			os.Exit(1)
 		}
 		output = MakePassphraseMap(input, bypass, functionDebug, passphraseWords)
@@ -125,13 +126,14 @@ func TransformationController(input map[string]int, mode string, startingIndex i
 		output = utils.SubstringMap(input, startingIndex, endingIndex, bypass, functionDebug)
 	case "replace-all", "replace":
 		if len(transformationFilesMap) == 0 {
-			fmt.Fprintf(os.Stderr, "[!] Replace operations require use of one or more -tf flags to specify one or more files\n")
+			fmt.Fprintf(os.Stderr, "[!] Replace operations require use of one or more -tf flags to specify one or more files.\n")
 			os.Exit(1)
 		}
 		output = ReplaceAllKeysInMap(input, transformationFilesMap, bypass, functionDebug)
 	case "regram":
+		fmt.Fprintf(os.Stderr, "[*] This transformation mode expects space separated content.\n")
 		if passphraseWords == 0 {
-			fmt.Fprintf(os.Stderr, "[!] Regram operations require use of the -w flag to specify the number of words to use\n")
+			fmt.Fprintf(os.Stderr, "[!] Regram operations require use of the -w flag to specify the number of words to use.\n")
 			os.Exit(1)
 		}
 		output = GenerateNGramMap(input, passphraseWords, bypass, functionDebug)
@@ -140,7 +142,7 @@ func TransformationController(input map[string]int, mode string, startingIndex i
 	}
 
 	if debug > 0 {
-		fmt.Fprintf(os.Stderr, "[?] TransformationController: Output map is %v\n", output)
+		fmt.Fprintf(os.Stderr, "[?] TransformationController: Output map is %v.\n", output)
 		fmt.Fprintf(os.Stderr, "[?] TransformationController: Transformation complete. Resuming output.\n")
 	}
 
