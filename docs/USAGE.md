@@ -1,5 +1,5 @@
 # Password Transformation Tool (PTT) Usage Guide
-## Version 0.3.3
+## Version 0.3.4
 
 ### Table of Contents
 #### Getting Started
@@ -32,7 +32,7 @@
 5. [Token Swapping](#token-swapping)
 6. [Passphrases](#passphrases)
 
-### Misc Creation Guide
+### Misc. Creation Guide
 1. [Misc Creation Introduction](#misc-creation-introduction)
 2. [Encoding and Decoding](#encoding-and-decoding)
 3. [Hex and Dehex](#hex-and-dehex)

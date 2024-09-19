@@ -981,7 +981,19 @@ func GenerateNGrams(text string, n int) []string {
 	return nGrams
 }
 
+// GeneratePassphrase generates a passphrase from a string of text
+// and returns a slice of passphrases
+//
+// Args:
+// text (string): The text to generate passphrases from
+// n (int): The number of words in the passphrase
+//
+// Returns:
+// []string: A slice of passphrases
 func GeneratePassphrase(text string, n int) []string {
+	text = strings.ReplaceAll(text, ".", "")
+	text = strings.ReplaceAll(text, ",", "")
+	text = strings.ReplaceAll(text, ";", "")
 	words := strings.Fields(text)
 	var passphrases []string
 
@@ -1031,6 +1043,10 @@ func GeneratePassphrase(text string, n int) []string {
 
 	passphrases = append(passphrases, strings.ReplaceAll(titleCaseWords, " ", ""))
 	passphrases = append(passphrases, strings.ReplaceAll(turkTitleCaseWords, " ", ""))
+	passphrases = append(passphrases, strings.ReplaceAll(titleCaseWords, " ", "-"))
+	passphrases = append(passphrases, strings.ReplaceAll(turkTitleCaseWords, " ", "-"))
+	passphrases = append(passphrases, strings.ReplaceAll(titleCaseWords, " ", "_"))
+	passphrases = append(passphrases, strings.ReplaceAll(turkTitleCaseWords, " ", "_"))
 	passphrases = append(passphrases, CAPSlowerPassphrase)
 	passphrases = append(passphrases, lowerCAPSPassphrase)
 	passphrases = append(passphrases, lowerl33tPassphrase)
