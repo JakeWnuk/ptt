@@ -52,14 +52,14 @@ func ReadFilesToMap(fs models.FileSystem, filenames []string) map[string]int {
 		if IsFileSystemDirectory(filename) {
 			files, err := GetFilesInDirectory(filename)
 			if err != nil {
-				fmt.Fprintf(os.Stderr, "[!] Error reading the directory %v: %v\n", filename, err)
+				fmt.Fprintf(os.Stderr, "[!] Error reading the directory %v: %v.\n", filename, err)
 				os.Exit(1)
 			}
 			filenames = append(filenames, files...)
 		} else {
 			file, err := fs.Open(filename)
 			if err != nil {
-				fmt.Fprintf(os.Stderr, "[!] Error opening file %s\n", filename)
+				fmt.Fprintf(os.Stderr, "[!] Error opening file %s.\n", filename)
 				os.Exit(1)
 			}
 			defer file.Close()
@@ -68,7 +68,7 @@ func ReadFilesToMap(fs models.FileSystem, filenames []string) map[string]int {
 			for {
 				bytesRead, err := file.Read(buffer)
 				if err != nil && err != io.EOF {
-					fmt.Fprintf(os.Stderr, "[!] Error reading file %s\n", filename)
+					fmt.Fprintf(os.Stderr, "[!] Error reading file %s.\n", filename)
 					os.Exit(1)
 				}
 				if bytesRead == 0 {
@@ -188,7 +188,7 @@ func ReadURLsToMap(urls []string, parsingMode int, debugMode int) (map[string]in
 
 			parsedURL, err := url.Parse(iURL)
 			if err != nil {
-				fmt.Println("Error parsing URL:", err)
+				fmt.Println("[!] Error parsing URL:", err)
 				continue
 			}
 			if parsedURL.Host == prevURL {
@@ -214,7 +214,7 @@ func ReadURLsToMap(urls []string, parsingMode int, debugMode int) (map[string]in
 			wg.Add(1)
 			go ProcessURLFile(iURL, ch, &wg, parsingMode, debugMode)
 		} else {
-			fmt.Fprintf(os.Stderr, "[!] Rejected URL or file: %s\n", iURL)
+			fmt.Fprintf(os.Stderr, "[!] Rejected URL or file: %s.\n", iURL)
 			return nil, fmt.Errorf("invalid input: %s", iURL)
 		}
 	}
@@ -311,14 +311,14 @@ func ProcessURL(url string, ch chan<- string, wg *sync.WaitGroup, parsingMode in
 		resp, err = client.Do(req)
 		if err != nil {
 			if debugMode >= 2 {
-				fmt.Fprintf(os.Stderr, "[!] Error fetching URL %s\n", url)
+				fmt.Fprintf(os.Stderr, "[!] Error fetching URL %s.\n", url)
 			}
 			return
 		}
 
 		if resp == nil {
 			if debugMode >= 2 {
-				fmt.Fprintf(os.Stderr, "[!] Error no response from URL %s\n", url)
+				fmt.Fprintf(os.Stderr, "[!] Error no response from URL %s.\n", url)
 			}
 			return
 		}
@@ -359,7 +359,7 @@ func ProcessURL(url string, ch chan<- string, wg *sync.WaitGroup, parsingMode in
 
 	if resp == nil {
 		if debugMode >= 1 {
-			fmt.Fprintf(os.Stderr, "[!] Error no response from URL %s\n", url)
+			fmt.Fprintf(os.Stderr, "[!] Error no response from URL %s.\n", url)
 		}
 		return
 	}
@@ -367,7 +367,7 @@ func ProcessURL(url string, ch chan<- string, wg *sync.WaitGroup, parsingMode in
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		if debugMode >= 1 {
-			fmt.Fprintf(os.Stderr, "[!] Error reading response body from URL %s\n", url)
+			fmt.Fprintf(os.Stderr, "[!] Error reading response body from URL %s.\n", url)
 		}
 		return
 	}
@@ -382,7 +382,7 @@ func ProcessURL(url string, ch chan<- string, wg *sync.WaitGroup, parsingMode in
 		doc, err := html.Parse(strings.NewReader(text))
 		if err != nil {
 			if debugMode >= 1 {
-				fmt.Fprintf(os.Stderr, "[!] Error parsing HTML from URL %s\n", url)
+				fmt.Fprintf(os.Stderr, "[!] Error parsing HTML from URL %s.\n", url)
 			}
 			return
 		}
@@ -584,19 +584,19 @@ func ReadJSONToArray(fs models.FileSystem, filenames []string) []models.Template
 				return nil
 			})
 			if err != nil {
-				fmt.Fprintf(os.Stderr, "[!] Error walking the path %v: %v\n", filename, err)
+				fmt.Fprintf(os.Stderr, "[!] Error walking the path %v: %v.\n", filename, err)
 				os.Exit(1)
 			}
 		} else {
 			data, err := fs.ReadFile(filename)
 			if err != nil {
-				fmt.Fprintf(os.Stderr, "[!] Error reading file %s\n", filename)
+				fmt.Fprintf(os.Stderr, "[!] Error reading file %s.\n", filename)
 				os.Exit(1)
 			}
 
 			err = json.Unmarshal(data, &template)
 			if err != nil {
-				fmt.Fprintf(os.Stderr, "[!] Error unmarshalling JSON file %s\n", filename)
+				fmt.Fprintf(os.Stderr, "[!] Error unmarshalling JSON file %s.\n", filename)
 				os.Exit(1)
 			}
 
@@ -610,32 +610,32 @@ func ReadJSONToArray(fs models.FileSystem, filenames []string) []models.Template
 
 	for _, template := range combinedTemplate {
 		if !numRe.MatchString(fmt.Sprintf("%v", template.StartIndex)) || !numRe.MatchString(fmt.Sprintf("%v", template.EndIndex)) {
-			fmt.Fprintf(os.Stderr, "[!] Error: StartIndex and EndIndex must be integers\n")
+			fmt.Fprintf(os.Stderr, "[!] Error: StartIndex and EndIndex must be integers.\n")
 			os.Exit(1)
 		}
 
 		if !alphaRe.MatchString(fmt.Sprintf("%v", template.Verbose)) {
-			fmt.Fprintf(os.Stderr, "[!] Error: Verbose must be a boolean\n")
+			fmt.Fprintf(os.Stderr, "[!] Error: Verbose must be a boolean.\n")
 			os.Exit(1)
 		}
 
 		if !alphaRe.MatchString(fmt.Sprintf("%v", template.ReplacementMask)) {
-			fmt.Fprintf(os.Stderr, "[!] Error: ReplacementMask must be a string\n")
+			fmt.Fprintf(os.Stderr, "[!] Error: ReplacementMask must be a string.\n")
 			os.Exit(1)
 		}
 
 		if !alphaRe.MatchString(fmt.Sprintf("%v", template.Bypass)) {
-			fmt.Fprintf(os.Stderr, "[!] Error: Bypass must be a boolean\n")
+			fmt.Fprintf(os.Stderr, "[!] Error: Bypass must be a boolean.\n")
 			os.Exit(1)
 		}
 
 		if !alphaRe.MatchString(fmt.Sprintf("%v", template.TransformationMode)) {
-			fmt.Fprintf(os.Stderr, "[!] Error: TransformationMode must be a string\n")
+			fmt.Fprintf(os.Stderr, "[!] Error: TransformationMode must be a string.\n")
 			os.Exit(1)
 		}
 
 		if !numRe.MatchString(fmt.Sprintf("%v", template.PassphraseWords)) {
-			fmt.Fprintf(os.Stderr, "[!] Error: PassphraseWords must be an integer\n")
+			fmt.Fprintf(os.Stderr, "[!] Error: PassphraseWords must be an integer.\n")
 			os.Exit(1)
 		}
 	}
@@ -663,7 +663,7 @@ func ProcessURLFile(filePath string, ch chan<- string, wg *sync.WaitGroup, parsi
 
 	file, err := os.Open(filePath)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "[!] Error opening file %v: %v\n", filePath, err)
+		fmt.Fprintf(os.Stderr, "[!] Error opening file %v: %v.\n", filePath, err)
 		return
 	}
 	defer file.Close()
@@ -675,7 +675,7 @@ func ProcessURLFile(filePath string, ch chan<- string, wg *sync.WaitGroup, parsi
 
 			parsedURL, err := url.Parse(line)
 			if err != nil {
-				fmt.Println("Error parsing URL:", err)
+				fmt.Println("[!] Error parsing URL:", err)
 				continue
 			}
 			if parsedURL.Host == prevURL {
@@ -688,12 +688,12 @@ func ProcessURLFile(filePath string, ch chan<- string, wg *sync.WaitGroup, parsi
 			wg.Add(1)
 			go ProcessURL(line, ch, wg, parsingMode, debugMode, sleepOnStart)
 		} else {
-			fmt.Fprintf(os.Stderr, "[!] Rejected URL: %s\n", line)
+			fmt.Fprintf(os.Stderr, "[!] Rejected URL: %s.\n", line)
 		}
 	}
 
 	if err := scanner.Err(); err != nil {
-		fmt.Fprintf(os.Stderr, "[!] Error reading file %v: %v\n", filePath, err)
+		fmt.Fprintf(os.Stderr, "[!] Error reading file %v: %v.\n", filePath, err)
 	}
 }
 
@@ -944,7 +944,7 @@ func SubstringMap(sMap map[string]int, sIndex int, eIndex int, bypass bool, debu
 		maxLen := eIndex
 		if sIndex > len(s) {
 			if debug {
-				fmt.Fprintf(os.Stderr, fmt.Sprintf("[!] Error: Start index is out of bounds: %s\n", s))
+				fmt.Fprintf(os.Stderr, fmt.Sprintf("[!] Error: Start index is out of bounds: %s.\n", s))
 			}
 			continue
 		} else if eIndex > len(s) {

@@ -138,7 +138,7 @@ func main() {
 	transformationTemplateArray := utils.ReadJSONToArray(fs, templateFiles)
 	readURLsMap, err := utils.ReadURLsToMap(readURLs, *URLParsingMode, *debugMode)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "[!] Error reading URLs: %s\n", err)
+		fmt.Fprintf(os.Stderr, "[!] Error reading URLs: %s.\n", err)
 		return
 	}
 
@@ -147,7 +147,7 @@ func main() {
 	if (stat.Mode() & os.ModeCharDevice) == 0 {
 		primaryMap, err = utils.LoadStdinToMap(bufio.NewScanner(os.Stdin))
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "[!] Error reading from stdin: %s\n", err)
+			fmt.Fprintf(os.Stderr, "[!] Error reading from stdin: %s.\n", err)
 			return
 		}
 	}
@@ -218,7 +218,7 @@ func main() {
 	if len(retainMap) > 0 || len(removeMap) > 0 {
 		primaryMap, err = format.RetainRemove(primaryMap, retainMap, removeMap, *debugMode)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "[!] Error processing retain and remove flags: %s\n", err)
+			fmt.Fprintf(os.Stderr, "[!] Error processing retain and remove flags: %s.\n", err)
 			return
 		}
 	}
@@ -239,14 +239,14 @@ func main() {
 
 	// Print output location if provided
 	if *jsonOutput != "" {
-		fmt.Fprintf(os.Stderr, "[*] Saving output to JSON file: %s\n", *jsonOutput)
+		fmt.Fprintf(os.Stderr, "[*] Saving output to JSON file: %s.\n", *jsonOutput)
 	}
 
 	// Save output to JSON if provided
 	if *jsonOutput != "" {
 		err = format.SaveArrayToJSON(*jsonOutput, primaryMap)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "[!] Error saving output to JSON: %s\n", err)
+			fmt.Fprintf(os.Stderr, "[!] Error saving output to JSON: %s.\n", err)
 			return
 		}
 	}
