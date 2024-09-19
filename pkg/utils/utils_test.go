@@ -25,6 +25,7 @@ import (
 // - ReplaceAllSubstring()
 // - SubstringMap()
 // - GenerateNGrams()
+// - GeneratePassphrase()
 //
 // ** Validation Functions **
 // - CheckASCIIString()
@@ -655,6 +656,36 @@ func TestGenerateNGrams(t *testing.T) {
 		given := GenerateNGrams(input1, input2)
 		if CheckAreArraysEqual(given, output) == false {
 			t.Errorf("GenerateNGrams(%v, %v) = %v; want %v", input1, input2, given, output)
+		}
+	}
+}
+
+// Unit Test for GeneratePassphrase()
+func TestGeneratePassphrase(t *testing.T) {
+
+	// Define a test case struct
+	type TestCase struct {
+		Input1 string
+		Input2 int
+		Output []string
+	}
+
+	type TestCases []TestCase
+
+	// Define test cases
+	testCases := TestCases{
+		{"I <3 you", 3, []string{"I<3you", "I<3YOU", "i<3you", "I<3YOU", "I<3You", "i<3you", "i<3you", "I<3YOU"}},
+	}
+
+	// Run test cases
+	for _, testCase := range testCases {
+		input1 := testCase.Input1
+		input2 := testCase.Input2
+		output := testCase.Output
+
+		given := GeneratePassphrase(input1, input2)
+		if CheckAreArraysEqual(given, output) == false {
+			t.Errorf("GeneratePassphrase(%v, %v) = %v; want %v", input1, input2, given, output)
 		}
 	}
 }

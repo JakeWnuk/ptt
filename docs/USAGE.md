@@ -177,8 +177,8 @@ The following transformations can be used with the `-t` flag:
         Transforms input by creating masks that still retain strings from file.
   -t mask-swap -tf [file]
         Transforms input by swapping tokens from a partial mask file and a input file.
-  -t passphrase -w [words] -tf [file]
-        Transforms input by randomly generating passphrases with a given number of words and separators from a file.
+  -t passphrase -w [words]
+        Transforms input by generating passphrases from sentences with a given number of words.
   -t regram -w [words]
         Transforms input by 'regramming' sentences into new n-grams with a given number of words.
   -t replace-all -tf [file]
@@ -525,8 +525,8 @@ wordlists. There are several ways to generate wordlists using PTT:
   This is implemented in the `pop` module.
 - `Token Swapping`: Generates tokens by swapping characters in a string. This is
   implemented in the `mask-swap` module.
-- `Passphrases`: Generates passphrases by combining words from a wordlist. This
-  is implemented in the `passphrase` module.
+- `Passphrases`: Generates passphrases by reforming setences. This is implemented
+  in the `passphrase` module.
 
 All modes support multibyte characters and can properly convert them. One
 transformation can be used at a time.
@@ -593,19 +593,14 @@ candidates by using masks. However, it is unique in that it uses partial
 masks to limit the swap positions from prior applications.
 
 ### Passphrases
-The `passphrase` module generates passphrases by combining words from a wordlist.
-The `-w` flag can be used to specify the number of words to use in the passphrase.
-The `-tf` flag is optional and can be used to specify a file containing separators
-to use between words. The syntax is as follows:
+The `passphrase` module generates passphrases by reforming sentences. The syntax is as follows:
 ```
-ptt -f <input-file> -t passphrase -w <word-count> -tf <separator-file>
+ptt -f <input-file> -t passphrase -w <word-count>
 ```
-
-The passphrases are generated randomly by selecting words and separators from the input.
-If no separator file is provided, no separators will be used. The default word count is 0.
-The number of passphrases generated is equal to the number of lines in the input file
-*including* duplicates. This means that the item count is also used to determine the number
-of passphrases generated.
+The `passphrase` mode will generate new passphrases from the input by
+reformatting the sentences into new passphrases. The number of words to use in
+the passphrase is specified by the `-w` flag. The output will be the new
+passphrases generated from the input with the specified word count.
 
 ## Misc Creation Guide
 
