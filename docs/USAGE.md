@@ -592,6 +592,39 @@ This mode is most similar to token-swapping in that it generates new
 candidates by using masks. However, it is unique in that it uses partial
 masks to limit the swap positions from prior applications.
 
+#### Token Swapping Example
+```bash
+$ cat pass.lst
+love@123
+@123love
+
+$ cat retain.txt
+love
+```
+
+Create retain masks:
+```bash
+$ ptt -f pass.lst -tf retain.txt -t mask-retain | tee retained.mask
+?s?d?d?dlove
+love?s?d?d?d
+```
+
+Then swap on them with matching values:
+```bash
+$ cat swap.lst
+$333
+#888
+#123
+
+$ ptt -f retained.mask -tf swap.lst -t mask-swap
+#123love
+$333love
+love$333
+love#888
+love#123
+#888love
+```
+
 ### Passphrases
 The `passphrase` module generates passphrases by reforming sentences. The syntax is as follows:
 ```
