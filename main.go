@@ -117,10 +117,24 @@ func main() {
 
 	// Parse any retain, remove, or transformation file arguments
 	fs := &models.RealFileSystem{}
-	retainMap := utils.ReadFilesToMap(fs, retain)
-	removeMap := utils.ReadFilesToMap(fs, remove)
-	readFilesMap := utils.ReadFilesToMap(fs, readFiles)
-	transformationFilesMap := utils.ReadFilesToMap(fs, transformationFiles)
+	var retainMap map[string]int
+	var removeMap map[string]int
+	var readFilesMap map[string]int
+	var transformationFilesMap map[string]int
+
+	if retain != nil {
+		retainMap = utils.ReadFilesToMap(fs, retain)
+	}
+	if remove != nil {
+		removeMap = utils.ReadFilesToMap(fs, remove)
+	}
+	if readFiles != nil {
+		readFilesMap = utils.ReadFilesToMap(fs, readFiles)
+	}
+	if transformationFiles != nil {
+		transformationFilesMap = utils.ReadFilesToMap(fs, transformationFiles)
+	}
+
 	transformationTemplateArray := utils.ReadJSONToArray(fs, templateFiles)
 	readURLsMap, err := utils.ReadURLsToMap(readURLs, *URLParsingMode, *debugMode)
 	if err != nil {

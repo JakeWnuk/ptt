@@ -109,13 +109,14 @@ func TransformationController(input map[string]int, mode string, startingIndex i
 	case "mask-pop", "pop":
 		output = mask.BoundarySplitPopMap(input, replacementMask, bypass, functionDebug)
 	case "mask-swap":
+		fmt.Fprintf(os.Stderr, "[!] This transformation mode requres a retain mask file to use for swapping\n")
 		if len(transformationFilesMap) == 0 {
-			fmt.Fprintf(os.Stderr, "[!] Mask-swap operations require use of one or more -tf flags to specify one or more files")
-			fmt.Fprintf(os.Stderr, "[!] This transformation mode requres a retain mask file to use for swapping")
+			fmt.Fprintf(os.Stderr, "[!] Mask-swap operations require use of one or more -tf flags to specify one or more files\n")
 			os.Exit(1)
 		}
 		output = mask.ShuffleMap(input, replacementMask, transformationFilesMap, bypass, functionDebug)
 	case "passphrase":
+		fmt.Fprintf(os.Stderr, "[!] This transformation mode expects sentences separated by spaces\n")
 		if passphraseWords == 0 {
 			fmt.Fprintf(os.Stderr, "[!] Passphrase operations require use of the -w flag to specify the number of words to use\n")
 			os.Exit(1)
@@ -130,6 +131,7 @@ func TransformationController(input map[string]int, mode string, startingIndex i
 		}
 		output = ReplaceAllKeysInMap(input, transformationFilesMap, bypass, functionDebug)
 	case "regram":
+		fmt.Fprintf(os.Stderr, "[!] This transformation mode expects sentences separated by spaces\n")
 		if passphraseWords == 0 {
 			fmt.Fprintf(os.Stderr, "[!] Regram operations require use of the -w flag to specify the number of words to use\n")
 			os.Exit(1)
