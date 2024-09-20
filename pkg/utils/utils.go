@@ -43,7 +43,7 @@ import (
 func ReadFilesToMap(fs models.FileSystem, filenames []string) map[string]int {
 	wordMap := make(map[string]int)
 	// 4 GB read buffer
-	fmt.Fprintf(os.Stderr, "[*] Creating file buffer...\n")
+	fmt.Fprintf(os.Stderr, "[*] Creating file buffer and reading...\n")
 	chunkSize := int64(4 * 1024 * 1024 * 1024)
 
 	i := 0
