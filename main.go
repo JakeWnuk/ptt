@@ -162,7 +162,7 @@ func main() {
 		primaryMap = utils.CombineMaps(primaryMap, readFilesMap, readURLsMap)
 	}
 
-	fmt.Fprintf(os.Stderr, "[*] All content loaded.\n")
+	fmt.Fprintf(os.Stderr, "[*] All input loaded.\n")
 
 	// Apply transformation if provided
 	if *transformation != "" && templateFiles == nil {
