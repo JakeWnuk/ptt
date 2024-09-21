@@ -15,7 +15,7 @@ import (
 	"github.com/jakewnuk/ptt/pkg/utils"
 )
 
-var version = "0.3.4"
+var version = "0.3.5"
 var wg sync.WaitGroup
 var mutex = &sync.Mutex{}
 var retain models.FileArgumentFlag
@@ -94,6 +94,7 @@ func main() {
 	bypassMap := flag.Bool("b", false, "Bypass map creation and use stdout as primary output.")
 	debugMode := flag.Int("d", 0, "Enable debug mode with verbosity levels [0-2].")
 	URLParsingMode := flag.Int("p", 0, "Change parsing mode for URL input. [0 = Strict, 1 = Permissive, 2 = Maximum] [0-2].")
+	// TODO -w should accept a range and documentation should reflect it
 	passPhraseWords := flag.Int("w", 0, "Number of words to use for a transformation if applicable.")
 	flag.Var(&retain, "k", "Only keep items in a file.")
 	flag.Var(&remove, "r", "Only keep items not in a file.")
