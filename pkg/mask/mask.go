@@ -445,7 +445,7 @@ func BoundarySplitPopMap(input map[string]int, replacementMask string, bypass bo
 func ShuffleMap(input map[string]int, replacementMask string, swapMap map[string]int, bypass bool, debug bool) map[string]int {
 	shuffleMap := make(map[string]int)
 	re := regexp.MustCompile(`^(\?u|\?l|\?d|\?s|\?b)*$`)
-	reParser := regexp.MustCompile("(\\?[luds])")
+	reParser := regexp.MustCompile("(\\?[ludsb])")
 
 	for key, value := range input {
 		newKey := ""
@@ -468,7 +468,7 @@ func ShuffleMap(input map[string]int, replacementMask string, swapMap map[string
 			}
 
 			maskedSwapKey := MakeMaskedString(swapKey, replacementMask)
-			if maskedSwapKey == newKey || fmt.Sprintf("%s%s", maskedSwapKey, maskedSwapKey) == newKey {
+			if maskedSwapKey == newKey {
 
 				var shufKey string
 				shufKey = strings.Replace(key, newKey, swapKey, 1)
