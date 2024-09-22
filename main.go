@@ -123,6 +123,11 @@ func main() {
 	var readFilesMap map[string]int
 	var transformationFilesMap map[string]int
 
+	// Read files if provided
+	if retain != nil || remove != nil || readFiles != nil || transformationFiles != nil {
+		fmt.Fprintf(os.Stderr, "[*] Reading files for input.\n")
+	}
+
 	if retain != nil {
 		retainMap = utils.ReadFilesToMap(fs, retain)
 	}
