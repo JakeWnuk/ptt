@@ -463,7 +463,7 @@ func ShuffleMap(input map[string]int, replacementMask string, swapMap map[string
 				fmt.Fprintf(os.Stderr, "[?] ShuffleMap:\n")
 				fmt.Fprintf(os.Stderr, "Key: %s\n", key)
 				fmt.Fprintf(os.Stderr, "Match: %s\n", match)
-				fmt.Fprintf(os.Stderr, "Swap Key: %s\n", swapKey)
+				fmt.Fprintf(os.Stderr, "Swap Token: %s\n", swapKey)
 				fmt.Fprintf(os.Stderr, "Replacement Mask: %s\n", replacementMask)
 			}
 
@@ -478,8 +478,9 @@ func ShuffleMap(input map[string]int, replacementMask string, swapMap map[string
 				}
 
 				if debug {
-					fmt.Fprintf(os.Stderr, "Masked Swap Key: %s\n", maskedSwapKey)
-					fmt.Fprintf(os.Stderr, "Shuffle Key: %s\n", shufKey)
+					fmt.Fprintf(os.Stderr, "[?][?] Swap performed:\n")
+					fmt.Fprintf(os.Stderr, "Swap Token Mask: %s\n", maskedSwapKey)
+					fmt.Fprintf(os.Stderr, "Swap Result: %s\n", shufKey)
 				}
 
 				if shufKey == key {
