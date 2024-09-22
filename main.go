@@ -15,7 +15,7 @@ import (
 	"github.com/jakewnuk/ptt/pkg/utils"
 )
 
-var version = "0.3.4"
+var version = "0.3.5"
 var wg sync.WaitGroup
 var mutex = &sync.Mutex{}
 var retain models.FileArgumentFlag
@@ -26,6 +26,7 @@ var transformationFiles models.FileArgumentFlag
 var templateFiles models.FileArgumentFlag
 var intRange models.IntRange
 var lenRange models.IntRange
+var wordRange models.IntRange
 var primaryMap map[string]int
 var err error
 
@@ -39,18 +40,18 @@ func main() {
 		fmt.Fprintf(os.Stderr, "Options:\n")
 		fmt.Fprintf(os.Stderr, "These modify or filter the transformation mode.\n\n")
 		flag.PrintDefaults()
-		fmt.Fprintf(os.Stderr, "-------------------------------------------------------------------------------------------------------------")
-		fmt.Fprintln(os.Stderr, "\nTransformation Modes:")
+		fmt.Fprintf(os.Stderr, "-------------------------------------------------------------------------------------------------------------\n")
+		fmt.Fprintf(os.Stderr, "Transformation Modes:\n")
 		fmt.Fprintf(os.Stderr, "These create or alter based on the selected mode.\n\n")
 		modes := map[string]string{
-			"rule-append":                        "Transforms input into append rules.",
-			"rule-append-remove":                 "Transforms input into append-remove rules.",
-			"rule-prepend":                       "Transforms input into prepend rules.",
-			"rule-prepend-remove":                "Transforms input into prepend-remove rules.",
-			"rule-prepend-toggle":                "Transforms input into prepend-toggle rules. Creating camelCase and PascalCase.",
-			"rule-insert -i [index]":             "Transforms input into insert rules starting at index.",
-			"rule-overwrite -i [index]":          "Transforms input into overwrite rules starting at index.",
-			"rule-toggle -i [index]":             "Transforms input into toggle rules starting at index.",
+			"rule-append":                        "Transforms input by creating append rules.",
+			"rule-append-remove":                 "Transforms input by creating append-remove rules.",
+			"rule-prepend":                       "Transforms input by creating prepend rules.",
+			"rule-prepend-remove":                "Transforms input by creating prepend-remove rules.",
+			"rule-prepend-toggle":                "Transforms input by creating prepend-toggle rules.",
+			"rule-insert -i [index]":             "Transforms input by creating insert rules starting at index.",
+			"rule-overwrite -i [index]":          "Transforms input by creating overwrite rules starting at index.",
+			"rule-toggle -i [index]":             "Transforms input by creating toggle rules starting at index.",
 			"encode":                             "Transforms input by HTML and Unicode escape encoding.",
 			"decode":                             "Transforms input by HTML and Unicode escape decoding.",
 			"hex":                                "Transforms input by encoding strings into $HEX[...] format.",
@@ -83,25 +84,25 @@ func main() {
 	}
 
 	// Define command line flags
-	verbose := flag.Bool("v", false, "Show verbose output when possible.")
+	verbose := flag.Bool("v", false, "Show verbose output when possible. (Can show additional metadata in some modes.)")
 	verbose2 := flag.Bool("vv", false, "Show statistics output when possible.")
 	verbose3 := flag.Bool("vvv", false, "Show verbose statistics output when possible.")
 	minimum := flag.Int("m", 0, "Minimum numerical frequency to include in output.")
 	outputVerboseMax := flag.Int("n", 0, "Maximum number of items to return in output.")
 	transformation := flag.String("t", "", "Transformation to apply to input.")
 	replacementMask := flag.String("rm", "uldsbt", "Replacement mask for transformations if applicable.")
-	jsonOutput := flag.String("o", "", "Output to JSON file in addition to stdout.")
-	bypassMap := flag.Bool("b", false, "Bypass map creation and use stdout as primary output.")
+	jsonOutput := flag.String("o", "", "Output to JSON file in addition to stdout. Accepts file names and paths.")
+	bypassMap := flag.Bool("b", false, "Bypass map creation and use stdout as primary output. Disables some options.")
 	debugMode := flag.Int("d", 0, "Enable debug mode with verbosity levels [0-2].")
 	URLParsingMode := flag.Int("p", 0, "Change parsing mode for URL input. [0 = Strict, 1 = Permissive, 2 = Maximum] [0-2].")
-	passPhraseWords := flag.Int("w", 0, "Number of words to use for a transformation if applicable.")
 	flag.Var(&retain, "k", "Only keep items in a file.")
 	flag.Var(&remove, "r", "Only keep items not in a file.")
 	flag.Var(&readFiles, "f", "Read additional files for input.")
 	flag.Var(&transformationFiles, "tf", "Read additional files for transformations if applicable.")
-	flag.Var(&templateFiles, "tp", "Read a template file for multiple transformations and operations.")
+	flag.Var(&templateFiles, "tp", "Read a template file for multiple transformations and operations. Cannot be used with -t flag.")
 	flag.Var(&intRange, "i", "Starting index for transformations if applicable. Accepts ranges separated by '-'.")
 	flag.Var(&lenRange, "l", "Only output items of a certain length (does not adjust for rules). Accepts ranges separated by '-'.")
+	flag.Var(&wordRange, "w", "Number of words for transformations if applicable. Accepts ranges separated by '-'.")
 	flag.Var(&readURLs, "u", "Read additional URLs for input.")
 	flag.Parse()
 
@@ -121,6 +122,11 @@ func main() {
 	var removeMap map[string]int
 	var readFilesMap map[string]int
 	var transformationFilesMap map[string]int
+
+	// Read files if provided
+	if retain != nil || remove != nil || readFiles != nil || transformationFiles != nil {
+		fmt.Fprintf(os.Stderr, "[*] Reading files for input.\n")
+	}
 
 	if retain != nil {
 		retainMap = utils.ReadFilesToMap(fs, retain)
@@ -166,7 +172,7 @@ func main() {
 
 	// Apply transformation if provided
 	if *transformation != "" && templateFiles == nil {
-		primaryMap = transform.TransformationController(primaryMap, *transformation, intRange.Start, intRange.End, *verbose, *replacementMask, transformationFilesMap, *bypassMap, *debugMode, *passPhraseWords)
+		primaryMap = transform.TransformationController(primaryMap, *transformation, intRange.Start, intRange.End, *verbose, *replacementMask, transformationFilesMap, *bypassMap, *debugMode, wordRange.Start, wordRange.End)
 	} else if templateFiles != nil && *transformation == "" {
 		fmt.Fprintf(os.Stderr, "[*] Using template files for multiple transformations.\n")
 
@@ -179,9 +185,9 @@ func main() {
 		// Apply transformations from template files
 		for i, template := range transformationTemplateArray {
 			if i == 0 {
-				temporaryMap = transform.TransformationController(primaryMap, template.TransformationMode, template.StartIndex, template.EndIndex, template.Verbose, template.ReplacementMask, transformationFilesMap, template.Bypass, *debugMode, template.PassphraseWords)
+				temporaryMap = transform.TransformationController(primaryMap, template.TransformationMode, template.StartIndex, template.EndIndex, template.Verbose, template.ReplacementMask, transformationFilesMap, template.Bypass, *debugMode, template.WordRangeStart, template.WordRangeEnd)
 			} else {
-				temporaryMap = utils.CombineMaps(temporaryMap, transform.TransformationController(primaryMap, template.TransformationMode, template.StartIndex, template.EndIndex, template.Verbose, template.ReplacementMask, transformationFilesMap, template.Bypass, *debugMode, template.PassphraseWords))
+				temporaryMap = utils.CombineMaps(temporaryMap, transform.TransformationController(primaryMap, template.TransformationMode, template.StartIndex, template.EndIndex, template.Verbose, template.ReplacementMask, transformationFilesMap, template.Bypass, *debugMode, template.WordRangeStart, template.WordRangeEnd))
 			}
 		}
 		primaryMap = temporaryMap

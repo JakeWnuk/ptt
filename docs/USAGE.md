@@ -1,5 +1,5 @@
 # Password Transformation Tool (PTT) Usage Guide
-## Version 0.3.4
+## Version 0.3.5
 
 ### Table of Contents
 #### Getting Started
@@ -114,7 +114,7 @@ These flags work with files and directories.
 
 #### Options:
 ```
-  -b    Bypass map creation and use stdout as primary output.
+  -b    Bypass map creation and use stdout as primary output. Disables some options.
   -d int
         Enable debug mode with verbosity levels [0-2].
   -f value
@@ -130,7 +130,7 @@ These flags work with files and directories.
   -n int
         Maximum number of items to return in output.
   -o string
-        Output to JSON file in addition to stdout.
+        Output to JSON file in addition to stdout. Accepts file names and paths.
   -p int
         Change parsing mode for URL input. [0 = Strict, 1 = Permissive, 2 = Maximum] [0-2].
   -r value
@@ -142,16 +142,16 @@ These flags work with files and directories.
   -tf value
         Read additional files for transformations if applicable.
   -tp value
-        Read a template file for multiple transformations and operations.
+        Read a template file for multiple transformations and operations. Cannot be used with -t flag.
   -u value
         Read additional URLs for input.
-  -v    Show verbose output when possible.
+  -v    Show verbose output when possible. (Can show additional metadata in some modes.)
   -vv
         Show statistics output when possible.
   -vvv
         Show verbose statistics output when possible.
-  -w int
-        Number of words to use for a transformation if applicable.
+  -w value
+        Number of words for transformations if applicable. Accepts ranges separated by '-'.
 ```
 
 #### Transformations:
@@ -184,21 +184,21 @@ The following transformations can be used with the `-t` flag:
   -t replace-all -tf [file]
         Transforms input by replacing all strings with all matches from a ':' separated file.
   -t rule-append
-        Transforms input into append rules.
+        Transforms input by creating append rules.
   -t rule-append-remove
-        Transforms input into append-remove rules.
+        Transforms input by creating append-remove rules.
   -t rule-insert -i [index]
-        Transforms input into insert rules starting at index.
+        Transforms input by creating insert rules starting at index.
   -t rule-overwrite -i [index]
-        Transforms input into overwrite rules starting at index.
+        Transforms input by creating overwrite rules starting at index.
   -t rule-prepend
-        Transforms input into prepend rules.
+        Transforms input by creating prepend rules.
   -t rule-prepend-remove
-        Transforms input into prepend-remove rules.
+        Transforms input by creating prepend-remove rules.
   -t rule-prepend-toggle
-        Transforms input into prepend-toggle rules. Creating camelCase and PascalCase.
+        Transforms input by creating prepend-toggle rules.
   -t rule-toggle -i [index]
-        Transforms input into toggle rules starting at index.
+        Transforms input by creating toggle rules starting at index.
   -t substring -i [index]
         Transforms input by extracting substrings starting at index and ending at index.
   -t swap-single -tf [file]

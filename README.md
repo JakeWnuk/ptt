@@ -40,7 +40,7 @@ git clone https://github.com/JakeWnuk/ptt && cd ptt && docker build -t ptt . && 
 
 ### Usage:
 ```
-Usage of Password Transformation Tool (ptt) version (0.3.4):
+Usage of Password Transformation Tool (ptt) version (0.3.5):
 
 ptt [options] [...]
 Accepts standard input and/or additonal arguments.
@@ -50,7 +50,7 @@ The -f, -k, -r, -tf, -tp, and -u flags can be used multiple times, together, and
 Options:
 These modify or filter the transformation mode.
 
-  -b    Bypass map creation and use stdout as primary output.
+  -b    Bypass map creation and use stdout as primary output. Disables some options.
   -d int
         Enable debug mode with verbosity levels [0-2].
   -f value
@@ -66,7 +66,7 @@ These modify or filter the transformation mode.
   -n int
         Maximum number of items to return in output.
   -o string
-        Output to JSON file in addition to stdout.
+        Output to JSON file in addition to stdout. Accepts file names and paths.
   -p int
         Change parsing mode for URL input. [0 = Strict, 1 = Permissive, 2 = Maximum] [0-2].
   -r value
@@ -78,16 +78,16 @@ These modify or filter the transformation mode.
   -tf value
         Read additional files for transformations if applicable.
   -tp value
-        Read a template file for multiple transformations and operations.
+        Read a template file for multiple transformations and operations. Cannot be used with -t flag.
   -u value
         Read additional URLs for input.
-  -v    Show verbose output when possible.
+  -v    Show verbose output when possible. (Can show additional metadata in some modes.)
   -vv
         Show statistics output when possible.
   -vvv
         Show verbose statistics output when possible.
-  -w int
-        Number of words to use for a transformation if applicable.
+  -w value
+        Number of words for transformations if applicable. Accepts ranges separated by '-'.
 -------------------------------------------------------------------------------------------------------------
 Transformation Modes:
 These create or alter based on the selected mode.
@@ -119,21 +119,21 @@ These create or alter based on the selected mode.
   -t replace-all -tf [file]
         Transforms input by replacing all strings with all matches from a ':' separated file.
   -t rule-append
-        Transforms input into append rules.
+        Transforms input by creating append rules.
   -t rule-append-remove
-        Transforms input into append-remove rules.
+        Transforms input by creating append-remove rules.
   -t rule-insert -i [index]
-        Transforms input into insert rules starting at index.
+        Transforms input by creating insert rules starting at index.
   -t rule-overwrite -i [index]
-        Transforms input into overwrite rules starting at index.
+        Transforms input by creating overwrite rules starting at index.
   -t rule-prepend
-        Transforms input into prepend rules.
+        Transforms input by creating prepend rules.
   -t rule-prepend-remove
-        Transforms input into prepend-remove rules.
+        Transforms input by creating prepend-remove rules.
   -t rule-prepend-toggle
-        Transforms input into prepend-toggle rules. Creating camelCase and PascalCase.
+        Transforms input by creating prepend-toggle rules.
   -t rule-toggle -i [index]
-        Transforms input into toggle rules starting at index.
+        Transforms input by creating toggle rules starting at index.
   -t substring -i [index]
         Transforms input by extracting substrings starting at index and ending at index.
   -t swap-single -tf [file]

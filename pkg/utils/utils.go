@@ -42,9 +42,8 @@ import (
 //	(map[string]int): A map of words from the files
 func ReadFilesToMap(fs models.FileSystem, filenames []string) map[string]int {
 	wordMap := make(map[string]int)
-	// 4 GB read buffer
-	fmt.Fprintf(os.Stderr, "[*] Creating buffer and reading file...\n")
-	chunkSize := int64(4 * 1024 * 1024 * 1024)
+	// 1 GB read buffer
+	chunkSize := int64(1 * 1024 * 1024 * 1024)
 
 	i := 0
 	for i < len(filenames) {
@@ -634,8 +633,8 @@ func ReadJSONToArray(fs models.FileSystem, filenames []string) []models.Template
 			os.Exit(1)
 		}
 
-		if !numRe.MatchString(fmt.Sprintf("%v", template.PassphraseWords)) {
-			fmt.Fprintf(os.Stderr, "[!] Error: PassphraseWords must be an integer.\n")
+		if !numRe.MatchString(fmt.Sprintf("%v", template.WordRangeStart)) || !numRe.MatchString(fmt.Sprintf("%v", template.WordRangeEnd)) {
+			fmt.Fprintf(os.Stderr, "[!] Error: WordRangeStart and WordRangeEnd must be integers.\n")
 			os.Exit(1)
 		}
 	}

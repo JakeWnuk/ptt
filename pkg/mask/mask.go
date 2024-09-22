@@ -445,7 +445,7 @@ func BoundarySplitPopMap(input map[string]int, replacementMask string, bypass bo
 func ShuffleMap(input map[string]int, replacementMask string, swapMap map[string]int, bypass bool, debug bool) map[string]int {
 	shuffleMap := make(map[string]int)
 	re := regexp.MustCompile(`^(\?u|\?l|\?d|\?s|\?b)*$`)
-	reParser := regexp.MustCompile("(\\?[luds])")
+	reParser := regexp.MustCompile("(\\?[ludsb])")
 
 	for key, value := range input {
 		newKey := ""
@@ -462,27 +462,30 @@ func ShuffleMap(input map[string]int, replacementMask string, swapMap map[string
 			if debug {
 				fmt.Fprintf(os.Stderr, "[?] ShuffleMap:\n")
 				fmt.Fprintf(os.Stderr, "Key: %s\n", key)
-				fmt.Fprintf(os.Stderr, "New Key: %s\n", newKey)
-				fmt.Fprintf(os.Stderr, "Swap Key: %s\n", swapKey)
+				fmt.Fprintf(os.Stderr, "Match: %s\n", match)
+				fmt.Fprintf(os.Stderr, "Swap Token: %s\n", swapKey)
 				fmt.Fprintf(os.Stderr, "Replacement Mask: %s\n", replacementMask)
 			}
 
 			maskedSwapKey := MakeMaskedString(swapKey, replacementMask)
-			if maskedSwapKey == newKey || fmt.Sprintf("%s%s", maskedSwapKey, maskedSwapKey) == newKey {
+			if maskedSwapKey == newKey {
 
 				var shufKey string
-				if fmt.Sprintf("%s%s", maskedSwapKey, maskedSwapKey) == newKey {
-					shufKey = strings.Replace(key, maskedSwapKey, swapKey, 2)
-				} else {
-					shufKey = strings.Replace(key, newKey, swapKey, 1)
-				}
+				shufKey = strings.Replace(key, newKey, swapKey, 1)
 
 				if debug {
-					fmt.Fprintf(os.Stderr, "Masked Swap Key: %s\n", maskedSwapKey)
-					fmt.Fprintf(os.Stderr, "Shuffle Key: %s\n", shufKey)
+					fmt.Fprintf(os.Stderr, "[?][?] Swap performed:\n")
+					fmt.Fprintf(os.Stderr, "Swap Token Mask: %s\n", maskedSwapKey)
+					fmt.Fprintf(os.Stderr, "Swap Result: %s\n", shufKey)
 				}
 
 				if shufKey == key {
+					if debug {
+						fmt.Fprintf(os.Stderr, "[?][?] Swap failed identical keys:\n")
+						fmt.Fprintf(os.Stderr, "Key: %s\n", key)
+						fmt.Fprintf(os.Stderr, "Swap Result: %s\n", shufKey)
+					}
+
 					continue
 				}
 

@@ -6,7 +6,8 @@
         "ReplacementMask": "uldsb",
         "Bypass": false,
         "TransformationMode": "insert",
-        "PassphraseWords": 0
+        "WordRangeStart": 0,
+        "WordRangeEnd": 0
     },
     {
         "StartIndex": 1,
@@ -15,6 +16,7 @@
         "ReplacementMask": "uldsb",
         "Bypass": false,
         "TransformationMode": "overwrite",
-        "PassphraseWords": 0    
+        "WordRangeStart": 0,
+        "WordRangeEnd": 0
     }
 ]
