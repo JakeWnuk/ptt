@@ -150,8 +150,8 @@ These flags work with files and directories.
         Show statistics output when possible.
   -vvv
         Show verbose statistics output when possible.
-  -w int
-        Number of words to use for a transformation if applicable.
+  -w value
+        Number of words for transformations if applicable. Accepts ranges separated by '-'.
 ```
 
 #### Transformations:

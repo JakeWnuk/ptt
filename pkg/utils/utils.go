@@ -634,8 +634,8 @@ func ReadJSONToArray(fs models.FileSystem, filenames []string) []models.Template
 			os.Exit(1)
 		}
 
-		if !numRe.MatchString(fmt.Sprintf("%v", template.PassphraseWords)) {
-			fmt.Fprintf(os.Stderr, "[!] Error: PassphraseWords must be an integer.\n")
+		if !numRe.MatchString(fmt.Sprintf("%v", template.WordRangeStart)) || !numRe.MatchString(fmt.Sprintf("%v", template.WordRangeEnd)) {
+			fmt.Fprintf(os.Stderr, "[!] Error: WordRangeStart and WordRangeEnd must be integers.\n")
 			os.Exit(1)
 		}
 	}

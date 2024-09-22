@@ -26,6 +26,7 @@ var transformationFiles models.FileArgumentFlag
 var templateFiles models.FileArgumentFlag
 var intRange models.IntRange
 var lenRange models.IntRange
+var wordRange models.IntRange
 var primaryMap map[string]int
 var err error
 
@@ -94,9 +95,6 @@ func main() {
 	bypassMap := flag.Bool("b", false, "Bypass map creation and use stdout as primary output.")
 	debugMode := flag.Int("d", 0, "Enable debug mode with verbosity levels [0-2].")
 	URLParsingMode := flag.Int("p", 0, "Change parsing mode for URL input. [0 = Strict, 1 = Permissive, 2 = Maximum] [0-2].")
-	// TODO -w should accept a range and documentation should reflect it
-	// (update templates if needed)
-	passPhraseWords := flag.Int("w", 0, "Number of words to use for a transformation if applicable.")
 	flag.Var(&retain, "k", "Only keep items in a file.")
 	flag.Var(&remove, "r", "Only keep items not in a file.")
 	flag.Var(&readFiles, "f", "Read additional files for input.")
@@ -104,6 +102,7 @@ func main() {
 	flag.Var(&templateFiles, "tp", "Read a template file for multiple transformations and operations.")
 	flag.Var(&intRange, "i", "Starting index for transformations if applicable. Accepts ranges separated by '-'.")
 	flag.Var(&lenRange, "l", "Only output items of a certain length (does not adjust for rules). Accepts ranges separated by '-'.")
+	flag.Var(&wordRange, "w", "Number of words for transformations if applicable. Accepts ranges separated by '-'.")
 	flag.Var(&readURLs, "u", "Read additional URLs for input.")
 	flag.Parse()
 
@@ -168,7 +167,7 @@ func main() {
 
 	// Apply transformation if provided
 	if *transformation != "" && templateFiles == nil {
-		primaryMap = transform.TransformationController(primaryMap, *transformation, intRange.Start, intRange.End, *verbose, *replacementMask, transformationFilesMap, *bypassMap, *debugMode, *passPhraseWords)
+		primaryMap = transform.TransformationController(primaryMap, *transformation, intRange.Start, intRange.End, *verbose, *replacementMask, transformationFilesMap, *bypassMap, *debugMode, wordRange.Start, wordRange.End)
 	} else if templateFiles != nil && *transformation == "" {
 		fmt.Fprintf(os.Stderr, "[*] Using template files for multiple transformations.\n")
 
@@ -181,9 +180,9 @@ func main() {
 		// Apply transformations from template files
 		for i, template := range transformationTemplateArray {
 			if i == 0 {
-				temporaryMap = transform.TransformationController(primaryMap, template.TransformationMode, template.StartIndex, template.EndIndex, template.Verbose, template.ReplacementMask, transformationFilesMap, template.Bypass, *debugMode, template.PassphraseWords)
+				temporaryMap = transform.TransformationController(primaryMap, template.TransformationMode, template.StartIndex, template.EndIndex, template.Verbose, template.ReplacementMask, transformationFilesMap, template.Bypass, *debugMode, template.WordRangeStart, template.WordRangeEnd)
 			} else {
-				temporaryMap = utils.CombineMaps(temporaryMap, transform.TransformationController(primaryMap, template.TransformationMode, template.StartIndex, template.EndIndex, template.Verbose, template.ReplacementMask, transformationFilesMap, template.Bypass, *debugMode, template.PassphraseWords))
+				temporaryMap = utils.CombineMaps(temporaryMap, transform.TransformationController(primaryMap, template.TransformationMode, template.StartIndex, template.EndIndex, template.Verbose, template.ReplacementMask, transformationFilesMap, template.Bypass, *debugMode, template.WordRangeStart, template.WordRangeEnd))
 			}
 		}
 		primaryMap = temporaryMap

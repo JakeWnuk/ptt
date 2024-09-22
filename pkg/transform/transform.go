@@ -32,12 +32,13 @@ import (
 //	use for modes like retain-mask
 //	bypass (bool): If true, the map is not used for output or filtering
 //	debug (int): Different debug levels to use for debugging [0-2]
-//	passphraseWords (int): The number of words to use for passphrase generation
+//	wordRangeStart (int): The starting range for word operations
+//	wordRangeEnd (int): The ending range for word operations
 //
 // Returns:
 //
 //	(map[string]int): A map of transformed values
-func TransformationController(input map[string]int, mode string, startingIndex int, endingIndex int, verbose bool, replacementMask string, transformationFilesMap map[string]int, bypass bool, debug int, passphraseWords int) (output map[string]int) {
+func TransformationController(input map[string]int, mode string, startingIndex int, endingIndex int, verbose bool, replacementMask string, transformationFilesMap map[string]int, bypass bool, debug int, wordRangeStart int, wordRangeEnd int) (output map[string]int) {
 
 	functionDebug := false
 	if debug > 1 {
@@ -117,11 +118,11 @@ func TransformationController(input map[string]int, mode string, startingIndex i
 		output = mask.ShuffleMap(input, replacementMask, transformationFilesMap, bypass, functionDebug)
 	case "passphrase":
 		fmt.Fprintf(os.Stderr, "[*] This transformation mode expects space separated content.\n")
-		if passphraseWords == 0 {
+		if wordRangeStart == 0 {
 			fmt.Fprintf(os.Stderr, "[!] Passphrase operations require use of the -w flag to specify the number of words to use.\n")
 			os.Exit(1)
 		}
-		output = MakePassphraseMap(input, bypass, functionDebug, passphraseWords)
+		output = MakePassphraseMap(input, bypass, functionDebug, wordRangeStart, wordRangeEnd)
 	case "substring":
 		output = utils.SubstringMap(input, startingIndex, endingIndex, bypass, functionDebug)
 	case "replace-all", "replace":
@@ -132,11 +133,11 @@ func TransformationController(input map[string]int, mode string, startingIndex i
 		output = ReplaceAllKeysInMap(input, transformationFilesMap, bypass, functionDebug)
 	case "regram":
 		fmt.Fprintf(os.Stderr, "[*] This transformation mode expects space separated content.\n")
-		if passphraseWords == 0 {
+		if wordRangeStart == 0 {
 			fmt.Fprintf(os.Stderr, "[!] Regram operations require use of the -w flag to specify the number of words to use.\n")
 			os.Exit(1)
 		}
-		output = GenerateNGramMap(input, passphraseWords, bypass, functionDebug)
+		output = GenerateNGramMap(input, wordRangeStart, wordRangeEnd, bypass, functionDebug)
 	default:
 		output = input
 	}
@@ -232,29 +233,38 @@ func ReplaceAllKeysInMap(originalMap map[string]int, replacements map[string]int
 //	use for constructing the passphrases
 //	bypass (bool): If true, the map is not used for output or filtering
 //	debug (bool): If true, print additional debug information to stderr
-//	passphraseWord (int): The number of words to use for passphrase generation
+//	wordRangeStart (int): The starting number of words to use for passphrases
+//	wordRangeEnd (int): The ending iteration number of words to use for passphrases
 //
 // Returns:
 //
 //	(map[string]int): A new map with the keys replaced
-func MakePassphraseMap(input map[string]int, bypass bool, debug bool, passphraseWord int) map[string]int {
+func MakePassphraseMap(input map[string]int, bypass bool, debug bool, wordRangeStart int, wordRangeEnd int) map[string]int {
 	newMap := make(map[string]int)
 	for key, value := range input {
-		newKeyArray := utils.GeneratePassphrase(key, passphraseWord)
-		for _, newKey := range newKeyArray {
 
-			if debug {
-				fmt.Fprintf(os.Stderr, "Key: %s\n", key)
-				fmt.Fprintf(os.Stderr, "New Key: %s\n", newKey)
-			}
+		for i := wordRangeStart; i <= wordRangeEnd; i++ {
+			newKeyArray := utils.GeneratePassphrase(key, i)
+			for _, newKey := range newKeyArray {
 
-			if !bypass {
-				newMap[newKey] = value
-			} else {
-				fmt.Println(newKey)
+				if debug {
+					fmt.Fprintf(os.Stderr, "Key: %s\n", key)
+					fmt.Fprintf(os.Stderr, "New Key: %s\n", newKey)
+				}
+
+				if !bypass {
+					if newMap[newKey] == 0 {
+						newMap[newKey] = value
+					} else {
+						newMap[newKey] += value
+					}
+				} else {
+					fmt.Println(newKey)
+				}
 			}
 		}
 	}
+
 	return newMap
 }
 
@@ -266,37 +276,40 @@ func MakePassphraseMap(input map[string]int, bypass bool, debug bool, passphrase
 // Args:
 //
 //	input (map[string]int): The original map to generate n-grams from
-//	ngramSize (int): The size of the n-grams to generate
+//	wordRangeStart (int): The starting number of words to use for n-grams
+//	wordRangeEnd (int): The ending iteration number of words to use for n-grams
 //	bypass (bool): If true, the map is not used for output or filtering
 //	debug (bool): If true, print additional debug information to stderr
 //
 // Returns:
 //
 //	(map[string]int): A new map with the n-grams generated
-func GenerateNGramMap(input map[string]int, ngramSize int, bypass bool, debug bool) map[string]int {
+func GenerateNGramMap(input map[string]int, wordRangeStart int, wordRangeEnd int, bypass bool, debug bool) map[string]int {
 	newMap := make(map[string]int)
 	for key, value := range input {
-		newKeyArray := utils.GenerateNGrams(key, ngramSize)
-		for _, newKey := range newKeyArray {
+		for i := wordRangeStart; i <= wordRangeEnd; i++ {
+			newKeyArray := utils.GenerateNGrams(key, i)
+			for _, newKey := range newKeyArray {
 
-			if debug {
-				fmt.Fprintf(os.Stderr, "Key: %s\n", key)
-				fmt.Fprintf(os.Stderr, "New Key: %s\n", newKey)
-			}
-
-			newKey = strings.TrimSpace(newKey)
-			newKey = strings.TrimLeft(newKey, ",")
-			newKey = strings.TrimRight(newKey, ",")
-			newKey = strings.TrimLeft(newKey, " ")
-
-			if !bypass {
-				if newMap[newKey] == 0 {
-					newMap[newKey] = value
-				} else {
-					newMap[newKey] += value
+				if debug {
+					fmt.Fprintf(os.Stderr, "Key: %s\n", key)
+					fmt.Fprintf(os.Stderr, "New Key: %s\n", newKey)
 				}
-			} else {
-				fmt.Println(newKey)
+
+				newKey = strings.TrimSpace(newKey)
+				newKey = strings.TrimLeft(newKey, ",")
+				newKey = strings.TrimRight(newKey, ",")
+				newKey = strings.TrimLeft(newKey, " ")
+
+				if !bypass {
+					if newMap[newKey] == 0 {
+						newMap[newKey] = value
+					} else {
+						newMap[newKey] += value
+					}
+				} else {
+					fmt.Println(newKey)
+				}
 			}
 		}
 	}

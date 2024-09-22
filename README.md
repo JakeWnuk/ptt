@@ -40,7 +40,7 @@ git clone https://github.com/JakeWnuk/ptt && cd ptt && docker build -t ptt . && 
 
 ### Usage:
 ```
-Usage of Password Transformation Tool (ptt) version (0.3.4):
+Usage of Password Transformation Tool (ptt) version (0.3.5):
 
 ptt [options] [...]
 Accepts standard input and/or additonal arguments.
@@ -86,8 +86,8 @@ These modify or filter the transformation mode.
         Show statistics output when possible.
   -vvv
         Show verbose statistics output when possible.
-  -w int
-        Number of words to use for a transformation if applicable.
+  -w value
+        Number of words for transformations if applicable. Accepts ranges separated by '-'.
 -------------------------------------------------------------------------------------------------------------
 Transformation Modes:
 These create or alter based on the selected mode.

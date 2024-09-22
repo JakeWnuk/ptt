@@ -63,7 +63,8 @@ type TemplateFileOperation struct {
 	ReplacementMask    string
 	Bypass             bool
 	TransformationMode string
-	PassphraseWords    int
+	WordRangeStart     int
+	WordRangeEnd       int
 }
 
 // ----------------------------------------------------------------------------
@@ -158,7 +159,7 @@ func (r *RealFileSystem) ReadFile(filename string) ([]byte, error) {
 }
 
 // Open opens a file and returns a File interface
-func (fs RealFileSystem) Open(filename string) (File, error) {
+func (r RealFileSystem) Open(filename string) (File, error) {
 	return os.Open(filename)
 }
 
