@@ -471,11 +471,7 @@ func ShuffleMap(input map[string]int, replacementMask string, swapMap map[string
 			if maskedSwapKey == newKey || fmt.Sprintf("%s%s", maskedSwapKey, maskedSwapKey) == newKey {
 
 				var shufKey string
-				if fmt.Sprintf("%s%s", maskedSwapKey, maskedSwapKey) == newKey {
-					shufKey = strings.Replace(key, maskedSwapKey, swapKey, 2)
-				} else {
-					shufKey = strings.Replace(key, newKey, swapKey, 1)
-				}
+				shufKey = strings.Replace(key, newKey, swapKey, 1)
 
 				if debug {
 					fmt.Fprintf(os.Stderr, "[?][?] Swap performed:\n")
@@ -484,6 +480,12 @@ func ShuffleMap(input map[string]int, replacementMask string, swapMap map[string
 				}
 
 				if shufKey == key {
+					if debug {
+						fmt.Fprintf(os.Stderr, "[?][?] Swap failed identical keys:\n")
+						fmt.Fprintf(os.Stderr, "Key: %s\n", key)
+						fmt.Fprintf(os.Stderr, "Swap Result: %s\n", shufKey)
+					}
+
 					continue
 				}
 
