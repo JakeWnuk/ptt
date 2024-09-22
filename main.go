@@ -40,8 +40,8 @@ func main() {
 		fmt.Fprintf(os.Stderr, "Options:\n")
 		fmt.Fprintf(os.Stderr, "These modify or filter the transformation mode.\n\n")
 		flag.PrintDefaults()
-		fmt.Fprintf(os.Stderr, "-------------------------------------------------------------------------------------------------------------")
-		fmt.Fprintln(os.Stderr, "\nTransformation Modes:")
+		fmt.Fprintf(os.Stderr, "-------------------------------------------------------------------------------------------------------------\n")
+		fmt.Fprintf(os.Stderr, "Transformation Modes:\n")
 		fmt.Fprintf(os.Stderr, "These create or alter based on the selected mode.\n\n")
 		modes := map[string]string{
 			"rule-append":                        "Transforms input by creating append rules.",
