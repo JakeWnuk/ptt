@@ -44,14 +44,14 @@ func main() {
 		fmt.Fprintln(os.Stderr, "\nTransformation Modes:")
 		fmt.Fprintf(os.Stderr, "These create or alter based on the selected mode.\n\n")
 		modes := map[string]string{
-			"rule-append":                        "Transforms input into append rules.",
-			"rule-append-remove":                 "Transforms input into append-remove rules.",
-			"rule-prepend":                       "Transforms input into prepend rules.",
-			"rule-prepend-remove":                "Transforms input into prepend-remove rules.",
-			"rule-prepend-toggle":                "Transforms input into prepend-toggle rules. Creating camelCase and PascalCase.",
-			"rule-insert -i [index]":             "Transforms input into insert rules starting at index.",
-			"rule-overwrite -i [index]":          "Transforms input into overwrite rules starting at index.",
-			"rule-toggle -i [index]":             "Transforms input into toggle rules starting at index.",
+			"rule-append":                        "Transforms input by creating append rules.",
+			"rule-append-remove":                 "Transforms input by creating append-remove rules.",
+			"rule-prepend":                       "Transforms input by creating prepend rules.",
+			"rule-prepend-remove":                "Transforms input by creating prepend-remove rules.",
+			"rule-prepend-toggle":                "Transforms input by creating prepend-toggle rules.",
+			"rule-insert -i [index]":             "Transforms input by creating insert rules starting at index.",
+			"rule-overwrite -i [index]":          "Transforms input by creating overwrite rules starting at index.",
+			"rule-toggle -i [index]":             "Transforms input by creating toggle rules starting at index.",
 			"encode":                             "Transforms input by HTML and Unicode escape encoding.",
 			"decode":                             "Transforms input by HTML and Unicode escape decoding.",
 			"hex":                                "Transforms input by encoding strings into $HEX[...] format.",
@@ -84,22 +84,22 @@ func main() {
 	}
 
 	// Define command line flags
-	verbose := flag.Bool("v", false, "Show verbose output when possible.")
+	verbose := flag.Bool("v", false, "Show verbose output when possible. (Can show additional metadata in some modes.)")
 	verbose2 := flag.Bool("vv", false, "Show statistics output when possible.")
 	verbose3 := flag.Bool("vvv", false, "Show verbose statistics output when possible.")
 	minimum := flag.Int("m", 0, "Minimum numerical frequency to include in output.")
 	outputVerboseMax := flag.Int("n", 0, "Maximum number of items to return in output.")
 	transformation := flag.String("t", "", "Transformation to apply to input.")
 	replacementMask := flag.String("rm", "uldsbt", "Replacement mask for transformations if applicable.")
-	jsonOutput := flag.String("o", "", "Output to JSON file in addition to stdout.")
-	bypassMap := flag.Bool("b", false, "Bypass map creation and use stdout as primary output.")
+	jsonOutput := flag.String("o", "", "Output to JSON file in addition to stdout. Accepts file names and paths.")
+	bypassMap := flag.Bool("b", false, "Bypass map creation and use stdout as primary output. Disables some options.")
 	debugMode := flag.Int("d", 0, "Enable debug mode with verbosity levels [0-2].")
 	URLParsingMode := flag.Int("p", 0, "Change parsing mode for URL input. [0 = Strict, 1 = Permissive, 2 = Maximum] [0-2].")
 	flag.Var(&retain, "k", "Only keep items in a file.")
 	flag.Var(&remove, "r", "Only keep items not in a file.")
 	flag.Var(&readFiles, "f", "Read additional files for input.")
 	flag.Var(&transformationFiles, "tf", "Read additional files for transformations if applicable.")
-	flag.Var(&templateFiles, "tp", "Read a template file for multiple transformations and operations.")
+	flag.Var(&templateFiles, "tp", "Read a template file for multiple transformations and operations. Cannot be used with -t flag.")
 	flag.Var(&intRange, "i", "Starting index for transformations if applicable. Accepts ranges separated by '-'.")
 	flag.Var(&lenRange, "l", "Only output items of a certain length (does not adjust for rules). Accepts ranges separated by '-'.")
 	flag.Var(&wordRange, "w", "Number of words for transformations if applicable. Accepts ranges separated by '-'.")
