@@ -674,7 +674,7 @@ func TestGeneratePassphrase(t *testing.T) {
 
 	// Define test cases
 	testCases := TestCases{
-		{"I <3 you", 3, []string{"I<3you", "I<3YOU", "i<3you", "I<3YOU", "I<3You", "i<3you", "i<3you", "I<3YOU", "I-<3-You", "I-<3-YOU", "I_<3_YOU", "I_<3_You"}},
+		{"I <3 you", 3, []string{"I <3 YOU", "I-<3-YOU", "I-<3-You", "I<3YOU", "I<3YOU", "I<3You", "I<3You", "I<3you", "I_<3_YOU", "I_<3_You", "i <3 you", "i<3you"}},
 	}
 
 	// Run test cases

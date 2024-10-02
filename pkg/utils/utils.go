@@ -1004,10 +1004,6 @@ func GeneratePassphrase(text string, n int) []string {
 	var turkTitleCaseWords string
 	var CAPSlowerWords []string
 	var lowerCAPSWords []string
-	var lowerl33tWords []string
-	var l33tlowerWords []string
-	var CAPSl33tWords []string
-	var l33tCAPSWords []string
 	tick := false
 	titleCaseWords = cases.Title(language.Und, cases.NoLower).String(text)
 	turkTitleCaseWords = cases.Upper(language.Turkish, cases.NoLower).String(text)
@@ -1017,28 +1013,14 @@ func GeneratePassphrase(text string, n int) []string {
 		if tick {
 			CAPSlowerWords = append(CAPSlowerWords, strings.ToUpper(word))
 			lowerCAPSWords = append(lowerCAPSWords, strings.ToLower(word))
-			lowerl33tWords = append(lowerl33tWords, strings.ToLower(word))
-			l33tlowerWords = append(l33tlowerWords, strings.ToLower(strings.ReplaceAll(strings.ReplaceAll(word, "a", "4"), "e", "3")))
-			CAPSl33tWords = append(CAPSl33tWords, strings.ToUpper(word))
-			l33tCAPSWords = append(l33tCAPSWords, strings.ReplaceAll(strings.ReplaceAll(word, "a", "4"), "e", "3"))
 		} else {
 			CAPSlowerWords = append(CAPSlowerWords, strings.ToLower(word))
 			lowerCAPSWords = append(lowerCAPSWords, strings.ToUpper(word))
-			lowerl33tWords = append(lowerl33tWords, strings.ToLower(strings.ReplaceAll(strings.ReplaceAll(word, "a", "4"), "e", "3")))
-			l33tlowerWords = append(l33tlowerWords, strings.ToLower(word))
-			CAPSl33tWords = append(CAPSl33tWords, strings.ReplaceAll(strings.ReplaceAll(word, "a", "4"), "e", "3"))
-			l33tCAPSWords = append(l33tCAPSWords, strings.ToUpper(word))
 		}
 
 		tick = !tick
 
 	}
-	CAPSlowerPassphrase := strings.Join(CAPSlowerWords, "")
-	lowerCAPSPassphrase := strings.Join(lowerCAPSWords, "")
-	lowerl33tPassphrase := strings.Join(lowerl33tWords, "")
-	l33tlowerPassphrase := strings.Join(l33tlowerWords, "")
-	CAPSl33tPassphrase := strings.Join(CAPSl33tWords, "")
-	l33tCAPSPassphrase := strings.Join(l33tCAPSWords, "")
 
 	passphrases = append(passphrases, strings.ReplaceAll(titleCaseWords, " ", ""))
 	passphrases = append(passphrases, strings.ReplaceAll(turkTitleCaseWords, " ", ""))
@@ -1046,12 +1028,12 @@ func GeneratePassphrase(text string, n int) []string {
 	passphrases = append(passphrases, strings.ReplaceAll(turkTitleCaseWords, " ", "-"))
 	passphrases = append(passphrases, strings.ReplaceAll(titleCaseWords, " ", "_"))
 	passphrases = append(passphrases, strings.ReplaceAll(turkTitleCaseWords, " ", "_"))
-	passphrases = append(passphrases, CAPSlowerPassphrase)
-	passphrases = append(passphrases, lowerCAPSPassphrase)
-	passphrases = append(passphrases, lowerl33tPassphrase)
-	passphrases = append(passphrases, l33tlowerPassphrase)
-	passphrases = append(passphrases, CAPSl33tPassphrase)
-	passphrases = append(passphrases, l33tCAPSPassphrase)
+	passphrases = append(passphrases, strings.Join(CAPSlowerWords, " "))
+	passphrases = append(passphrases, strings.Join(CAPSlowerWords, ""))
+	passphrases = append(passphrases, strings.Join(lowerCAPSWords, " "))
+	passphrases = append(passphrases, strings.Join(lowerCAPSWords, ""))
+	passphrases = append(passphrases, strings.ReplaceAll(text, " ", ""))
+	passphrases = append(passphrases, strings.ReplaceAll(titleCaseWords, " ", ""))
 
 	return passphrases
 }
