@@ -1033,7 +1033,8 @@ func GeneratePassphrase(text string, n int) []string {
 	passphrases = append(passphrases, strings.Join(lowerCAPSWords, " "))
 	passphrases = append(passphrases, strings.Join(lowerCAPSWords, ""))
 	passphrases = append(passphrases, strings.ReplaceAll(text, " ", ""))
-	passphrases = append(passphrases, strings.ReplaceAll(titleCaseWords, " ", ""))
+	passphrases = append(passphrases, titleCaseWords)
+	passphrases = append(passphrases, turkTitleCaseWords)
 
 	return passphrases
 }
