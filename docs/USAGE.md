@@ -1,5 +1,5 @@
 # Password Transformation Tool (PTT) Usage Guide
-## Version 0.3.5
+## Version 0.3.6
 
 ### Table of Contents
 #### Getting Started
