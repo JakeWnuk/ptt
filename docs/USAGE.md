@@ -127,6 +127,8 @@ These flags work with files and directories.
         Only output items of a certain length (does not adjust for rules). Accepts ranges separated by '-'.
   -m int
         Minimum numerical frequency to include in output.
+  -md
+        If Markdown format should be used for output instead.
   -n int
         Maximum number of items to return in output.
   -o string
@@ -244,6 +246,7 @@ The following transformations can be used with the `-t` flag:
 - `ptt -vvv`: Show verbose statistics output.
 - `ptt -n 50`: Show verbose statistics output with a maximum of 50 items.
 - `ptt -o [FILE]`: Show output and save JSON output to a file.
+- `ptt -md`: Show output as a Markdown table.
 - These options are available for all transformations.
 
 #### Real Examples:
