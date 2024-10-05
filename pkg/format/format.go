@@ -49,6 +49,35 @@ func PrintArrayToSTDOUT(freq map[string]int, verbose bool) {
 	}
 }
 
+// PrintArrayToMarkdown prints an array of items to stdout in markdown format
+// including the item and the frequency.
+//
+// Args:
+// freq (map[string]int): A map of item frequencies
+// command (string): The command that was run
+//
+// Returns:
+// None
+func PrintArrayToMarkdown(freq map[string]int, command string) {
+
+	fmt.Println("| Item | Frequency |")
+	fmt.Println("| ---- | --------- |")
+
+	p := make(models.PairList, len(freq))
+	i := 0
+	for k, v := range freq {
+		p[i] = models.Pair{k, v}
+		i++
+	}
+	sort.Sort(sort.Reverse(p))
+	for _, pair := range p {
+		fmt.Printf("| %s | %d |\n", pair.Key, pair.Value)
+	}
+
+	fmt.Println(fmt.Sprintf("Command: %s\n", command))
+
+}
+
 // PrintStatsToSTDOUT prints statistics about the frequency map to stdout
 // including several statistics about the frequency map. If verbose is true,
 // additional information is printed and increased number of items are
@@ -58,12 +87,12 @@ func PrintArrayToSTDOUT(freq map[string]int, verbose bool) {
 //
 //	freq (map[string]int): A map of item frequencies
 //	verbose (bool): If true, additional information is printed
-//	max (int): The maximum number of items to print
+//	maxItems (int): The maximum number of items to print
 //
 // Returns:
 //
 //	None
-func PrintStatsToSTDOUT(freq map[string]int, verbose bool, max int) {
+func PrintStatsToSTDOUT(freq map[string]int, verbose bool, maxItems int) {
 
 	// Sort by frequency
 	p := make(models.PairList, len(freq))
@@ -77,12 +106,12 @@ func PrintStatsToSTDOUT(freq map[string]int, verbose bool, max int) {
 	sort.Sort(sort.Reverse(p))
 	sort.Sort(sort.Reverse(normalizedP))
 
-	if max == 0 {
-		max = 25
+	if maxItems == 0 {
+		maxItems = 25
 	}
 
-	if max > len(p) {
-		max = len(p)
+	if maxItems > len(p) {
+		maxItems = len(p)
 	}
 
 	if len(p) == 0 {
@@ -93,7 +122,7 @@ func PrintStatsToSTDOUT(freq map[string]int, verbose bool, max int) {
 	// Print the statistics
 	if verbose {
 		fmt.Fprintf(os.Stderr, "[*] Starting statistics generation. Please wait...\n")
-		fmt.Println(fmt.Sprintf("Verbose Statistics: max=%d", max))
+		fmt.Println(fmt.Sprintf("Verbose Statistics: max=%d", maxItems))
 		fmt.Println("--------------------------------------------------")
 		fmt.Println(CreateVerboseStats(freq))
 		fmt.Println("--------------------------------------------------")
@@ -108,14 +137,14 @@ func PrintStatsToSTDOUT(freq map[string]int, verbose bool, max int) {
 
 	// Use the longest key to normalize padding for the graph
 	longest := 0
-	for _, value := range p[0:max] {
+	for _, value := range p[0:maxItems] {
 		if len(value.Key) > longest {
 			longest = len(value.Key)
 		}
 	}
 
 	// Print the top items
-	for index, value := range p[0:max] {
+	for index, value := range p[0:maxItems] {
 		if value.Value == 1 && index == 0 {
 			fmt.Println("[!] No items with a frequency greater than 1!")
 			break
@@ -179,15 +208,15 @@ func CreateVerboseStats(freq map[string]int) string {
 	stats += fmt.Sprintf("Smallest frequency: %d\n", p[len(p)-1].Value)
 
 	stats += "\nPlots:\n"
-	plot, min, q1, q2, q3, max := CreateBoxAndWhiskersPlot(lengths)
+	plot, minBW, q1, q2, q3, maxBW := CreateBoxAndWhiskersPlot(lengths)
 	stats += fmt.Sprintf("Item Length: %s\n", plot)
-	stats += fmt.Sprintf("Min: %d, Q1: %d, Q2: %d, Q3: %d, Max: %d\n", min, q1, q2, q3, max)
-	plot, min, q1, q2, q3, max = CreateBoxAndWhiskersPlot(frequencies)
+	stats += fmt.Sprintf("Min: %d, Q1: %d, Q2: %d, Q3: %d, Max: %d\n", minBW, q1, q2, q3, maxBW)
+	plot, minBW, q1, q2, q3, maxBW = CreateBoxAndWhiskersPlot(frequencies)
 	stats += fmt.Sprintf("Item Frequency: %s\n", plot)
-	stats += fmt.Sprintf("Min: %d, Q1: %d, Q2: %d, Q3: %d, Max: %d\n", min, q1, q2, q3, max)
-	plot, min, q1, q2, q3, max = CreateBoxAndWhiskersPlot(complexities)
+	stats += fmt.Sprintf("Min: %d, Q1: %d, Q2: %d, Q3: %d, Max: %d\n", minBW, q1, q2, q3, maxBW)
+	plot, minBW, q1, q2, q3, maxBW = CreateBoxAndWhiskersPlot(complexities)
 	stats += fmt.Sprintf("Item Complexity: %s\n", plot)
-	stats += fmt.Sprintf("Min: %d, Q1: %d, Q2: %d, Q3: %d, Max: %d\n", min, q1, q2, q3, max)
+	stats += fmt.Sprintf("Min: %d, Q1: %d, Q2: %d, Q3: %d, Max: %d\n", minBW, q1, q2, q3, maxBW)
 
 	stats += "\nCategory Counts:\n"
 	for category, count := range categoryCounts {
@@ -384,19 +413,19 @@ func CalculateQuartiles(data []int) (int, int, int) {
 //	int: The maximum value
 func CreateBoxAndWhiskersPlot(data []int) (string, int, int, int, int, int) {
 	q1, q2, q3 := CalculateQuartiles(data)
-	min := data[0]
-	max := data[len(data)-1]
+	minBW := data[0]
+	maxBW := data[len(data)-1]
 
 	// Normalize the plot
-	largest := max
+	largest := maxBW
 	normalizedQ1 := q1 * 50 / largest
 	normalizedQ2 := q2 * 50 / largest
 	normalizedQ3 := q3 * 50 / largest
-	normalizedMin := min * 50 / largest
-	normalizedMax := max * 50 / largest
+	normalizedMin := minBW * 50 / largest
+	normalizedMax := maxBW * 50 / largest
 
 	plot := fmt.Sprintf("|%s[%s|%s]%s|", strings.Repeat("-", normalizedQ1-normalizedMin), strings.Repeat("=", normalizedQ2-normalizedQ1), strings.Repeat("=", normalizedQ3-normalizedQ2), strings.Repeat("-", normalizedMax-normalizedQ3))
-	return plot, min, q1, q2, q3, max
+	return plot, minBW, q1, q2, q3, maxBW
 }
 
 // SaveArrayToJSON saves an array of items to a JSON file at the specified path
@@ -488,15 +517,15 @@ func RetainRemove(textMap map[string]int, retainMap map[string]int, removeMap ma
 // Args:
 //
 //	freq (map[string]int): A map of item frequencies
-//	min (int): The minimum frequency threshold
+//	minF (int): The minimum frequency threshold
 //
 // Returns:
 //
 //	(map[string]int): A new map of item frequencies above the minimum threshold
-func RemoveMinimumFrequency(freq map[string]int, min int) map[string]int {
+func RemoveMinimumFrequency(freq map[string]int, minF int) map[string]int {
 	newFreq := make(map[string]int)
 	for key, value := range freq {
-		if value >= min {
+		if value >= minF {
 			newFreq[key] = value
 		}
 	}

@@ -15,7 +15,7 @@ import (
 	"github.com/jakewnuk/ptt/pkg/utils"
 )
 
-var version = "0.3.5"
+var version = "0.3.6"
 var wg sync.WaitGroup
 var mutex = &sync.Mutex{}
 var retain models.FileArgumentFlag
@@ -88,6 +88,7 @@ func main() {
 	verbose2 := flag.Bool("vv", false, "Show statistics output when possible.")
 	verbose3 := flag.Bool("vvv", false, "Show verbose statistics output when possible.")
 	minimum := flag.Int("m", 0, "Minimum numerical frequency to include in output.")
+	markDownOutput := flag.Bool("md", false, "If Markdown format should be used for output instead.")
 	outputVerboseMax := flag.Int("n", 0, "Maximum number of items to return in output.")
 	transformation := flag.String("t", "", "Transformation to apply to input.")
 	replacementMask := flag.String("rm", "uldsbt", "Replacement mask for transformations if applicable.")
@@ -238,12 +239,22 @@ func main() {
 
 	fmt.Fprintf(os.Stderr, "[*] Task complete with %d unique results.\n", len(primaryMap))
 
+	// Print in markdown if provided
+	if *markDownOutput {
+		command := "ptt "
+		for _, arg := range os.Args[1:] {
+			command += arg + " "
+		}
+
+		format.PrintArrayToMarkdown(primaryMap, command)
+	}
+
 	// Print output to stdout
-	if *verbose3 {
+	if *verbose3 && !*markDownOutput {
 		format.PrintStatsToSTDOUT(primaryMap, *verbose3, *outputVerboseMax)
-	} else if *verbose2 {
+	} else if *verbose2 && !*markDownOutput {
 		format.PrintStatsToSTDOUT(primaryMap, *verbose3, *outputVerboseMax)
-	} else {
+	} else if !*markDownOutput {
 		format.PrintArrayToSTDOUT(primaryMap, *verbose)
 	}
 

@@ -40,7 +40,7 @@ git clone https://github.com/JakeWnuk/ptt && cd ptt && docker build -t ptt . && 
 
 ### Usage:
 ```
-Usage of Password Transformation Tool (ptt) version (0.3.5):
+Usage of Password Transformation Tool (ptt) version (0.3.6):
 
 ptt [options] [...]
 Accepts standard input and/or additonal arguments.
@@ -63,6 +63,8 @@ These modify or filter the transformation mode.
         Only output items of a certain length (does not adjust for rules). Accepts ranges separated by '-'.
   -m int
         Minimum numerical frequency to include in output.
+  -md
+        If Markdown format should be used for output instead.
   -n int
         Maximum number of items to return in output.
   -o string
