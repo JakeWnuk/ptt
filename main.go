@@ -241,15 +241,20 @@ func main() {
 
 	// Print in markdown if provided
 	if *markDownOutput {
-		fmt.Println("TODO")
+		command := "ptt "
+		for _, arg := range os.Args[1:] {
+			command += arg + " "
+		}
+
+		format.PrintArrayToMarkdown(primaryMap, command)
 	}
 
 	// Print output to stdout
-	if *verbose3 {
+	if *verbose3 && !*markDownOutput {
 		format.PrintStatsToSTDOUT(primaryMap, *verbose3, *outputVerboseMax)
-	} else if *verbose2 {
+	} else if *verbose2 && !*markDownOutput {
 		format.PrintStatsToSTDOUT(primaryMap, *verbose3, *outputVerboseMax)
-	} else {
+	} else if !*markDownOutput {
 		format.PrintArrayToSTDOUT(primaryMap, *verbose)
 	}
 
