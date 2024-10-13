@@ -489,6 +489,22 @@ func ShuffleMap(input map[string]int, replacementMask string, swapMap map[string
 					continue
 				}
 
+				// if the line ends or starts with ?[uldbs] then the swap failed
+				if strings.HasPrefix(shufKey, "?") || strings.HasSuffix(shufKey, "?") {
+
+					if strings.ContainsRune("uldbs", rune(shufKey[len(shufKey)-1])) || strings.ContainsRune("uldbs", rune(shufKey[1])) {
+
+						if debug {
+							fmt.Fprintf(os.Stderr, "[?][?] Swap failed invalid key:\n")
+							fmt.Fprintf(os.Stderr, "Key: %s\n", key)
+							fmt.Fprintf(os.Stderr, "Swap Result: %s\n", shufKey)
+						}
+
+						continue
+
+					}
+				}
+
 				switch bypass {
 				case false:
 					if oldValue, exists := shuffleMap[shufKey]; exists {
