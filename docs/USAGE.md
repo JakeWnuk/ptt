@@ -1,5 +1,5 @@
 # Password Transformation Tool (PTT) Usage Guide
-## Version 0.3.6
+## Version 0.3.7
 
 ### Table of Contents
 #### Getting Started
@@ -178,7 +178,7 @@ The following transformations can be used with the `-t` flag:
   -t mask-retain -rm [uldsb] -tf [file]
         Transforms input by creating masks that still retain strings from file.
   -t mask-swap -tf [file]
-        Transforms input by swapping tokens from a partial mask file and a input file.
+        Transforms input by swapping tokens from a partial mask file and a input file of tokens. Expects partial masks as input.
   -t passphrase -w [words]
         Transforms input by generating passphrases from sentences with a given number of words.
   -t regram -w [words]

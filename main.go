@@ -15,7 +15,7 @@ import (
 	"github.com/jakewnuk/ptt/pkg/utils"
 )
 
-var version = "0.3.6"
+var version = "0.3.7"
 var wg sync.WaitGroup
 var mutex = &sync.Mutex{}
 var retain models.FileArgumentFlag
@@ -62,7 +62,7 @@ func main() {
 			"mask-pop -rm [uldsbt]":              "Transforms input by generating tokens from popping strings at character boundaries.",
 			"mask-match -tf [file]":              "Transforms input by keeping only strings with matching masks from a mask file.",
 			"swap-single -tf [file]":             "Transforms input by swapping tokens once per string per replacement with exact matches from a ':' separated file.",
-			"mask-swap -tf [file]":               "Transforms input by swapping tokens from a partial mask file and a input file.",
+			"mask-swap -tf [file]":               "Transforms input by swapping tokens from a partial mask file and a input file of tokens. Expects partial masks as input.",
 			"passphrase -w [words]":              "Transforms input by generating passphrases from sentences with a given number of words.",
 			"substring -i [index]":               "Transforms input by extracting substrings starting at index and ending at index.",
 			"replace-all -tf [file]":             "Transforms input by replacing all strings with all matches from a ':' separated file.",
