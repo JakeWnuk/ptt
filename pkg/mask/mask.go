@@ -490,9 +490,9 @@ func ShuffleMap(input map[string]int, replacementMask string, swapMap map[string
 				}
 
 				// if the line ends or starts with ?[uldbs] then the swap failed
-				if strings.HasPrefix(shufKey, "?") || strings.HasSuffix(shufKey, "?") {
+				if strings.HasPrefix(shufKey, "?") || strings.HasSuffix(shufKey[len(shufKey)-2:len(shufKey)-1], "?") {
 
-					if strings.ContainsRune("uldbs", rune(shufKey[len(shufKey)-1])) || strings.ContainsRune("uldbs", rune(shufKey[1])) {
+					if strings.ContainsRune("uldbs", rune(shufKey[1])) && strings.HasPrefix(shufKey, "?") || strings.ContainsRune("uldbs", rune(shufKey[len(shufKey)-1])) && strings.HasSuffix(shufKey[len(shufKey)-2:len(shufKey)-1], "?") {
 
 						if debug {
 							fmt.Fprintf(os.Stderr, "[?][?] Swap failed invalid key:\n")
