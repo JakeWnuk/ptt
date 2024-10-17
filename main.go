@@ -57,12 +57,12 @@ func main() {
 			"hex":                                "Transforms input by encoding strings into $HEX[...] format.",
 			"dehex":                              "Transforms input by decoding $HEX[...] formatted strings.",
 			"mask -rm [uldsb] -v":                "Transforms input by masking characters with provided mask.",
-			"mask-remove -rm [uldsb]":            "Transforms input by removing characters with provided mask characters.",
+			"mask-remove -rm [uldsb]":            "Transforms input by removing characters with provided mask.",
 			"mask-retain -rm [uldsb] -tf [file]": "Transforms input by creating masks that still retain strings from file.",
-			"mask-pop -rm [uldsbt]":              "Transforms input by generating tokens from popping strings at character boundaries.",
+			"mask-pop -rm [uldsbt]":              "Transforms input by 'popping' tokens from character boundaries using the provided mask.",
 			"mask-match -tf [file]":              "Transforms input by keeping only strings with matching masks from a mask file.",
 			"swap-single -tf [file]":             "Transforms input by swapping tokens once per string per replacement with exact matches from a ':' separated file.",
-			"mask-swap -tf [file]":               "Transforms input by swapping tokens from a partial mask file and a input file of tokens. Expects partial masks as input.",
+			"mask-swap -tf [file]":               "Transforms input by swapping tokens from a mask/partial mask input and a transformation file of tokens.",
 			"passphrase -w [words]":              "Transforms input by generating passphrases from sentences with a given number of words.",
 			"substring -i [index]":               "Transforms input by extracting substrings starting at index and ending at index.",
 			"replace-all -tf [file]":             "Transforms input by replacing all strings with all matches from a ':' separated file.",
@@ -95,7 +95,7 @@ func main() {
 	jsonOutput := flag.String("o", "", "Output to JSON file in addition to stdout. Accepts file names and paths.")
 	bypassMap := flag.Bool("b", false, "Bypass map creation and use stdout as primary output. Disables some options.")
 	debugMode := flag.Int("d", 0, "Enable debug mode with verbosity levels [0-2].")
-	URLParsingMode := flag.Int("p", 0, "Change parsing mode for URL input. [0 = Strict, 1 = Permissive, 2 = Maximum] [0-2].")
+	URLParsingMode := flag.Int("p", 0, "Change parsing mode for URL input. [0 = Strict, 1 = Permissive, 2 = Maximum].")
 	flag.Var(&retain, "k", "Only keep items in a file.")
 	flag.Var(&remove, "r", "Only keep items not in a file.")
 	flag.Var(&readFiles, "f", "Read additional files for input.")
