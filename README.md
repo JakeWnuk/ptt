@@ -1,46 +1,58 @@
  Password Transformation Tool (`ptt`) is a versatile utility designed for password cracking. It facilitates the creation of custom rules and transformations, as well as the generation of wordlists. This tool supports processing data from files, URLs, and standard input, streamlining cracking workflows.
 
+`PTT` is written in `Go`, is compatible with multiple platforms, and can be easily integrated into existing workflows. The tool is designed to be user-friendly and intuitive, with a wide range of features and options.
+
 ## Features:
-- Transform input strings with various modes.
-- Creates `Hashcat` rules and masks from input strings.
-- Transforms input strings with a variety of functions for password cracking.
-- Accepts input from multiple sources including; standard input, files, and URLs.
-- All transformations support multibyte characters.
-- Supports JSON output for easy parsing and integration with other tools.
-- Supports multiple transformations and operations with a template file.
+- **Multiple Input Sources:** Process data from files, URLs, and standard input. Accepts directories, files, and URLs as input. Use multiple flags to combine sources.
+- **Deduplication and Frequency Filtering:** Remove duplicates and filter by
+  frequency automatically.
+- **Output Formatting:** Output data in JSON format or Markdown for easy parsing and
+  analysis. Easily load and chain previous results for further processing.
+- **Debugging Mode:** Enable debug mode to display verbose output and
+  statistics with multiple levels of verbosity.
+- **Transformation Modes:** Choose from various transformation modes to
+  manipulate input data.
+- **Wordlist Generation:** Generate wordlists from input data using custom rules
+  and transformations.
+- **Rule Creation:** Create custom rules for appending, prepending,
+  overwriting, and toggling strings.
+- **Mask Making:** Create `Hashcat` masks to mask, remove, retain, or swap characters
+  in strings.
+- **Multibyte Support:** Support for multibyte characters in transformations.
+- **URL Parsing:** Parse URLs with strict, permissive, or maximum parsing
+  modes to create wordlists from URLs.
+- **Analysis Tools:** Analyze input data with statistics and verbose output.
+- **Template Files:** Use template files to apply multiple transformations and
+  operations to input data.
 
 ## Getting Started:
 
-Documentation on usage and examples can be found in the `/docs/USAGE.md` directory or on the repository here:
+Usage documentation can be found in the `/docs/USAGE.md` directory or on the repository here:
 - [GitHub Link](https://github.com/JakeWnuk/ptt/tree/main/docs/USAGE.md)
 
 ### Install:
 
-#### Source:
-Fast method with Go installed:
+From source with `go`:
 ```
 go install github.com/jakewnuk/ptt@latest
 ```
-Slow method with Go installed:
+From `git` clone then build with `go`:
 ```
 git clone https://github.com/JakeWnuk/ptt && cd ptt && go build ./main.go && mv ./main ~/go/bin/ptt && ptt
 ```
-
-#### Docker:
-Pull the latest image from Docker Hub:
+From `docker` with the program as the entry point:
 ```
 docker run -it -v ${PWD}:/data jwnuk/ptt
 ``` 
-Build the Docker image from the Dockerfile:
+From `git` then build with `docker`:
 ```
 git clone https://github.com/JakeWnuk/ptt && cd ptt && docker build -t ptt . && docker run -it -v ${PWD}:/data ptt
 ```
 
 ---
-
 ### Usage:
 ```
-Usage of Password Transformation Tool (ptt) version (0.3.6):
+Usage of Password Transformation Tool (ptt) version (0.3.7):
 
 ptt [options] [...]
 Accepts standard input and/or additonal arguments.
@@ -70,7 +82,7 @@ These modify or filter the transformation mode.
   -o string
         Output to JSON file in addition to stdout. Accepts file names and paths.
   -p int
-        Change parsing mode for URL input. [0 = Strict, 1 = Permissive, 2 = Maximum] [0-2].
+        Change parsing mode for URL input. [0 = Strict, 1 = Permissive, 2 = Maximum].
   -r value
         Only keep items not in a file.
   -rm string
@@ -107,13 +119,13 @@ These create or alter based on the selected mode.
   -t mask-match -tf [file]
         Transforms input by keeping only strings with matching masks from a mask file.
   -t mask-pop -rm [uldsbt]
-        Transforms input by generating tokens from popping strings at character boundaries.
+        Transforms input by 'popping' tokens from character boundaries using the provided mask.
   -t mask-remove -rm [uldsb]
-        Transforms input by removing characters with provided mask characters.
+        Transforms input by removing characters with provided mask.
   -t mask-retain -rm [uldsb] -tf [file]
         Transforms input by creating masks that still retain strings from file.
   -t mask-swap -tf [file]
-        Transforms input by swapping tokens from a partial mask file and a input file.
+        Transforms input by swapping tokens from a mask/partial mask input and a transformation file of tokens.
   -t passphrase -w [words]
         Transforms input by generating passphrases from sentences with a given number of words.
   -t regram -w [words]
