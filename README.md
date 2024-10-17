@@ -1,6 +1,6 @@
  Password Transformation Tool (`ptt`) is a versatile utility designed for password cracking. It facilitates the creation of custom rules and transformations, as well as the generation of wordlists. This tool supports processing data from files, URLs, and standard input, streamlining cracking workflows.
 
-`PTT` is written in `Go` and is compatible with multiple platforms and can be easily integrated into existing workflows. The tool is designed to be user-friendly and intuitive, with a wide range of features and options.
+`PTT` is written in `Go`, is compatible with multiple platforms, and can be easily integrated into existing workflows. The tool is designed to be user-friendly and intuitive, with a wide range of features and options.
 
 ## Features:
 - **Multiple Input Sources:** Process data from files, URLs, and standard input. Accepts directories, files, and URLs as input. Use multiple flags to combine sources.
@@ -10,13 +10,13 @@
   analysis. Easily load and chain previous results for further processing.
 - **Debugging Mode:** Enable debug mode to display verbose output and
   statistics with multiple levels of verbosity.
-- **Transformation Modes:** Choose from a variety of transformation modes to
+- **Transformation Modes:** Choose from various transformation modes to
   manipulate input data.
 - **Wordlist Generation:** Generate wordlists from input data using custom rules
   and transformations.
 - **Rule Creation:** Create custom rules for appending, prepending,
   overwriting, and toggling strings.
-- **Masking Making:** Create `Hashcat` masks to mask, remove, retain, or swap characters
+- **Mask Making:** Create `Hashcat` masks to mask, remove, retain, or swap characters
   in strings.
 - **Multibyte Support:** Support for multibyte characters in transformations.
 - **URL Parsing:** Parse URLs with strict, permissive, or maximum parsing

@@ -29,11 +29,11 @@
   - [Regram](#regram)
 
 ## Introduction
-The Password Transformation Tool (PTT) is a command-line utility that allows users to transform passwords using a variety of methods. This guide will provide instructions on how to install and use the tool.
+The Password Transformation Tool (PTT) is a command-line utility that allows users to transform passwords using various methods. This guide will provide instructions on how to install and use the tool.
 
-The tool was created as a complete solution for password transformation, and is designed to be easy to use and flexible. PTT is designed around my previous tools, `maskcat`, `rulecat`, and `mode`, and offers many of the same features and capabilities with a more user-friendly interface and new functionality.
+The tool was created as a complete solution for password transformation and is designed to be easy to use and flexible. PTT is designed around my previous tools, `maskcat`, `rulecat`, and `mode`, and offers many of the same features and capabilities with a more user-friendly interface and new functionality.
 
-The tool can read multiple input from standard input, files, or URLs and can read from multiple sources at the same time. The tool reads all input to a single data object and then processes the data object with the specified transformations.
+The tool can read multiple inputs from standard input, files, or URLs and can read from multiple sources at the same time. The tool reads all input into a single data object and then processes the data object with the specified transformations.
 
 The output contains no duplicates and is sorted by frequency of occurrence. The output can be shown as is, with frequency counts, as a simple statistics report, or as a verbose statistics report. The tool also supports template files, loading directories and files, chaining input from multiple sessions, JSON output, debugging levels, and other quality of life features.
 
@@ -56,24 +56,24 @@ git clone https://github.com/JakeWnuk/ptt && cd ptt && docker build -t ptt . && 
 ```
 ### Usage
 There are some additional notes when importing data and getting started:
-- There are no positional arguments and every argument is defined after a `flag`.
+- There are no positional arguments, and every argument is defined after a `flag`.
 - When reading from standard input, the tool can detect chaining `ptt` commands when the `-v` flag is used. This can be used to pipe multiple commands together without losing frequency data.
 - When reading from files, the tool can detect when `ptt` JSON output is used as input and will parse the JSON data.
 - The tool should support multibyte characters and transformations in every mode.
-- The `-b` flag can be used to bypass map creation and use `stdout` as primary output. This can be useful for working with large datasets.
-    - If the `-b` flag is used, the final output will be empty and all filtering and duplication removal will be disabled.
+- The `-b` flag can be used to bypass map creation and use `stdout` as the primary output. This can be useful for working with large datasets.
+    - If the `-b` flag is used, the final output will be empty, and all filtering and duplication removal will be disabled.
 - The `-d [0-2]` flag can be used to enable debug output. This will show the data
   object after all transformations have been applied. There are two levels
   of debug output that can be used.
-    - Level 1 will not print each iteration transformation but overall input and output.
-    - Level 2 will print each iteration transformation and overall input and output.
-- The `-tp` flag can not be used with other transformations at the same time (`-t`).
+    - Level 1 will not print each iteration transformation but the overall input and output.
+    - Level 2 will print each iteration transformation and the overall input and output.
+- The `-tp` flag cannot be used with other transformations at the same time (`-t`).
 - The template file should contain a list of transformations and operations to apply
   to the input data. The template file should be in JSON format.
     - See `docs/template.json` ([link](https://github.com/JakeWnuk/ptt/blob/main/docs/template.json)) for an example.
     - See `templates/` ([link](https://github.com/JakeWnuk/ptt/blob/main/templates/)) for more examples.
 - The `-f`, `-k`, `-r`, `-tf`, `-tp`, and `-u` flags can be used multiple times and have their collective values combined. The rest of the flags can only be used once. These flags work with files and directories.
-- The `-p` flag can be used to change the parsing mode for URLs. The default mode is `0` and will use a narrow character set to parse text from URLs. The `1` mode will use a larger character set to parse text from URLs and include additional parsing by default. The `2` mode will use the same character set as `1` but will also include additional parsing options for maximum parsing including n-grams and other parsing options.
+- The `-p` flag can be used to change the parsing mode for URLs. The default mode is `0` and will use a narrow character set to parse text from URLs. The `1` mode will use a larger character set to parse text from URLs and include additional parsing by default. The `2` mode will use the same character set as `1` but will also include additional parsing options for maximum parsing, including n-grams and other parsing options.
 - The `-i` and `-w` flags can also accept range values in the format of `start-end`. For example, `1-5` will print output for the transformation starting from index 1 to 5. For the `-w` flag, this will be the number of words the output will contain.
 
 > [!CAUTION]
@@ -255,7 +255,7 @@ Where `<mask_characters>` can be any of the following:
 - `b`: Byte characters
 - Multiple characters can be combined to create a mask.
 
-The default value is `uldsb` for all characters. The `-v` flag is optional and if provided, will print the length of the original string and its character complexity. The format will be `:length:complexity` appended to the end of the output.
+The default value is `uldsb` for all characters. The `-v` flag is optional and, if provided, will print the length of the original string and its character complexity. The format will be `:length:complexity` appended to the end of the output.
 ### Mask Matching
 Masks can be matched to a given string to determine if the string matches the mask. The syntax to match a mask is as follows:
 ```
@@ -328,19 +328,13 @@ Insert rules are used to insert a string at a specific position in the password.
 ```
 ptt -f <input_file> -t rule-insert -i <index>
 ```
-Where `<index>` is the position where the string will be inserted. If no index is provided,
-the string will be inserted at the beginning of the password. The `<index>`
-can also accept range values in the format of `start-end`. For example, `1-5` will
-print output for the insert transformation starting from index 1 to 5.
+Where `<index>` is the position where the string will be inserted. If no index is provided, the string will be inserted at the beginning of the password. The `<index>` can also accept range values in the format of `start-end`. For example, `1-5` will print output for the insert transformation starting from index 1 to 5.
 ### Overwrite Rules
 Overwrite rules are used to overwrite a string at a specific position in the password. The syntax for an overwrite rule is as follows:
 ```
 ptt -f <input_file> -t rule-overwrite -i <index>
 ```
-Where `<index>` is the position where the string will be overwritten. If no index is provided,
-the string will be overwritten at the beginning of the password. The `<index>`
-can also accept range values in the format of `start-end`. For example, `1-5` will
-print output for the overwrite transformation starting from index 1 to 5.
+Where `<index>` is the position where the string will be overwritten. If no index is provided, the string will be overwritten at the beginning of the password. The `<index>` can also accept range values in the format of `start-end`. For example, `1-5` will print output for the overwrite transformation starting from index 1 to 5.
 ## Wordlist Creation Usage
 There are several ways to generate wordlists using PTT:
 - `Direct Swapping`: Swapping characters directly with a `:` separated file.
@@ -358,13 +352,13 @@ The `swap-single` module swaps characters directly with a `:` separated file. Th
 ```
 ptt -f <input-file> -t swap-single -tf <replacement-file>
 ```
-The replacement file should contain the strings to be transformed as `PRIOR:POST` pairs. The replacements will be applied to the all instance in each line but only one swap is applied at once. This mode is ideal for substituting words or characters in a string.
+The replacement file should contain the strings to be transformed as `PRIOR:POST` pairs. The replacements will be applied to all instances in each line, but only one swap is applied at a time. This mode is ideal for substituting words or characters in a string.
 ### Replacing Text and Characters
 The `replace-all` module replaces text and characters in a string. This mode replaces all strings with all matches from a ':' separated file. The syntax is as follows:
 ```
 ptt -f <input-file> -t replace-all -tf <replacement-file>
 ```
-The replacement file should contain the strings to be transformed as `PRIOR:POST` pairs. The replacements will be applied to all instances in each line and all replacements are applied to the string. This mode is ideal for replacing all instances of a word or character in a string.
+The replacement file should contain the strings to be transformed as `PRIOR:POST` pairs. The replacements will be applied to all instances in each line, and all replacements will be applied to the string. This mode is ideal for replacing all instances of a word or character in a string.
 ### Token Popping
 The `pop` module generates tokens by popping strings at character boundaries. The syntax is as follows:
 ```
@@ -389,7 +383,7 @@ ptt -f <input-file> -t mask-swap -tf <replacement-file>
 > [!NOTE]
 > The input for `mask-swap` is partial masks. This is different from other modes.
 
-The replacement file does not need to be in any specific format. The replacements will be applied to the first instance in each line. The `mask-swap` mode is unique in that it uses partial masks from the `retain` module to generate new candidates. This mode also uses its own replacer module (different from the other modes) to generate new candidates by extracting the masks and then matching them to the replacement file.
+The replacement file does not need to be in any specific format. The replacements will be applied to the first instance in each line. The `mask-swap` mode is unique in that it uses partial masks from the `retain` module to generate new candidates. This mode also uses its replacer module (different from the other modes) to generate new candidates by extracting the masks and then matching them to the replacement file.
 #### Token Swapping Example
 ```bash
 $ cat pass.lst
