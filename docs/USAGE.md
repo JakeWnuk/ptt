@@ -30,9 +30,13 @@
 
 ## Introduction
 The Password Transformation Tool (PTT) is a command-line utility that allows users to transform passwords using a variety of methods. This guide will provide instructions on how to install and use the tool.
+
 The tool was created as a complete solution for password transformation, and is designed to be easy to use and flexible. PTT is designed around my previous tools, `maskcat`, `rulecat`, and `mode`, and offers many of the same features and capabilities with a more user-friendly interface and new functionality.
+
 The tool can read multiple input from standard input, files, or URLs and can read from multiple sources at the same time. The tool reads all input to a single data object and then processes the data object with the specified transformations.
+
 The output contains no duplicates and is sorted by frequency of occurrence. The output can be shown as is, with frequency counts, as a simple statistics report, or as a verbose statistics report. The tool also supports template files, loading directories and files, chaining input from multiple sessions, JSON output, debugging levels, and other quality of life features.
+
 ### Installation
 From source with `go`:
 ```
@@ -109,7 +113,9 @@ There are some additional notes when importing data and getting started:
 - These options are available for all transformations.
 #### Rockyou Examples:
 `ptt -f rockyou.txt -t pop -l 4-5`:
+
 **Flags**: `-f` to select a *file*, `-t` to use the `pop` *transformation*, and `-l` to give a  *length* range of results.
+
 ```shell
 $ ptt -f rockyou.txt -t pop -l 4-5
 1234
@@ -126,7 +132,9 @@ life
 ```
 
  `ptt -f rockyou.txt -t pop -l 4-5 -v`:
+ 
  **Flags**: `-f` to select a *file*, `-t` to use the `pop` *transformation*, `-l` to give a  *length* range of results, and `-v` to print *verbose* output.
+
 ```shell
 $ ptt -f rockyou.txt -t pop -l 4-5 -v
 29529 1234
@@ -143,7 +151,9 @@ $ ptt -f rockyou.txt -t pop -l 4-5 -v
 ```
 
 `ptt -f rockyou.txt -t pop -l 4-5 -vv`:
+ 
  **Flags**: `-f` to select a *file*, `-t` to use the `pop` *transformation*, `-l` to give a  *length* range of results, and `-vv` to print very *verbose* output with an item graph.
+
 ```shell
 $ ptt -f rockyou.txt -t pop -l 4-5 -vv
 1234 [29529]==================================================
@@ -158,7 +168,9 @@ life [14496]========================
 1992 [14159]=======================
 ```
 `ptt -f rockyou.txt -t pop -l 4-5 -vvv`:
- **Flags**: `-f` to select a *file*, `-t` to use the `pop` *transformation*, `-l` to give a  *length* range of results, and `-vvv` to print very very *verbose* output with a full report.
+
+**Flags**: `-f` to select a *file*, `-t` to use the `pop` *transformation*, `-l` to give a  *length* range of results, and `-vvv` to print very very *verbose* output with a full report.
+
 ```shell
 [*] Starting statistics generation. Please wait...
 Verbose Statistics: max=25
@@ -234,7 +246,6 @@ Masks replace characters in a string with a common character. The syntax to crea
 ```
 ptt -f <input_file> -t mask -rm <mask_characters> -v
 ```
-**Flags**: `-f` to select a *file*, `-t` to use the `mask` *transformation*, `-rm` to set a *replacement mask*, and `-v` to use *verbose* output.
 
 Where `<mask_characters>` can be any of the following:
 - `u`: Uppercase characters
