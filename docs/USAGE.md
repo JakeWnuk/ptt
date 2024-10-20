@@ -274,6 +274,28 @@ Retain masks or partial masks can be created to retain only certain keywords in 
 ptt -f <input_file> -t mask-retain -rm <mask_characters> -tf <keep_file>
 ```
 Where `<mask_characters>` is the mask to retain and `<keep_file>` is the file containing the keywords to retain. The output will be the mask with only the keywords retained.
+
+The `retain` mode can also be used with `-rm` to alter the replacement mask and recieve different output.
+```
+$ echo 'sp-test1337' | ptt -t retain -tf keep.tmp
+[*] Reading files for input.
+[*] All input loaded.
+[*] Task complete with 2 unique results.
+sp-?l?l?l?l?d?d?d?d
+?l?l?s?l?l?l?l1337
+
+$ echo 'sp-test1337' | ptt -t retain -tf keep.tmp -rm l
+[*] Reading files for input.
+[*] All input loaded.
+[*] Task complete with 2 unique results.
+sp-?l?l?l?l1337
+?l?l-?l?l?l?l1337
+
+$ cat keep.tmp
+sp-
+1337
+```
+
 ## Rule Transformation Usage
 There are several types of rules that can be created using PTT:
 - `Append Rules`: Append a string to the end of the password.
