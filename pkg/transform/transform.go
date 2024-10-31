@@ -138,6 +138,10 @@ func TransformationController(input map[string]int, mode string, startingIndex i
 			os.Exit(1)
 		}
 		output = GenerateNGramMap(input, wordRangeStart, wordRangeEnd, bypass, functionDebug)
+	case "mask-sort":
+		fmt.Fprintf(os.Stderr, "[*] This transformation mode expects mask or partial masks.\n")
+		fmt.Fprintf(os.Stderr, "[!] This mode does not support the bypass flag.\n")
+		output = mask.SortMasksByKeyspace(input, functionDebug)
 	default:
 		output = input
 	}

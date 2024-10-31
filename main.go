@@ -15,7 +15,7 @@ import (
 	"github.com/jakewnuk/ptt/pkg/utils"
 )
 
-var version = "0.3.7"
+var version = "0.4.0"
 var wg sync.WaitGroup
 var mutex = &sync.Mutex{}
 var retain models.FileArgumentFlag
@@ -67,6 +67,7 @@ func main() {
 			"substring -i [index]":               "Transforms input by extracting substrings starting at index and ending at index.",
 			"replace-all -tf [file]":             "Transforms input by replacing all strings with all matches from a ':' separated file.",
 			"regram -w [words]":                  "Transforms input by 'regramming' sentences into new n-grams with a given number of words.",
+			"mask-sort":                          "Transforms input by sorting full and partial masks based on calculated keyspace.",
 		}
 
 		// Sort and print transformation modes

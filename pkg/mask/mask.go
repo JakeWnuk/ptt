@@ -521,3 +521,49 @@ func ShuffleMap(input map[string]int, replacementMask string, swapMap map[string
 	}
 	return shuffleMap
 }
+
+// SortMasksByKeyspace accepts a map of masks and/or partial masks and returns
+// a map sorted by keyspace
+//
+// Args:
+//
+//	input (map[string]int): Input map
+//	debug (bool): If true, print additional debug information to stderr
+//
+// Returns:
+//
+// (map[string]int): Output map of sorted masks
+func SortMasksByKeyspace(input map[string]int, debug bool) map[string]int {
+	// TODO
+
+	// open up the input map and iterate it
+	// for each mask, determine if it is a valid mask
+	// for each mask, calculate its estimated keyspace
+	for key, value := range input {
+		fmt.Println(CalculateMaskKeyspace(key), value)
+	}
+
+	return input
+}
+
+// CalculateMaskKeyspace accepts a mask or partial mask string and returns the
+// estimated keyspace of the mask
+//
+// Args:
+//
+// input (string): Input mask or partial mask
+//
+// Returns:
+// (int): Estimated mask complexity
+func CalculateMaskKeyspace(input string) int {
+	// TODO
+
+	// identify if the mask is a complete mask or if it is partial
+	// if it is a complete mask,
+	// take the mask and iterate 2 characters at a time to find keyspace
+	// if it is a partial mask,
+	// find all "?" characters then the character to their right
+	// for each pair, calculate the keyspace and return
+
+	return 0
+}
