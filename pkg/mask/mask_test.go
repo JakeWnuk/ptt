@@ -25,6 +25,8 @@ import (
 // - MakeMatchedMaskedMap()
 // - BoundarySplitPopMap()
 // - ShuffleMap()
+// - SortMasksByKeyspace() TODO
+// - CalculateMaskKeyspace() TODO
 //
 // ----------------------------------------------------------------------------
 // Functions without Unit Tests
