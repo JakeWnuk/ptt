@@ -52,7 +52,7 @@ git clone https://github.com/JakeWnuk/ptt && cd ptt && docker build -t ptt . && 
 ---
 ### Usage:
 ```
-Usage of Password Transformation Tool (ptt) version (0.4.0):
+Usage of Password Transformation Tool (ptt) version (0.3.8):
 
 ptt [options] [...]
 Accepts standard input and/or additonal arguments.
@@ -124,8 +124,6 @@ These create or alter based on the selected mode.
         Transforms input by removing characters with provided mask.
   -t mask-retain -rm [uldsb] -tf [file]
         Transforms input by creating masks that still retain strings from file.
-  -t mask-sort
-        Transforms input by sorting full and partial masks based on calculated keyspace.
   -t mask-swap -tf [file]
         Transforms input by swapping tokens from a mask/partial mask input and a transformation file of tokens.
   -t passphrase -w [words]

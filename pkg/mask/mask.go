@@ -94,7 +94,7 @@ func MakeMaskedMap(input map[string]int, replacementMask string, verbose bool, b
 		}
 
 		if verbose {
-			newKey = fmt.Sprintf("%s:%d:%d", newKey, len(key), TestMaskComplexity(newKey))
+			newKey = fmt.Sprintf("%s:%d:%d:%d", newKey, len(key), TestMaskComplexity(newKey), CalculateMaskKeyspace(newKey))
 		}
 
 		if debug {
@@ -241,7 +241,8 @@ func ConvertMultiByteMask(str string) string {
 	return returnStr
 }
 
-// TestMaskComplexity tests the complexity of an input mask
+// TestMaskComplexity tests the complexity of an input full mask or a partial
+// mask string and returns a score
 //
 // Args:
 //
@@ -251,14 +252,62 @@ func ConvertMultiByteMask(str string) string {
 //
 //	(int): Complexity score as an integer
 func TestMaskComplexity(str string) int {
-	complexity := 0
-	charTypes := []string{"?u", "?l", "?d", "?s", "?b"}
-	for _, charType := range charTypes {
-		if strings.Contains(str, charType) {
-			complexity++
+	score := 0
+	lowerBool := false
+	upperBool := false
+	digitBool := false
+	specialBool := false
+	byteBool := false
+	for i := 0; i < len(str); i++ {
+		if str[i] == '?' {
+			if i+1 < len(str) {
+				switch str[i+1] {
+				case 'l':
+					lowerBool = true
+				case 'u':
+					upperBool = true
+				case 'd':
+					digitBool = true
+				case 's':
+					specialBool = true
+				case 'b':
+					byteBool = true
+				}
+			}
+		} else {
+			if unicode.IsLower(rune(str[i])) {
+				lowerBool = true
+			}
+			if unicode.IsUpper(rune(str[i])) {
+				upperBool = true
+			}
+			if unicode.IsDigit(rune(str[i])) {
+				digitBool = true
+			}
+			if strings.ContainsRune(" !\"#$%&\\()*+,-./:;<=>?@[\\]^_`{|}~'", rune(str[i])) {
+				specialBool = true
+			}
+			if str[i] > 127 {
+				byteBool = true
+			}
 		}
 	}
-	return complexity
+	if lowerBool {
+		score++
+	}
+	if upperBool {
+		score++
+	}
+	if digitBool {
+		score++
+	}
+	if specialBool {
+		score++
+	}
+	if byteBool {
+		score++
+	}
+	return score
 }
 
 // RemoveMaskedCharacters removes masked characters from the input map
@@ -522,30 +571,6 @@ func ShuffleMap(input map[string]int, replacementMask string, swapMap map[string
 	return shuffleMap
 }
 
-// SortMasksByKeyspace accepts a map of masks and/or partial masks and returns
-// a map sorted by keyspace
-//
-// Args:
-//
-//	input (map[string]int): Input map
-//	debug (bool): If true, print additional debug information to stderr
-//
-// Returns:
-//
-// (map[string]int): Output map of sorted masks
-func SortMasksByKeyspace(input map[string]int, debug bool) map[string]int {
-	// TODO
-
-	// open up the input map and iterate it
-	// for each mask, determine if it is a valid mask
-	// for each mask, calculate its estimated keyspace
-	for key, value := range input {
-		fmt.Println(CalculateMaskKeyspace(key), value)
-	}
-
-	return input
-}
-
 // CalculateMaskKeyspace accepts a mask or partial mask string and returns the
 // estimated keyspace of the mask
 //
@@ -556,14 +581,88 @@ func SortMasksByKeyspace(input map[string]int, debug bool) map[string]int {
 // Returns:
 // (int): Estimated mask complexity
 func CalculateMaskKeyspace(input string) int {
-	// TODO
+	if IsMaskAFullMask(input) {
+		return CalculateKeyspace(input)
+	}
 
-	// identify if the mask is a complete mask or if it is partial
-	// if it is a complete mask,
-	// take the mask and iterate 2 characters at a time to find keyspace
-	// if it is a partial mask,
-	// find all "?" characters then the character to their right
-	// for each pair, calculate the keyspace and return
+	keyspace := 0
+	// find the first "?" character in the mask
+	for i := 0; i < len(input); i++ {
+		if input[i] == '?' {
+			if i+1 < len(input) {
+				switch input[i+1] {
+				case 'l':
+					keyspace += CalculateMaskKeyspace(input[i : i+2])
+				case 'u':
+					keyspace += CalculateMaskKeyspace(input[i : i+2])
+				case 'd':
+					keyspace += CalculateMaskKeyspace(input[i : i+2])
+				case 's':
+					keyspace += CalculateMaskKeyspace(input[i : i+2])
+				case 'b':
+					keyspace += CalculateMaskKeyspace(input[i : i+2])
+				case 'a':
+					keyspace += CalculateMaskKeyspace(input[i : i+2])
+				}
+			}
+		}
+	}
+	return keyspace
+}
 
-	return 0
+// CalculateKeyspace accepts a mask or partial mask string and returns the
+// estimated keyspace of the mask
+//
+// Args:
+// input (string): Input mask or partial mask
+//
+// Returns:
+// (int): Estimated mask complexity
+func CalculateKeyspace(input string) int {
+	keyspace := 0
+	for i := 0; i < len(input); i += 2 {
+		if input[i] == '?' && input[i+1] == 'u' {
+			keyspace += 26
+		} else if input[i] == '?' && input[i+1] == 'l' {
+			keyspace += 26
+		} else if input[i] == '?' && input[i+1] == 'd' {
+			keyspace += 10
+		} else if input[i] == '?' && input[i+1] == 's' {
+			keyspace += 32
+		} else if input[i] == '?' && input[i+1] == 'b' {
+			keyspace += 256
+		} else if input[i] == '?' && input[i+1] == 'a' {
+			keyspace += 95
+		}
+	}
+	return keyspace
+}
+
+// IsMaskAFullMask accepts a mask string and returns the type of mask
+// either a full mask or a partial mask
+// A full mask is a mask that contains all mask characters in the mask and
+// a partial mask is a mask that contains some mask characters in the mask
+//
+// Args:
+// input (string): Input mask or partial mask
+//
+// Returns:
+// (bool): True if the mask is a full mask, false if the mask is a partial mask
+func IsMaskAFullMask(input string) bool {
+	for i := 0; i < len(input); i += 2 {
+		if input[i] != '?' {
+			return false
+		}
+
+		if len(input) == 1 {
+			return false
+		}
+
+		if input[i+1] != 'u' && input[i+1] != 'l' && input[i+1] != 'd' && input[i+1] != 's' && input[i+1] != 'b' && input[i+1] != 'a' {
+			return false
+		}
+
+	}
+
+	return true
 }
