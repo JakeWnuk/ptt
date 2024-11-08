@@ -649,19 +649,22 @@ func CalculateKeyspace(input string) int {
 // Returns:
 // (bool): True if the mask is a full mask, false if the mask is a partial mask
 func IsMaskAFullMask(input string) bool {
+	if len(input)%2 != 0 {
+		return false
+	}
+
 	for i := 0; i < len(input); i += 2 {
 		if input[i] != '?' {
 			return false
 		}
 
-		if len(input) == 1 {
+		if i+1 >= len(input) {
 			return false
 		}
 
 		if input[i+1] != 'u' && input[i+1] != 'l' && input[i+1] != 'd' && input[i+1] != 's' && input[i+1] != 'b' && input[i+1] != 'a' {
 			return false
 		}
-
 	}
 
 	return true
