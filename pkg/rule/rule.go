@@ -431,7 +431,14 @@ func ToggleRules(items map[string]int, index string, end string, bypass bool, de
 
 	for i < e+1 {
 		for key, value := range items {
-			rule := StringToToggleRule(key, "T", i)
+			// if the key is all uppercase just set it to "u"
+			rule := ""
+			if strings.ToUpper(key) == key {
+				rule = "u"
+			} else {
+				rule = StringToToggleRule(key, "T", i)
+			}
+
 			toggleRule := FormatCharToIteratingRuleOutput(i, rule)
 
 			if debug {
