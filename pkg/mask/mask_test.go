@@ -25,11 +25,13 @@ import (
 // - MakeMatchedMaskedMap()
 // - BoundarySplitPopMap()
 // - ShuffleMap()
+// - CalculateKeySpace()
+// - IsMaskAFullMask()
 //
 // ----------------------------------------------------------------------------
 // Functions without Unit Tests
 // ----------------------------------------------------------------------------
-// -
+// - CalculateMaskKeyspace()
 
 // Unit Test for ConstructReplacements()
 func TestConstructReplacements(t *testing.T) {
@@ -192,7 +194,7 @@ func TestTestMaskComplexity(t *testing.T) {
 
 	// Define test cases
 	tests := testCases{
-		{"?l?l?l123", 1},
+		{"?l?l?l123", 2},
 		{"?l?l?l?d?d?d", 2},
 		{"?l?l?l?d?d?d?s?s?s", 3},
 		{"?u?u?l?d?d?d?s?s?s", 4},
@@ -312,6 +314,60 @@ func TestShuffleMap(t *testing.T) {
 	for _, test := range tests {
 		output := ShuffleMap(test.input, test.replacements, test.swaps, false, false)
 		if !utils.CheckAreMapsEqual(output, test.output) {
+			t.Errorf("Test failed: %v inputted, %v expected, %v returned", test.input, test.output, output)
+		}
+	}
+}
+
+// Unit Test for CalculateKeyspace()
+func TestCalculateKeyspace(t *testing.T) {
+	// Define a test case struct
+	type testCase struct {
+		input  string
+		output int
+	}
+
+	type testCases []testCase
+
+	// Define test cases
+	tests := testCases{
+		{"?l?l?l123", 78},
+		{"?l?l?l?d?d?d", 108},
+		{"?l?l?l?d?d?d?s?s?s", 204},
+		{"?u?u?l?d?d?d?s?s?s", 204},
+	}
+
+	// Run test cases
+	for _, test := range tests {
+		output := CalculateKeyspace(test.input)
+		if output != test.output {
+			t.Errorf("Test failed: %v inputted, %v expected, %v returned", test.input, test.output, output)
+		}
+	}
+}
+
+// Unit Test for IsMaskAFullMask()
+func TestIsMaskAFullMask(t *testing.T) {
+	// Define a test case struct
+	type testCase struct {
+		input  string
+		output bool
+	}
+
+	type testCases []testCase
+
+	// Define test cases
+	tests := testCases{
+		{"?l?l?l123", false},
+		{"?l?l?l?d?d?d", true},
+		{"?l?l?l?d?d?d?s?s?s", true},
+		{"?u?u?l?d?d?d?s?s?s", true},
+	}
+
+	// Run test cases
+	for _, test := range tests {
+		output := IsMaskAFullMask(test.input)
+		if output != test.output {
 			t.Errorf("Test failed: %v inputted, %v expected, %v returned", test.input, test.output, output)
 		}
 	}

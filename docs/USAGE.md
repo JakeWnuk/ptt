@@ -1,5 +1,5 @@
 # Password Transformation Tool (PTT) Usage Guide
-> Version 0.3.7
+> Version 0.3.8
 ## Table of Contents
 - [Introduction](#introduction)
 - [Installation](#installation)
@@ -110,6 +110,7 @@ There are some additional notes when importing data and getting started:
 - `ptt -n 50`: Show verbose statistics output with a maximum of 50 items.
 - `ptt -o [FILE]`: Show output and save JSON output to a file.
 - `ptt -md`: Show output as a Markdown table.
+- `ptt -ic`: Ignore case when creating output.
 - These options are available for all transformations.
 #### Rockyou Examples:
 `ptt -f rockyou.txt -t pop -l 4-5`:
@@ -255,7 +256,13 @@ Where `<mask_characters>` can be any of the following:
 - `b`: Byte characters
 - Multiple characters can be combined to create a mask.
 
-The default value is `uldsb` for all characters. The `-v` flag is optional and, if provided, will print the length of the original string and its character complexity. The format will be `:length:complexity` appended to the end of the output.
+The default value is `uldsb` for all characters. The `-v` flag is optional and, if provided, will print the length of the original string and its character complexity. The format will be `:length:complexity:mask-keyspace` appended to the end of the output. The mask keyspace is the number of possible combinations for the masked portion of the string.
+```
+$ echo 'HelloWorld!I<3ThePasswordTransformationToolPr0j3ct' | go run . -t mask -rm ds -v
+[*] All input loaded.
+[*] Task complete with 1 unique results.
+1 HelloWorld?sI?s?dThePasswordTransformationToolPr?dj?dct:50:4:94
+```
 ### Mask Matching
 Masks can be matched to a given string to determine if the string matches the mask. The syntax to match a mask is as follows:
 ```

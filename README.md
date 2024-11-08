@@ -52,7 +52,7 @@ git clone https://github.com/JakeWnuk/ptt && cd ptt && docker build -t ptt . && 
 ---
 ### Usage:
 ```
-Usage of Password Transformation Tool (ptt) version (0.3.7):
+Usage of Password Transformation Tool (ptt) version (0.3.8):
 
 ptt [options] [...]
 Accepts standard input and/or additonal arguments.
@@ -69,6 +69,8 @@ These modify or filter the transformation mode.
         Read additional files for input.
   -i value
         Starting index for transformations if applicable. Accepts ranges separated by '-'.
+  -ic
+        Ignore case when processing output and converts to lowercase.
   -k value
         Only keep items in a file.
   -l value

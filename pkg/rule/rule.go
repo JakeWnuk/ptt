@@ -61,7 +61,7 @@ func CharToIteratingRule(str string, rule string, index int) string {
 	for i, r := range str {
 		if i+index < 10 {
 			result.WriteString(fmt.Sprintf("%s%d%c ", rule, i+index, r))
-		} else {
+		} else if i+index-10 < 26 {
 			result.WriteString(fmt.Sprintf("%s%c%c ", rule, 'A'+i+index-10, r))
 		}
 	}
@@ -182,6 +182,12 @@ func AppendRules(items map[string]int, operation string, bypass bool, debug bool
 	// remove will remove characters then append
 	case "rule-append-remove", "append-remove":
 		for key, value := range items {
+			if len(key) > 15 {
+				if debug {
+					fmt.Fprintf(os.Stderr, "[!] Error: Key is too long for append-remove operation\n")
+				}
+				continue
+			}
 			rule := CharToRule(key, "$")
 			remove := LenToRule(key, "]")
 			appendRemoveRule := FormatCharToRuleOutput(remove, rule)
@@ -241,6 +247,12 @@ func PrependRules(items map[string]int, operation string, bypass bool, debug boo
 	// remove will remove characters then prepend
 	case "rule-prepend-remove", "prepend-remove":
 		for key, value := range items {
+			if len(key) > 15 {
+				if debug {
+					fmt.Fprintf(os.Stderr, "[!] Error: Key is too long for prepend-remove operation\n")
+				}
+				continue
+			}
 			rule := CharToRule(utils.ReverseString(key), "^")
 			remove := LenToRule(key, "[")
 			prependRemoveRule := FormatCharToRuleOutput(remove, rule)
@@ -431,7 +443,14 @@ func ToggleRules(items map[string]int, index string, end string, bypass bool, de
 
 	for i < e+1 {
 		for key, value := range items {
-			rule := StringToToggleRule(key, "T", i)
+			// if the key is all uppercase just set it to "u"
+			rule := ""
+			if strings.ToUpper(key) == key {
+				rule = "u"
+			} else {
+				rule = StringToToggleRule(key, "T", i)
+			}
+
 			toggleRule := FormatCharToIteratingRuleOutput(i, rule)
 
 			if debug {
