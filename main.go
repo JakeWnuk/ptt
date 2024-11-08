@@ -15,7 +15,7 @@ import (
 	"github.com/jakewnuk/ptt/pkg/utils"
 )
 
-var version = "0.3.8"
+var version = "0.4.0"
 var wg sync.WaitGroup
 var mutex = &sync.Mutex{}
 var retain models.FileArgumentFlag
@@ -44,29 +44,29 @@ func main() {
 		fmt.Fprintf(os.Stderr, "Transformation Modes:\n")
 		fmt.Fprintf(os.Stderr, "These create or alter based on the selected mode.\n\n")
 		modes := map[string]string{
-			"rule-append":                        "Transforms input by creating append rules.",
-			"rule-append-remove":                 "Transforms input by creating append-remove rules.",
-			"rule-prepend":                       "Transforms input by creating prepend rules.",
-			"rule-prepend-remove":                "Transforms input by creating prepend-remove rules.",
-			"rule-prepend-toggle":                "Transforms input by creating prepend-toggle rules.",
-			"rule-insert -i [index]":             "Transforms input by creating insert rules starting at index.",
-			"rule-overwrite -i [index]":          "Transforms input by creating overwrite rules starting at index.",
-			"rule-toggle -i [index]":             "Transforms input by creating toggle rules starting at index.",
-			"encode":                             "Transforms input by HTML and Unicode escape encoding.",
-			"decode":                             "Transforms input by HTML and Unicode escape decoding.",
-			"hex":                                "Transforms input by encoding strings into $HEX[...] format.",
-			"dehex":                              "Transforms input by decoding $HEX[...] formatted strings.",
-			"mask -rm [uldsb] -v":                "Transforms input by masking characters with provided mask.",
-			"mask-remove -rm [uldsb]":            "Transforms input by removing characters with provided mask.",
-			"mask-retain -rm [uldsb] -tf [file]": "Transforms input by creating masks that still retain strings from file.",
-			"mask-pop -rm [uldsbt]":              "Transforms input by 'popping' tokens from character boundaries using the provided mask.",
-			"mask-match -tf [file]":              "Transforms input by keeping only strings with matching masks from a mask file.",
-			"swap-single -tf [file]":             "Transforms input by swapping tokens once per string per replacement with exact matches from a ':' separated file.",
-			"mask-swap -tf [file]":               "Transforms input by swapping tokens from a mask/partial mask input and a transformation file of tokens.",
-			"passphrase -w [words]":              "Transforms input by generating passphrases from sentences with a given number of words.",
-			"substring -i [index]":               "Transforms input by extracting substrings starting at index and ending at index.",
-			"replace-all -tf [file]":             "Transforms input by replacing all strings with all matches from a ':' separated file.",
-			"regram -w [words]":                  "Transforms input by 'regramming' sentences into new n-grams with a given number of words.",
+			"rule-append":                           "Transforms input by creating append rules.",
+			"rule-append-remove":                    "Transforms input by creating append-remove rules.",
+			"rule-prepend":                          "Transforms input by creating prepend rules.",
+			"rule-prepend-remove":                   "Transforms input by creating prepend-remove rules.",
+			"rule-prepend-toggle":                   "Transforms input by creating prepend-toggle rules.",
+			"rule-insert -i [index]":                "Transforms input by creating insert rules starting at index.",
+			"rule-overwrite -i [index]":             "Transforms input by creating overwrite rules starting at index.",
+			"rule-toggle -i [index]":                "Transforms input by creating toggle rules starting at index.",
+			"encode":                                "Transforms input by HTML and Unicode escape encoding.",
+			"decode":                                "Transforms input by HTML and Unicode escape decoding.",
+			"hex":                                   "Transforms input by encoding strings into $HEX[...] format.",
+			"dehex":                                 "Transforms input by decoding $HEX[...] formatted strings.",
+			"mask -rm [uldsb] -v":                   "Transforms input by masking characters with provided mask.",
+			"mask-remove -rm [uldsb]":               "Transforms input by removing characters with provided mask.",
+			"mask-retain -rm [uldsb] -tf [file] -v": "Transforms input by creating masks that still retain strings from file.",
+			"mask-pop -rm [uldsbt]":                 "Transforms input by 'popping' tokens from character boundaries using the provided mask.",
+			"mask-match -tf [file]":                 "Transforms input by keeping only strings with matching masks from a mask file.",
+			"swap-single -tf [file]":                "Transforms input by swapping tokens once per string per replacement with exact matches from a ':' separated file.",
+			"mask-swap -tf [file]":                  "Transforms input by swapping tokens from a mask/partial mask input and a transformation file of tokens.",
+			"passphrase -w [words]":                 "Transforms input by generating passphrases from sentences with a given number of words.",
+			"substring -i [index]":                  "Transforms input by extracting substrings starting at index and ending at index.",
+			"replace-all -tf [file]":                "Transforms input by replacing all strings with all matches from a ':' separated file.",
+			"regram -w [words]":                     "Transforms input by 'regramming' sentences into new n-grams with a given number of words.",
 		}
 
 		// Sort and print transformation modes

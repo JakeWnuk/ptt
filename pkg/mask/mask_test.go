@@ -115,7 +115,7 @@ func TestMakeRetainMaskedMap(t *testing.T) {
 
 	// Run test cases
 	for _, test := range tests {
-		output := MakeRetainMaskedMap(test.input, test.replacements, test.retain, false, false)
+		output := MakeRetainMaskedMap(test.input, test.replacements, test.retain, false, false, false)
 		if !reflect.DeepEqual(output, test.output) {
 			t.Errorf("Test failed: %v inputted, %v expected, %v returned", test.input, test.output, output)
 		}

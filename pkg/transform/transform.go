@@ -93,7 +93,7 @@ func TransformationController(input map[string]int, mode string, startingIndex i
 			fmt.Fprintf(os.Stderr, "[!] Retain masks require use of one or more -tf flags to specify one or more files.\n")
 			os.Exit(1)
 		}
-		output = mask.MakeRetainMaskedMap(input, replacementMask, transformationFilesMap, bypass, functionDebug)
+		output = mask.MakeRetainMaskedMap(input, replacementMask, transformationFilesMap, bypass, functionDebug, verbose)
 	case "mask-match", "match":
 		if len(transformationFilesMap) == 0 {
 			fmt.Fprintf(os.Stderr, "[!] Match masks require use of one or more -tf flags to specify one or more files.\n")

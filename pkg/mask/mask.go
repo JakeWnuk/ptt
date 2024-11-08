@@ -130,11 +130,12 @@ func MakeMaskedMap(input map[string]int, replacementMask string, verbose bool, b
 //	retain (map[string]int): Map of keywords to retain
 //	bypass (bool): If true, the map is not used for output or filtering
 //	debug (bool): If true, print additional debug information to stderr
+//	verbose (bool): Verbose information if true
 //
 // Returns:
 //
 //	maskedMap (map[string]int): Masked retain map
-func MakeRetainMaskedMap(input map[string]int, replacementMask string, retain map[string]int, bypass bool, debug bool) map[string]int {
+func MakeRetainMaskedMap(input map[string]int, replacementMask string, retain map[string]int, bypass bool, debug bool, verbose bool) map[string]int {
 	maskedMap := make(map[string]int)
 	replacements := ConstructReplacements(replacementMask)
 	replacer := strings.NewReplacer(replacements...)
@@ -161,6 +162,10 @@ func MakeRetainMaskedMap(input map[string]int, replacementMask string, retain ma
 			} else {
 				// if the key is not in the string continue
 				continue
+			}
+
+			if verbose {
+				newKey = fmt.Sprintf("%s:%d:%d:%d", newKey, len(key), TestMaskComplexity(newKey), CalculateMaskKeyspace(newKey))
 			}
 
 			if debug {
