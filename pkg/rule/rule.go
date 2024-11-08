@@ -61,7 +61,7 @@ func CharToIteratingRule(str string, rule string, index int) string {
 	for i, r := range str {
 		if i+index < 10 {
 			result.WriteString(fmt.Sprintf("%s%d%c ", rule, i+index, r))
-		} else {
+		} else if i+index-10 < 26 {
 			result.WriteString(fmt.Sprintf("%s%c%c ", rule, 'A'+i+index-10, r))
 		}
 	}
