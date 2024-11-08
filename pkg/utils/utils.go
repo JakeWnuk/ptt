@@ -30,6 +30,19 @@ import (
 // Loading and Processing Functions
 // ----------------------------------------------------------------------------
 
+func TrackElapsedTime(mode string, inputLength int, transformationFileLength int, bypass bool) {
+	start := time.Now()
+	ticker := time.NewTicker(5 * time.Minute)
+	defer ticker.Stop()
+
+	go func() {
+		for range ticker.C {
+			elapsed := time.Since(start)
+			fmt.Fprintf(os.Stderr, "[-] Processing. Processing Mode: %s. Input Length: %d. Transformation File Length: %d. Elapsed Time: %v.\n", mode, inputLength, transformationFileLength, elapsed)
+		}
+	}()
+}
+
 // ReadFilesToMap reads the contents of the multiple files and returns a map of words
 //
 // Args:
