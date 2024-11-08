@@ -69,6 +69,8 @@ These modify or filter the transformation mode.
         Read additional files for input.
   -i value
         Starting index for transformations if applicable. Accepts ranges separated by '-'.
+  -ic
+        Ignore case when processing output and converts to lowercase.
   -k value
         Only keep items in a file.
   -l value
