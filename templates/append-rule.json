@@ -5,7 +5,7 @@
         "Verbose": false,
         "ReplacementMask": "uldsb",
         "Bypass": false,
-        "TransformationMode": "prepend",
+        "TransformationMode": "rule-append",
         "WordRangeStart": 0,
         "WordRangeEnd": 0
     },
@@ -15,17 +15,7 @@
         "Verbose": false,
         "ReplacementMask": "uldsb",
         "Bypass": false,
-        "TransformationMode": "prepend-remove",
-        "WordRangeStart": 0,
-        "WordRangeEnd": 0
-    },
-    {
-        "StartIndex": 0,
-        "EndIndex": 0,
-        "Verbose": false,
-        "ReplacementMask": "uldsb",
-        "Bypass": false,
-        "TransformationMode": "prepend-shift",
+        "TransformationMode": "rule-append-remove",
         "WordRangeStart": 0,
         "WordRangeEnd": 0
     }
