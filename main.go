@@ -96,6 +96,7 @@ func main() {
 	bypassMap := flag.Bool("b", false, "Bypass map creation and use stdout as primary output. Disables some options.")
 	debugMode := flag.Int("d", 0, "Enable debug mode with verbosity levels [0-2].")
 	URLParsingMode := flag.Int("p", 0, "Change parsing mode for URL input. [0 = Strict, 1 = Permissive, 2 = Maximum].")
+	ignoreCase := flag.Bool("ic", false, "Ignore case when processing output and converts to lowercase.")
 	flag.Var(&retain, "k", "Only keep items in a file.")
 	flag.Var(&remove, "r", "Only keep items not in a file.")
 	flag.Var(&readFiles, "f", "Read additional files for input.")
@@ -198,6 +199,16 @@ func main() {
 		return
 	}
 
+	// Print ignore case if provided
+	if *ignoreCase {
+		fmt.Fprintf(os.Stderr, "[*] Ignoring case when processing output.\n")
+	}
+
+	// Ignore case if provided
+	if *ignoreCase {
+		primaryMap = format.CreateIgnoreCaseMap(primaryMap)
+	}
+
 	// Print remove frequency if provided
 	if *minimum > 0 {
 		fmt.Fprintf(os.Stderr, "[*] Removing items with frequency less than %d.\n", *minimum)
@@ -232,7 +243,7 @@ func main() {
 		}
 	}
 
-	// if -n is providied, filter ALL results to only that top amount
+	// if -n is provided, filter ALL results to only that top amount
 	if *outputVerboseMax > 0 {
 		primaryMap = format.FilterTopN(primaryMap, *outputVerboseMax)
 	}

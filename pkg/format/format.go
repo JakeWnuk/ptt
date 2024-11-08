@@ -588,6 +588,28 @@ func FilterTopN(freq map[string]int, n int) map[string]int {
 	return newFreq
 }
 
+// CreateIgnoreCaseMap creates a new map of item frequencies with all keys
+// with the same case-insensitive value. The new map will have the
+// case-insensitive key as the key and the sum of the frequencies of all keys
+//
+// Args:
+// freq (map[string]int): A map of item frequencies
+//
+// Returns:
+// map[string]int: A new map of item frequencies with case-insensitive keys
+func CreateIgnoreCaseMap(freq map[string]int) map[string]int {
+	newFreq := make(map[string]int)
+	for key, value := range freq {
+		key = strings.ToLower(key)
+		if _, ok := newFreq[key]; ok {
+			newFreq[key] += value
+		} else {
+			newFreq[key] = value
+		}
+	}
+	return newFreq
+}
+
 // ----------------------------------------------------------------------------
 // Encoding Functions
 // ----------------------------------------------------------------------------
