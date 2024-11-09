@@ -12,6 +12,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"runtime"
 	"sort"
 	"strconv"
 	"strings"
@@ -45,13 +46,22 @@ func TrackLoadTime(done <-chan bool, work string) {
 		select {
 		case <-done:
 			ticker.Stop()
-			fmt.Fprintf(os.Stderr, "[-] Total %s Time: %02d:%02d:%02d.\n", work, int(time.Since(start).Hours()), int(time.Since(start).Minutes())%60, int(time.Since(start).Seconds())%60)
+			memUsage := GetMemoryUsage()
+			fmt.Fprintf(os.Stderr, "[-] Total %s Time: %02d:%02d:%02d. Memory Usage: %.2f MB.\n", work, int(time.Since(start).Hours()), int(time.Since(start).Minutes())%60, int(time.Since(start).Seconds())%60, memUsage)
 			return
 		case t := <-ticker.C:
 			elapsed := t.Sub(start)
-			fmt.Fprintf(os.Stderr, "[-] Please wait. Elapsed: %02d:%02d:%02d.%03d.\n", int(t.Sub(start).Hours()), int(t.Sub(start).Minutes())%60, int(t.Sub(start).Seconds())%60, elapsed.Milliseconds()%1000)
+			memUsage := GetMemoryUsage()
+			fmt.Fprintf(os.Stderr, "[-] Please wait. Elapsed: %02d:%02d:%02d.%03d. Memory Usage: %.2f MB.\n", int(t.Sub(start).Hours()), int(t.Sub(start).Minutes())%60, int(t.Sub(start).Seconds())%60, elapsed.Milliseconds()%1000, memUsage)
 		}
 	}
+}
+
+// GetMemoryUsage returns the current memory usage in megabytes
+func GetMemoryUsage() float64 {
+	var m runtime.MemStats
+	runtime.ReadMemStats(&m)
+	return float64(m.Alloc) / 1024 / 1024
 }
 
 // ReadFilesToMap reads the contents of the multiple files and returns a map of words

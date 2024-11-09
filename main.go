@@ -110,7 +110,7 @@ func main() {
 
 	// Bypass map creation if requested
 	if *bypassMap {
-		fmt.Fprintf(os.Stderr, "[*] Bypassing map creation and using standard output as primary output. Options are disabled.\n")
+		fmt.Fprintf(os.Stderr, "[*] Bypassing map creation and using standard output as primary output. Options are disabled. This does not bypass the initial input memory usage.\n")
 	}
 
 	// Print debug information if requested
