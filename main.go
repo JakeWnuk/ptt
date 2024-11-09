@@ -128,6 +128,7 @@ func main() {
 	// Read files if provided
 	if retain != nil || remove != nil || readFiles != nil || transformationFiles != nil {
 		fmt.Fprintf(os.Stderr, "[*] Reading files for input.\n")
+		utils.TrackLoadTime()
 	}
 
 	if retain != nil {

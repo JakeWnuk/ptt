@@ -30,6 +30,40 @@ import (
 // Loading and Processing Functions
 // ----------------------------------------------------------------------------
 
+// TrackLoadTime tracks the time it takes to load the input and prints the time
+// to stderr every 5 minutes
+//
+// Args:
+// None
+//
+// Returns:
+// None
+func TrackLoadTime() {
+	start := time.Now()
+	ticker := time.NewTicker(5 * time.Minute)
+	defer ticker.Stop()
+
+	go func() {
+		for range ticker.C {
+			elapsed := time.Since(start)
+			fmt.Fprintf(os.Stderr, "[-] Loading. Elapsed Time: %v.\n", elapsed)
+		}
+	}()
+}
+
+// TrackElapsedTime tracks the elapsed time for processing and prints the time
+// to stderr every 5 minutes
+//
+// Args:
+//
+// mode (string): The processing mode
+// inputLength (int): The length of the input
+// transformationFileLength (int): The length of the transformation file
+// bypass (bool): A flag to bypass tracking the elapsed time
+//
+// Returns:
+//
+// None
 func TrackElapsedTime(mode string, inputLength int, transformationFileLength int, bypass bool) {
 	start := time.Now()
 	ticker := time.NewTicker(5 * time.Minute)
