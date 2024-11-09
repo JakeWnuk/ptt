@@ -48,7 +48,8 @@ func TrackLoadTime(done <-chan bool, work string) {
 			fmt.Fprintf(os.Stderr, "[-] Total %s Time: %02d:%02d:%02d.\n", work, int(time.Since(start).Hours()), int(time.Since(start).Minutes())%60, int(time.Since(start).Seconds())%60)
 			return
 		case t := <-ticker.C:
-			fmt.Fprintf(os.Stderr, "[-] Please wait. Elapsed: %02d:%02d:%02d.\n", int(t.Sub(start).Hours()), int(t.Sub(start).Minutes())%60, int(t.Sub(start).Seconds())%60)
+			elapsed := t.Sub(start)
+			fmt.Fprintf(os.Stderr, "[-] Please wait. Elapsed: %02d:%02d:%02d.%03d.\n", int(t.Sub(start).Hours()), int(t.Sub(start).Minutes())%60, int(t.Sub(start).Seconds())%60, elapsed.Milliseconds()%1000)
 		}
 	}
 }
