@@ -38,15 +38,22 @@ import (
 //
 // Returns:
 // None
-func TrackLoadTime() {
+func TrackLoadTime(done chan bool) {
+	fmt.Fprintln(os.Stderr, "[*] TrackLoadTime started")
 	start := time.Now()
-	ticker := time.NewTicker(5 * time.Minute)
+	ticker := time.NewTicker(1 * time.Second)
 	defer ticker.Stop()
 
 	go func() {
-		for range ticker.C {
-			elapsed := time.Since(start)
-			fmt.Fprintf(os.Stderr, "[-] Loading. Elapsed Time: %v.\n", elapsed)
+		for {
+			select {
+			case <-ticker.C:
+				elapsed := time.Since(start)
+				fmt.Fprintf(os.Stderr, "[-] Loading. Elapsed Time: %v.\n", elapsed)
+			case <-done:
+				fmt.Fprintln(os.Stderr, "[*] TrackLoadTime stopped")
+				return
+			}
 		}
 	}()
 }

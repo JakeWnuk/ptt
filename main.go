@@ -124,11 +124,12 @@ func main() {
 	var removeMap map[string]int
 	var readFilesMap map[string]int
 	var transformationFilesMap map[string]int
+	done := make(chan bool)
+	go utils.TrackLoadTime(done)
 
 	// Read files if provided
 	if retain != nil || remove != nil || readFiles != nil || transformationFiles != nil {
 		fmt.Fprintf(os.Stderr, "[*] Reading files for input.\n")
-		go utils.TrackLoadTime()
 	}
 
 	if retain != nil {
@@ -171,6 +172,8 @@ func main() {
 		primaryMap = utils.CombineMaps(primaryMap, readFilesMap, readURLsMap)
 	}
 
+	done <- true
+	close(done)
 	fmt.Fprintf(os.Stderr, "[*] All input loaded.\n")
 
 	// Apply transformation if provided
