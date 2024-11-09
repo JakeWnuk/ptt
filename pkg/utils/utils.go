@@ -46,8 +46,7 @@ func TrackLoadTime(done <-chan bool, work string) {
 		select {
 		case <-done:
 			ticker.Stop()
-			memUsage := GetMemoryUsage()
-			fmt.Fprintf(os.Stderr, "[-] Total %s Time: %02d:%02d:%02d. Memory Usage: %.2f MB.\n", work, int(time.Since(start).Hours()), int(time.Since(start).Minutes())%60, int(time.Since(start).Seconds())%60, memUsage)
+			fmt.Fprintf(os.Stderr, "[-] Total %s Time: %02d:%02d:%02d.\n", work, int(time.Since(start).Hours()), int(time.Since(start).Minutes())%60, int(time.Since(start).Seconds())%60)
 			return
 		case t := <-ticker.C:
 			elapsed := t.Sub(start)
