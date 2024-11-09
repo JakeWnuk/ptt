@@ -124,8 +124,8 @@ func main() {
 	var removeMap map[string]int
 	var readFilesMap map[string]int
 	var transformationFilesMap map[string]int
-	done := make(chan bool)
-	go utils.TrackLoadTime(done)
+	doneLoad := make(chan bool)
+	go utils.TrackLoadTime(doneLoad, "Load")
 
 	// Read files if provided
 	if retain != nil || remove != nil || readFiles != nil || transformationFiles != nil {
@@ -172,9 +172,13 @@ func main() {
 		primaryMap = utils.CombineMaps(primaryMap, readFilesMap, readURLsMap)
 	}
 
-	done <- true
-	close(done)
+	doneLoad <- true
+	close(doneLoad)
 	fmt.Fprintf(os.Stderr, "[*] All input loaded.\n")
+	fmt.Fprintf(os.Stderr, "[*] Starting Processing.\n")
+
+	doneProcess := make(chan bool)
+	go utils.TrackLoadTime(doneProcess, "Processing")
 
 	// Apply transformation if provided
 	if *transformation != "" && templateFiles == nil {
@@ -202,6 +206,9 @@ func main() {
 		fmt.Fprintf(os.Stderr, "[!] Transformation and template flags cannot be used together.\n")
 		return
 	}
+
+	doneProcess <- true
+	close(doneProcess)
 
 	// Print ignore case if provided
 	if *ignoreCase {

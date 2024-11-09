@@ -40,8 +40,6 @@ import (
 //	(map[string]int): A map of transformed values
 func TransformationController(input map[string]int, mode string, startingIndex int, endingIndex int, verbose bool, replacementMask string, transformationFilesMap map[string]int, bypass bool, debug int, wordRangeStart int, wordRangeEnd int) (output map[string]int) {
 
-	go utils.TrackElapsedTime(mode, len(input), len(transformationFilesMap), bypass)
-
 	functionDebug := false
 	if debug > 1 {
 		functionDebug = true

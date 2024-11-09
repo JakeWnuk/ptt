@@ -31,57 +31,25 @@ import (
 // ----------------------------------------------------------------------------
 
 // TrackLoadTime tracks the time it takes to load the input and prints the time
-// to stderr every 5 minutes
 //
 // Args:
 // None
 //
 // Returns:
 // None
-func TrackLoadTime(done chan bool) {
-	fmt.Fprintln(os.Stderr, "[*] TrackLoadTime started")
+func TrackLoadTime(done <-chan bool, work string) {
 	start := time.Now()
-	ticker := time.NewTicker(1 * time.Second)
-	defer ticker.Stop()
-
-	go func() {
-		for {
-			select {
-			case <-ticker.C:
-				elapsed := time.Since(start)
-				fmt.Fprintf(os.Stderr, "[-] Loading. Elapsed Time: %v.\n", elapsed)
-			case <-done:
-				fmt.Fprintln(os.Stderr, "[*] TrackLoadTime stopped")
-				return
-			}
+	ticker := time.NewTicker(30 * time.Second)
+	for {
+		select {
+		case <-done:
+			ticker.Stop()
+			fmt.Fprintf(os.Stderr, "[-] Total %s Time: %s\n", work, time.Since(start))
+			return
+		case t := <-ticker.C:
+			fmt.Fprintf(os.Stderr, "[-] Please wait... %s\n", t.Sub(start))
 		}
-	}()
-}
-
-// TrackElapsedTime tracks the elapsed time for processing and prints the time
-// to stderr every 5 minutes
-//
-// Args:
-//
-// mode (string): The processing mode
-// inputLength (int): The length of the input
-// transformationFileLength (int): The length of the transformation file
-// bypass (bool): A flag to bypass tracking the elapsed time
-//
-// Returns:
-//
-// None
-func TrackElapsedTime(mode string, inputLength int, transformationFileLength int, bypass bool) {
-	start := time.Now()
-	ticker := time.NewTicker(5 * time.Minute)
-	defer ticker.Stop()
-
-	go func() {
-		for range ticker.C {
-			elapsed := time.Since(start)
-			fmt.Fprintf(os.Stderr, "[-] Processing. Processing Mode: %s. Input Length: %d. Transformation File Length: %d. Elapsed Time: %v.\n", mode, inputLength, transformationFileLength, elapsed)
-		}
-	}()
+	}
 }
 
 // ReadFilesToMap reads the contents of the multiple files and returns a map of words
