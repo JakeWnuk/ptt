@@ -33,7 +33,8 @@ import (
 // TrackLoadTime tracks the time it takes to load the input and prints the time
 //
 // Args:
-// None
+// done (chan bool): channel to use to track tasks
+// work (string): string used in status printing
 //
 // Returns:
 // None
@@ -44,10 +45,10 @@ func TrackLoadTime(done <-chan bool, work string) {
 		select {
 		case <-done:
 			ticker.Stop()
-			fmt.Fprintf(os.Stderr, "[-] Total %s Time: %s\n", work, time.Since(start))
+			fmt.Fprintf(os.Stderr, "[-] Total %s Time: %02d:%02d:%02d.\n", work, int(time.Since(start).Hours()), int(time.Since(start).Minutes())%60, int(time.Since(start).Seconds())%60)
 			return
 		case t := <-ticker.C:
-			fmt.Fprintf(os.Stderr, "[-] Please wait... %s\n", t.Sub(start))
+			fmt.Fprintf(os.Stderr, "[-] Please wait. Elapsed: %02d:%02d:%02d.\n", int(t.Sub(start).Hours()), int(t.Sub(start).Minutes())%60, int(t.Sub(start).Seconds())%60)
 		}
 	}
 }
