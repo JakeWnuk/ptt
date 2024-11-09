@@ -3,9 +3,9 @@
         "StartIndex": 0,
         "EndIndex": 0,
         "Verbose": false,
-        "ReplacementMask": "uldsb",
+        "ReplacementMask": "ult",
         "Bypass": false,
-        "TransformationMode": "append",
+        "TransformationMode": "mask-pop",
         "WordRangeStart": 0,
         "WordRangeEnd": 0
     },
@@ -13,9 +13,9 @@
         "StartIndex": 0,
         "EndIndex": 0,
         "Verbose": false,
-        "ReplacementMask": "uldsb",
+        "ReplacementMask": "dsb",
         "Bypass": false,
-        "TransformationMode": "append-remove",
+        "TransformationMode": "mask-pop",
         "WordRangeStart": 0,
         "WordRangeEnd": 0
     },
@@ -23,9 +23,19 @@
         "StartIndex": 0,
         "EndIndex": 0,
         "Verbose": false,
-        "ReplacementMask": "uldsb",
+        "ReplacementMask": "ul",
         "Bypass": false,
-        "TransformationMode": "append-shift",
+        "TransformationMode": "mask-remove",
+        "WordRangeStart": 0,
+        "WordRangeEnd": 0
+    },
+    {
+        "StartIndex": 0,
+        "EndIndex": 0,
+        "Verbose": false,
+        "ReplacementMask": "dsb",
+        "Bypass": false,
+        "TransformationMode": "mask-remove",
         "WordRangeStart": 0,
         "WordRangeEnd": 0
     }

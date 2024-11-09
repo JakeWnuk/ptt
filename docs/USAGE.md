@@ -1,5 +1,5 @@
 # Password Transformation Tool (PTT) Usage Guide
-> Version 0.3.8
+> Version 0.4.0
 ## Table of Contents
 - [Introduction](#introduction)
 - [Installation](#installation)
@@ -256,7 +256,7 @@ Where `<mask_characters>` can be any of the following:
 - `b`: Byte characters
 - Multiple characters can be combined to create a mask.
 
-The default value is `uldsb` for all characters. The `-v` flag is optional and, if provided, will print the length of the original string and its character complexity. The format will be `:length:complexity:mask-keyspace` appended to the end of the output. The mask keyspace is the number of possible combinations for the masked portion of the string.
+The default value is `uldsb` for all characters. The `-v` flag is optional and, if provided, will print the length of the original string, the length, the complexity, and the remaining mask keyspace. The format will be `:length:complexity:mask-keyspace` appended to the end of the output. The mask keyspace is the number of possible combinations for the masked portion of the string.
 ```
 $ echo 'HelloWorld!I<3ThePasswordTransformationToolPr0j3ct' | go run . -t mask -rm ds -v
 [*] All input loaded.
@@ -276,9 +276,9 @@ ptt -f <input_file> -t mask-remove -rm <mask_characters>
 ```
 Where `<mask_characters>` is the mask to remove from the string. The output will be the string with the characters removed.
 ### Creating Retain/Partial Masks
-Retain masks or partial masks can be created to retain only certain keywords in a string. The syntax to create a retain mask is as follows:
+Retain masks or partial masks can be created to retain only certain keywords in a string. The `-v` flag is optional and, if provided, will print the length of the original string, the length, the complexity, and the remaining mask keyspace. The syntax to create a retain mask is as follows:
 ```
-ptt -f <input_file> -t mask-retain -rm <mask_characters> -tf <keep_file>
+ptt -f <input_file> -t mask-retain -rm <mask_characters> -tf <keep_file> -v
 ```
 Where `<mask_characters>` is the mask to retain and `<keep_file>` is the file containing the keywords to retain. The output will be the mask with only the keywords retained.
 

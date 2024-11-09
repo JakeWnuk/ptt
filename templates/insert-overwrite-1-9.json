@@ -1,21 +1,21 @@
 [
     {
-        "StartIndex": 0,
-        "EndIndex": 0,
+        "StartIndex": 1,
+        "EndIndex": 9,
         "Verbose": false,
         "ReplacementMask": "uldsb",
         "Bypass": false,
-        "TransformationMode": "swap",
+        "TransformationMode": "rule-insert",
         "WordRangeStart": 0,
         "WordRangeEnd": 0
     },
     {
-        "StartIndex": 0,
-        "EndIndex": 0,
+        "StartIndex": 1,
+        "EndIndex": 9,
         "Verbose": false,
         "ReplacementMask": "uldsb",
         "Bypass": false,
-        "TransformationMode": "encode",
+        "TransformationMode": "rule-overwrite",
         "WordRangeStart": 0,
         "WordRangeEnd": 0
     }
