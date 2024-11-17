@@ -258,7 +258,7 @@ Where `<mask_characters>` can be any of the following:
 
 The default value is `uldsb` for all characters. The `-v` flag is optional and, if provided, will print the length of the original string, the length, the complexity, and the remaining mask keyspace. The format will be `:length:complexity:mask-keyspace` appended to the end of the output. The mask keyspace is the number of possible combinations for the masked portion of the string.
 ```
-$ echo 'HelloWorld!I<3ThePasswordTransformationToolPr0j3ct' | go run . -t mask -rm ds -v
+$ echo 'HelloWorld!I<3ThePasswordTransformationToolPr0j3ct' | ptt -t mask -rm ds -v
 [*] All input loaded.
 [*] Task complete with 1 unique results.
 1 HelloWorld?sI?s?dThePasswordTransformationToolPr?dj?dct:50:4:94
