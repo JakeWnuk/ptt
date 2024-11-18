@@ -293,10 +293,10 @@ func CombineMaps(maps ...map[string]int) map[string]int {
 func ProcessURL(url string, ch chan<- string, wg *sync.WaitGroup, parsingMode int, debugMode int, sleepOnStart bool) {
 	defer wg.Done()
 	var resp *http.Response
-	throttleInterval := 30
+	throttleInterval := 90
 	source := rand.NewSource(time.Now().UnixNano())
 	r := rand.New(source)
-	const maxRetries = 3
+	const maxRetries = 5
 	userAgents := []string{
 		"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3",
 		"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0.3 Safari/605.1.15",
@@ -342,13 +342,13 @@ func ProcessURL(url string, ch chan<- string, wg *sync.WaitGroup, parsingMode in
 
 		defer resp.Body.Close()
 
-		fmt.Fprintf(os.Stderr, "[+] Requested %s. Attempt [%d/%d]. Response Code: %s. Content-Type: %s. \n", url, attempts, maxRetries, resp.Status, resp.Header.Get("Content-Type"))
-
 		// Check the response code for throttling
 		if resp.StatusCode == http.StatusTooManyRequests {
-			fmt.Fprintf(os.Stderr, "[!] Throttling detected. Waiting %d seconds before retrying.\n", throttleInterval)
 			throttleInterval += throttleInterval
 			time.Sleep(time.Second * time.Duration(throttleInterval))
+			fmt.Fprintf(os.Stderr, "[!] Requested %s. Attempt [%d/%d]. Response Code: %s. Waiting %d seconds before retrying. \n", url, attempts, maxRetries, resp.Status, throttleInterval)
+		} else {
+			fmt.Fprintf(os.Stderr, "[+] Requested %s. Attempt [%d/%d]. Response Code: %s. Content-Type: %s. \n", url, attempts, maxRetries, resp.Status, resp.Header.Get("Content-Type"))
 		}
 
 		if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusNotFound {
