@@ -51,7 +51,7 @@ func TrackLoadTime(done <-chan bool, work string) {
 		case t := <-ticker.C:
 			elapsed := t.Sub(start)
 			memUsage := GetMemoryUsage()
-			fmt.Fprintf(os.Stderr, "[-] Please wait. Elapsed: %02d:%02d:%02d.%03d. Memory Usage: %.2f MB.\n", int(t.Sub(start).Hours()), int(t.Sub(start).Minutes())%60, int(t.Sub(start).Seconds())%60, elapsed.Milliseconds()%1000, memUsage)
+			fmt.Fprintf(os.Stderr, "[-] Please wait loading. Elapsed: %02d:%02d:%02d.%03d. Loading Memory Usage: %.2f MB.\n", int(t.Sub(start).Hours()), int(t.Sub(start).Minutes())%60, int(t.Sub(start).Seconds())%60, elapsed.Milliseconds()%1000, memUsage)
 		}
 	}
 }
