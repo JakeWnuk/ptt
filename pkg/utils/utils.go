@@ -296,7 +296,7 @@ func ProcessURL(url string, ch chan<- string, wg *sync.WaitGroup, parsingMode in
 	throttleInterval := 90
 	source := rand.NewSource(time.Now().UnixNano())
 	r := rand.New(source)
-	const maxRetries = 5
+	const maxRetries = 3
 	userAgents := []string{
 		"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3",
 		"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0.3 Safari/605.1.15",
@@ -344,8 +344,8 @@ func ProcessURL(url string, ch chan<- string, wg *sync.WaitGroup, parsingMode in
 
 		// Check the response code for throttling
 		if resp.StatusCode == http.StatusTooManyRequests {
-			throttleInterval += throttleInterval
-			time.Sleep(time.Second * time.Duration(throttleInterval))
+			throttleInterval += 30
+			time.Sleep(time.Second * time.Duration(throttleInterval*(r.Intn(3)+1)))
 			fmt.Fprintf(os.Stderr, "[!] Requested %s. Attempt [%d/%d]. Response Code: %s. Waiting %d seconds before retrying. \n", url, attempts, maxRetries, resp.Status, throttleInterval)
 		} else {
 			fmt.Fprintf(os.Stderr, "[+] Requested %s. Attempt [%d/%d]. Response Code: %s. Content-Type: %s. \n", url, attempts, maxRetries, resp.Status, resp.Header.Get("Content-Type"))
