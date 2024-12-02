@@ -15,7 +15,7 @@ import (
 	"github.com/jakewnuk/ptt/pkg/utils"
 )
 
-var version = "0.4.0"
+var version = "0.4.1"
 var wg sync.WaitGroup
 var mutex = &sync.Mutex{}
 var retain models.FileArgumentFlag
@@ -67,6 +67,8 @@ func main() {
 			"substring -i [index]":                  "Transforms input by extracting substrings starting at index and ending at index.",
 			"replace-all -tf [file]":                "Transforms input by replacing all strings with all matches from a ':' separated file.",
 			"regram -w [words]":                     "Transforms input by 'regramming' sentences into new n-grams with a given number of words.",
+			"rule-apply -tf [file]":                 "Transforms input by applying rules to strings using the HCRE library.",
+			"rule-simplify":                         "Transforms input by simplifying rules to efficient equivalents.",
 		}
 
 		// Sort and print transformation modes
@@ -96,7 +98,7 @@ func main() {
 	bypassMap := flag.Bool("b", false, "Bypass map creation and use stdout as primary output. Disables some options.")
 	debugMode := flag.Int("d", 0, "Enable debug mode with verbosity levels [0-2].")
 	URLParsingMode := flag.Int("p", 0, "Change parsing mode for URL input. [0 = Strict, 1 = Permissive, 2 = Maximum].")
-	ignoreCase := flag.Bool("ic", false, "Ignore case when processing output and converts to lowercase.")
+	ignoreCase := flag.Bool("ic", false, "Ignore case when processing output and converts all output to lowercase.")
 	flag.Var(&retain, "k", "Only keep items in a file.")
 	flag.Var(&remove, "r", "Only keep items not in a file.")
 	flag.Var(&readFiles, "f", "Read additional files for input.")

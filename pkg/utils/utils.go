@@ -51,7 +51,7 @@ func TrackLoadTime(done <-chan bool, work string) {
 		case t := <-ticker.C:
 			elapsed := t.Sub(start)
 			memUsage := GetMemoryUsage()
-			fmt.Fprintf(os.Stderr, "[-] Please wait. Elapsed: %02d:%02d:%02d.%03d. Memory Usage: %.2f MB.\n", int(t.Sub(start).Hours()), int(t.Sub(start).Minutes())%60, int(t.Sub(start).Seconds())%60, elapsed.Milliseconds()%1000, memUsage)
+			fmt.Fprintf(os.Stderr, "[-] Please wait loading. Elapsed: %02d:%02d:%02d.%03d. Memory Usage: %.2f MB.\n", int(t.Sub(start).Hours()), int(t.Sub(start).Minutes())%60, int(t.Sub(start).Seconds())%60, elapsed.Milliseconds()%1000, memUsage)
 		}
 	}
 }
@@ -213,23 +213,9 @@ func ReadURLsToMap(urls []string, parsingMode int, debugMode int) (map[string]in
 		}
 	}()
 
-	prevURL := ""
-	sleepOnStart := false
+	sleepOnStart := true
 	for _, iURL := range urls {
 		if IsValidURL(iURL) {
-
-			parsedURL, err := url.Parse(iURL)
-			if err != nil {
-				fmt.Println("[!] Error parsing URL:", err)
-				continue
-			}
-			if parsedURL.Host == prevURL {
-				sleepOnStart = true
-			} else {
-				sleepOnStart = false
-			}
-			prevURL = parsedURL.Host
-
 			wg.Add(1)
 			go ProcessURL(iURL, ch, &wg, parsingMode, debugMode, sleepOnStart)
 
@@ -306,9 +292,8 @@ func CombineMaps(maps ...map[string]int) map[string]int {
 //	None
 func ProcessURL(url string, ch chan<- string, wg *sync.WaitGroup, parsingMode int, debugMode int, sleepOnStart bool) {
 	defer wg.Done()
-
 	var resp *http.Response
-	throttleInterval := 30
+	throttleInterval := 90
 	source := rand.NewSource(time.Now().UnixNano())
 	r := rand.New(source)
 	const maxRetries = 3
@@ -328,7 +313,7 @@ func ProcessURL(url string, ch chan<- string, wg *sync.WaitGroup, parsingMode in
 	}
 
 	if sleepOnStart {
-		time.Sleep(time.Second * time.Duration(throttleInterval) * time.Duration(r.Intn(10)))
+		time.Sleep(time.Second * time.Duration(r.Intn(throttleInterval)))
 	}
 
 	for attempts := 0; attempts <= maxRetries; attempts++ {
@@ -359,15 +344,11 @@ func ProcessURL(url string, ch chan<- string, wg *sync.WaitGroup, parsingMode in
 
 		// Check the response code for throttling
 		if resp.StatusCode == http.StatusTooManyRequests {
-			fmt.Fprintf(os.Stderr, "[!] Throttling detected. Waiting %d seconds before retrying.\n", throttleInterval)
-			time.Sleep(time.Second * time.Duration(throttleInterval))
-			throttleInterval++
-		}
-
-		fmt.Fprintf(os.Stderr, "[+] Requested %s. Attempt [%d/%d]. Response Code: %s. Content-Type: %s. \n", url, attempts, maxRetries, resp.Status, resp.Header.Get("Content-Type"))
-		if resp.StatusCode == http.StatusTooManyRequests {
-			time.Sleep(time.Second * time.Duration(throttleInterval) * time.Duration(r.Intn(10)))
-			continue
+			throttleInterval += 30
+			time.Sleep(time.Second * time.Duration(throttleInterval*(r.Intn(3)+1)))
+			fmt.Fprintf(os.Stderr, "[!] Requested %s. Attempt [%d/%d]. Response Code: %s. Waiting %d seconds before retrying. \n", url, attempts, maxRetries, resp.Status, throttleInterval)
+		} else {
+			fmt.Fprintf(os.Stderr, "[+] Requested %s. Attempt [%d/%d]. Response Code: %s. Content-Type: %s. \n", url, attempts, maxRetries, resp.Status, resp.Header.Get("Content-Type"))
 		}
 
 		if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusNotFound {
@@ -691,7 +672,6 @@ func ReadJSONToArray(fs models.FileSystem, filenames []string) []models.Template
 func ProcessURLFile(filePath string, ch chan<- string, wg *sync.WaitGroup, parsingMode int, debugMode int) {
 	defer wg.Done()
 	sleepOnStart := false
-	prevURL := ""
 
 	file, err := os.Open(filePath)
 	if err != nil {
@@ -704,19 +684,6 @@ func ProcessURLFile(filePath string, ch chan<- string, wg *sync.WaitGroup, parsi
 	for scanner.Scan() {
 		line := scanner.Text()
 		if IsValidURL(line) {
-
-			parsedURL, err := url.Parse(line)
-			if err != nil {
-				fmt.Println("[!] Error parsing URL:", err)
-				continue
-			}
-			if parsedURL.Host == prevURL {
-				sleepOnStart = true
-			} else {
-				sleepOnStart = false
-			}
-			prevURL = parsedURL.Host
-
 			wg.Add(1)
 			go ProcessURL(line, ch, wg, parsingMode, debugMode, sleepOnStart)
 		} else {

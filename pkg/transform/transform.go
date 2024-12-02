@@ -138,6 +138,16 @@ func TransformationController(input map[string]int, mode string, startingIndex i
 			os.Exit(1)
 		}
 		output = GenerateNGramMap(input, wordRangeStart, wordRangeEnd, bypass, functionDebug)
+	case "rule-apply", "apply":
+		fmt.Fprintf(os.Stderr, "[*] This transformation mode expects a rule file to apply.\n")
+		if len(transformationFilesMap) == 0 {
+			fmt.Fprintf(os.Stderr, "[!] Apply operations require use of one or more -tf flags to specify one or more files.\n")
+			os.Exit(1)
+		}
+		output = rule.ApplyRulesHCRE(input, transformationFilesMap, bypass, functionDebug)
+	case "rule-simplify", "simplify":
+		fmt.Fprintf(os.Stderr, "[*] This transformation mode expects rule input to simplify.\n")
+		output = rule.SimplifyRules(input, bypass, functionDebug)
 	default:
 		output = input
 	}

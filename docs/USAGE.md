@@ -1,5 +1,5 @@
 # Password Transformation Tool (PTT) Usage Guide
-> Version 0.4.0
+> Version 0.4.1
 ## Table of Contents
 - [Introduction](#introduction)
 - [Installation](#installation)
@@ -27,6 +27,8 @@
   - [Hex and Dehex](#hex-and-dehex)
   - [Substrings](#substrings)
   - [Regram](#regram)
+  - [Rule Application](#rule-application)
+  - [Rule Simplification](#rule-simplification)
 
 ## Introduction
 The Password Transformation Tool (PTT) is a command-line utility that allows users to transform passwords using various methods. This guide will provide instructions on how to install and use the tool.
@@ -110,7 +112,7 @@ There are some additional notes when importing data and getting started:
 - `ptt -n 50`: Show verbose statistics output with a maximum of 50 items.
 - `ptt -o [FILE]`: Show output and save JSON output to a file.
 - `ptt -md`: Show output as a Markdown table.
-- `ptt -ic`: Ignore case when creating output.
+- `ptt -ic`: Ignore case when creating output and convert to lowercase.
 - These options are available for all transformations.
 #### Rockyou Examples:
 `ptt -f rockyou.txt -t pop -l 4-5`:
@@ -499,4 +501,17 @@ ptt -f <input_file> -t regram -w <word_count>
 ```
 The `regram` transformation will generate new n-grams from the input by combining words from the input. The number of words to use in the n-gram is specified by the `-w` flag. The output will be the new n-grams generated from the input.
 
+### Rule Application
+This mode allows applying rules to the input. The syntax is as follows:
+```
+ptt -f <input_file> -t rule-apply -tf <rule_file>
+```
+The `rule-apply` transformation will apply rules from the rule file to the input. The rule file should contain the rules to be applied to the input. The output will be the input with the rules applied. This feature is enabled by the work done on the [HCRE](https://git.launchpad.net/hcre/tree/README.md) project. Please consider visiting the project for more information and supporting the author.
 
+### Rule Simplification
+This mode allows simplifying rules from the input. The syntax is as follows:
+```
+ptt -f <input_file> -t rule-simplify
+```
+The `rule-simplify` transformation will simplify rules from the input. The output will be the simplified rules equivalent to the input. This feature is enabled by the work done on the [HCRE](https://git.launchpad.net/hcre/tree/README.md) project. Please consider visiting the project for more information and supporting the author.
+```
