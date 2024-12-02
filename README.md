@@ -72,7 +72,7 @@ These modify or filter the transformation mode.
   -i value
         Starting index for transformations if applicable. Accepts ranges separated by '-'.
   -ic
-        Ignore case when processing output and converts to lowercase.
+        Ignore case when processing output and converts all output to lowercase.
   -k value
         Only keep items in a file.
   -l value

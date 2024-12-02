@@ -112,7 +112,7 @@ There are some additional notes when importing data and getting started:
 - `ptt -n 50`: Show verbose statistics output with a maximum of 50 items.
 - `ptt -o [FILE]`: Show output and save JSON output to a file.
 - `ptt -md`: Show output as a Markdown table.
-- `ptt -ic`: Ignore case when creating output.
+- `ptt -ic`: Ignore case when creating output and convert to lowercase.
 - These options are available for all transformations.
 #### Rockyou Examples:
 `ptt -f rockyou.txt -t pop -l 4-5`:
