@@ -153,7 +153,7 @@ These create or alter based on the selected mode.
   -t rule-prepend-toggle
         Transforms input by creating prepend-toggle rules.
   -t rule-simplify
-        Transforms input by simplifying rules to efficient equivalents.
+        Transforms input by simplifying rules to efficient equivalents using the HCRE library.
   -t rule-toggle -i [index]
         Transforms input by creating toggle rules starting at index.
   -t substring -i [index]

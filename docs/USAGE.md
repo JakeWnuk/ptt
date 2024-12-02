@@ -506,12 +506,12 @@ This mode allows applying rules to the input. The syntax is as follows:
 ```
 ptt -f <input_file> -t rule-apply -tf <rule_file>
 ```
-The `rule-apply` transformation will apply rules from the rule file to the input. The rule file should contain the rules to be applied to the input. The output will be the input with the rules applied. This feature is enabled by the work done on the [HCRE](https://git.launchpad.net/hcre/tree/README.md) project. Please consider visiting the project for more information and supporting the author.
+The `rule-apply` transformation will apply rules from the rule file to the input. The rule file should contain the rules to be applied to the input. The output will be the input with the rules applied. This feature is enabled by the work done on the [HCRE](https://git.launchpad.net/hcre/tree/README.md) project. Please consider visiting and supporting the project.
 
 ### Rule Simplification
 This mode allows simplifying rules from the input. The syntax is as follows:
 ```
 ptt -f <input_file> -t rule-simplify
 ```
-The `rule-simplify` transformation will simplify rules from the input. The output will be the simplified rules equivalent to the input. This feature is enabled by the work done on the [HCRE](https://git.launchpad.net/hcre/tree/README.md) project. Please consider visiting the project for more information and supporting the author.
+The `rule-simplify` transformation will simplify rules from the input. The output will be the simplified rules equivalent to the input. This feature is enabled by the work done on the [HCRE](https://git.launchpad.net/hcre/tree/README.md) project. Please consider visiting and supporting the project.
 ```

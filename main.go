@@ -68,7 +68,7 @@ func main() {
 			"replace-all -tf [file]":                "Transforms input by replacing all strings with all matches from a ':' separated file.",
 			"regram -w [words]":                     "Transforms input by 'regramming' sentences into new n-grams with a given number of words.",
 			"rule-apply -tf [file]":                 "Transforms input by applying rules to strings using the HCRE library.",
-			"rule-simplify":                         "Transforms input by simplifying rules to efficient equivalents.",
+			"rule-simplify":                         "Transforms input by simplifying rules to efficient equivalents using the HCRE library.",
 		}
 
 		// Sort and print transformation modes
