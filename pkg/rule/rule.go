@@ -10,6 +10,7 @@ import (
 	"unicode"
 
 	"github.com/jakewnuk/ptt/pkg/utils"
+	"launchpad.net/hcre"
 )
 
 // ----------------------------------------------------------------------------
@@ -468,6 +469,82 @@ func ToggleRules(items map[string]int, index string, end string, bypass bool, de
 		}
 
 		i++
+	}
+	return returnMap
+}
+
+// ApplyRulesHCRE uses the HCRE library to apply rules to a map of items
+// and returns the results
+//
+// Args:
+// items (map[string]int): Items to use in the operation
+// rules (map[string]int): Rules to use in the operation
+// bypass (bool): If true, the map is not used for output or filtering
+// debug (bool): If true, print additional debug information to stderr
+//
+// Returns:
+// returnMap (map[string]int): Map of items to return
+func ApplyRulesHCRE(items map[string]int, rules map[string]int, bypass bool, debug bool) (returnMap map[string]int) {
+	returnMap = make(map[string]int)
+	for key, value := range items {
+		for rule, _ := range rules {
+
+			rr, err := hcre.Compile(rule)
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "[!] Error: %s\n", err)
+				os.Exit(1)
+			}
+			applyRule := rr.Simplify().Apply([]byte(key))
+
+			if debug {
+				fmt.Fprintf(os.Stderr, "[?] ApplyRulesHCRE:\n")
+				fmt.Fprintf(os.Stderr, "Key: %s\n", key)
+				fmt.Fprintf(os.Stderr, "Rule: %s\n", rule)
+				fmt.Fprintf(os.Stderr, "ApplyRule: %s\n", applyRule)
+			}
+
+			if applyRule != nil && !bypass {
+				returnMap[string(applyRule)] = value
+			} else if applyRule != nil && bypass {
+				fmt.Println(string(applyRule))
+			}
+		}
+	}
+	return returnMap
+}
+
+// SimplifyRules simplifies rules by simplifying rules to optimized equivalents
+// using the HCRE library
+//
+// Args:
+// items (map[string]int): Items to use in the operation
+// bypass (bool): If true, the map is not used for output or filtering
+// debug (bool): If true, print additional debug information to stderr
+//
+// Returns:
+// returnMap (map[string]int): Map of items to return
+func SimplifyRules(items map[string]int, bypass bool, debug bool) (returnMap map[string]int) {
+	returnMap = make(map[string]int)
+	for key, value := range items {
+
+		rr, err := hcre.Compile(key)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "[!] Error: %s\n", err)
+			os.Exit(1)
+		}
+		simplifyRule := rr.Simplify().String()
+
+		if debug {
+			fmt.Fprintf(os.Stderr, "[?] SimplifyRules:\n")
+			fmt.Fprintf(os.Stderr, "Key: %s\n", key)
+			fmt.Fprintf(os.Stderr, "SimplifyRule: %s\n", simplifyRule)
+		}
+
+		if simplifyRule != "" && !bypass {
+			returnMap[simplifyRule] = value
+		} else if simplifyRule != "" && bypass {
+			fmt.Println(simplifyRule)
+		}
 	}
 	return returnMap
 }

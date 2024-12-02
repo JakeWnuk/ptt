@@ -67,6 +67,8 @@ func main() {
 			"substring -i [index]":                  "Transforms input by extracting substrings starting at index and ending at index.",
 			"replace-all -tf [file]":                "Transforms input by replacing all strings with all matches from a ':' separated file.",
 			"regram -w [words]":                     "Transforms input by 'regramming' sentences into new n-grams with a given number of words.",
+			"rule-apply -tf [file]":                 "Transforms input by applying rules to strings using the HCRE library.",
+			"rule-simplify":                         "Transforms input by simplifying rules to efficient equivalents.",
 		}
 
 		// Sort and print transformation modes

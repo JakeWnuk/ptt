@@ -24,6 +24,8 @@
 - **Analysis Tools:** Analyze input data with statistics and verbose output.
 - **Template Files:** Use template files to apply multiple transformations and
   operations to input data.
+- **Rule Application & Simplification:** Apply rules to input data and simplify
+  rules for optimization by using the [HCRE](https://git.launchpad.net/hcre/tree/README.md) library.
 
 ## Getting Started:
 
@@ -138,6 +140,8 @@ These create or alter based on the selected mode.
         Transforms input by creating append rules.
   -t rule-append-remove
         Transforms input by creating append-remove rules.
+  -t rule-apply -tf [file]
+        Transforms input by applying rules to strings using the HCRE library.
   -t rule-insert -i [index]
         Transforms input by creating insert rules starting at index.
   -t rule-overwrite -i [index]
@@ -148,6 +152,8 @@ These create or alter based on the selected mode.
         Transforms input by creating prepend-remove rules.
   -t rule-prepend-toggle
         Transforms input by creating prepend-toggle rules.
+  -t rule-simplify
+        Transforms input by simplifying rules to efficient equivalents.
   -t rule-toggle -i [index]
         Transforms input by creating toggle rules starting at index.
   -t substring -i [index]

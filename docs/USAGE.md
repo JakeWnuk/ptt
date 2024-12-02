@@ -27,6 +27,8 @@
   - [Hex and Dehex](#hex-and-dehex)
   - [Substrings](#substrings)
   - [Regram](#regram)
+  - [Rule Application](#rule-application)
+  - [Rule Simplification](#rule-simplification)
 
 ## Introduction
 The Password Transformation Tool (PTT) is a command-line utility that allows users to transform passwords using various methods. This guide will provide instructions on how to install and use the tool.
@@ -499,4 +501,17 @@ ptt -f <input_file> -t regram -w <word_count>
 ```
 The `regram` transformation will generate new n-grams from the input by combining words from the input. The number of words to use in the n-gram is specified by the `-w` flag. The output will be the new n-grams generated from the input.
 
+### Rule Application
+This mode allows applying rules to the input. The syntax is as follows:
+```
+ptt -f <input_file> -t rule-apply -tf <rule_file>
+```
+The `rule-apply` transformation will apply rules from the rule file to the input. The rule file should contain the rules to be applied to the input. The output will be the input with the rules applied. This feature is enabled by the work done on the [HCRE](https://git.launchpad.net/hcre/tree/README.md) project. Please consider visiting the project for more information and supporting the author.
 
+### Rule Simplification
+This mode allows simplifying rules from the input. The syntax is as follows:
+```
+ptt -f <input_file> -t rule-simplify
+```
+The `rule-simplify` transformation will simplify rules from the input. The output will be the simplified rules equivalent to the input. This feature is enabled by the work done on the [HCRE](https://git.launchpad.net/hcre/tree/README.md) project. Please consider visiting the project for more information and supporting the author.
+```
