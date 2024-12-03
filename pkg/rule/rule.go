@@ -494,7 +494,7 @@ func ApplyRulesHCRE(items map[string]int, rules map[string]int, bypass bool, deb
 				fmt.Fprintf(os.Stderr, "[!] Error: %s\n", err)
 				os.Exit(1)
 			}
-			applyRule := rr.Simplify().Apply([]byte(key))
+			applyRule := rr.Apply([]byte(key))
 
 			if debug {
 				fmt.Fprintf(os.Stderr, "[?] ApplyRulesHCRE:\n")
