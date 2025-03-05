@@ -1,5 +1,5 @@
 # Password Transformation Tool (PTT) Usage Guide
-> Version 0.4.2
+> Version 1.0.0
 ## Table of Contents
 - [Introduction](#introduction)
 - [Installation](#installation)
