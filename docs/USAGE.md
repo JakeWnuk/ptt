@@ -1,5 +1,5 @@
 # Password Transformation Tool (PTT) Usage Guide
-> Version 0.4.1
+> Version 1.0.0
 ## Table of Contents
 - [Introduction](#introduction)
 - [Installation](#installation)
@@ -514,4 +514,3 @@ This mode allows simplifying rules from the input. The syntax is as follows:
 ptt -f <input_file> -t rule-simplify
 ```
 The `rule-simplify` transformation will simplify rules from the input. The output will be the simplified rules equivalent to the input. This feature is enabled by the work done on the [HCRE](https://git.launchpad.net/hcre/tree/README.md) project. Please consider visiting and supporting the project.
-```
