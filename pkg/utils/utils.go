@@ -1,35 +1,16 @@
 package utils
 
-import (
-	"bufio"
-	"fmt"
-	"os"
-	"ptt/pkg/models"
-	"ptt/pkg/transform"
-)
-
-// ReadReturnStandardInput reads from standard input and returns the input back
-// to standard output.
+// ReverseString will return a string in reverse
 //
 // Args:
-// transformationArray (models.MultiString): an array of strings to be
-// used for the transformation modes
+// str (string): Input string to transform
 //
 // Returns:
-// none
-func ReadReturnStandardInput(transformation models.MultiString) {
-	reader := bufio.NewScanner(os.Stdin)
-
-	for reader.Scan() {
-		line := reader.Text()
-
-		for _, operation := range transformation {
-			line = transform.Apply(line, operation)
-		}
-		fmt.Println(line)
+// (string): Transformed string
+func ReverseString(s string) string {
+	runes := []rune(s)
+	for i, j := 0, len(runes)-1; i < j; i, j = i+1, j-1 {
+		runes[i], runes[j] = runes[j], runes[i]
 	}
-
-	if err := reader.Err(); err != nil {
-		fmt.Fprintf(os.Stderr, "Error reading input: %v\n", err)
-	}
+	return string(runes)
 }
