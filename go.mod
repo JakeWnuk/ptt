@@ -1,4 +1,4 @@
-module github.com/jakewnuk/ptt
+module ptt
 
 go 1.24.1
 
