@@ -81,10 +81,9 @@ func ReadReturnStandardInput(transformation models.MultiString) {
 				line = readText
 			}
 		}
-
-		if models.Verbose {
-			utils.PrintStatsToSTDOUT(models.VerboseOutput)
-		}
+	}
+	if models.Verbose {
+		utils.PrintStatsToSTDOUT(models.VerboseOutput)
 	}
 
 	if err := reader.Err(); err != nil {
