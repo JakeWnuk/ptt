@@ -5,6 +5,13 @@ import (
 	"strings"
 )
 
+// ----------------------------------------------------------------------------
+// Global Variables
+// ----------------------------------------------------------------------------
+// These variables are used to store the global state of the application.
+// The intention is to provide a way to define the global state of the
+// application in a structured way.
+
 // DebugMode is a boolean flag to enable or disable debug mode
 var DebugMode bool = false
 
@@ -21,6 +28,14 @@ var MaskReplacer *strings.Replacer
 // Mask is a string flag to specify the mask replacement string
 // for operations
 var GlobalMask string
+
+// WordStart is a string flag to specify the start of the number of words for
+// operations
+var WordStart int
+
+// WordEnd is a string flag to specify the end of the number of words for
+// operations
+var WordEnd int
 
 // ----------------------------------------------------------------------------
 // Argument Flag Models

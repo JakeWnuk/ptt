@@ -11,6 +11,7 @@ import (
 	"ptt/pkg/utils"
 	"ptt/pkg/validation"
 	"strings"
+	"unicode"
 
 	"launchpad.net/hcre"
 )
@@ -44,6 +45,13 @@ func ReadReturnStandardInput(transformation models.MultiString) {
 					line = readText
 				}
 				models.OperationStart = start
+			} else if strings.Contains(operation, "pop") || strings.Contains(operation, "passphrase") || strings.Contains(operation, "regram") || strings.Contains(operation, "swap") {
+				output := Parse(line, operation)
+				for item, _ := range output {
+					if filter.Pass(item) {
+						fmt.Println(item)
+					}
+				}
 			} else {
 				line = Apply(line, operation)
 
@@ -96,6 +104,21 @@ func Apply(input string, transform string) string {
 		return mask.RemoveMaskedCharacters(makeMask(input))
 	default:
 		return ""
+	}
+}
+
+func Parse(input string, transform string) map[string]int {
+	switch transform {
+	case "pop":
+		return maskPop(input)
+	case "passphrase":
+		return makePassphrase(input)
+	case "regram":
+		return makeNGrams(input)
+	case "swap":
+		return map[string]int{}
+	default:
+		return map[string]int{}
 	}
 }
 
@@ -339,4 +362,111 @@ func makeMask(key string) string {
 	}
 
 	return newKey
+}
+
+// maskPop transforms the input string into a map of tokens and their
+// occurrences.
+//
+// Args:
+// input (string): The input string to be transformed.
+//
+// Returns:
+// (map[string]int): A map of tokens and their occurrences.
+func maskPop(input string) map[string]int {
+	result := make(map[string]int)
+	token := ""
+	var lastRuneType rune
+	var runeType rune
+	for _, r := range input {
+		switch {
+		case unicode.IsLower(r):
+			runeType = 'l'
+		case unicode.IsUpper(r):
+			runeType = 'u'
+		case unicode.IsDigit(r):
+			runeType = 'd'
+		// !\"#$%&\\()*+,-./:;<=>?@[\\]^_`{|}~'
+		case strings.ContainsRune("!\"#$%&\\()*+,-./:;<=>?@[\\]^_`{|}~'", r):
+			runeType = 's'
+		default:
+			runeType = 'b'
+		}
+
+		if (lastRuneType != 0 && lastRuneType != runeType) || !strings.ContainsRune(models.GlobalMask, runeType) {
+			if strings.ContainsRune(models.GlobalMask, 't') && lastRuneType == 'u' && runeType == 'l' {
+				// do nothing so the token continues
+			} else if token != "" {
+				result[token]++
+				token = ""
+			}
+		}
+		if strings.ContainsRune(models.GlobalMask, runeType) {
+			token += string(r)
+		}
+		lastRuneType = runeType
+	}
+
+	if models.DebugMode {
+		fmt.Fprintf(os.Stderr, "[?] transform.MaskPop(input):\n")
+		fmt.Fprintf(os.Stderr, "Key: %s\n", input)
+		fmt.Fprintf(os.Stderr, "Token: %s\n", token)
+		fmt.Fprintf(os.Stderr, "Replacement Mask: %s\n", models.GlobalMask)
+	}
+
+	if token != "" {
+		result[token]++
+	}
+	return result
+}
+
+// makePassphrase transforms the input string into a map of passphrases
+// and their occurrences.
+//
+// Args:
+// input (string): The input string to be transformed.
+//
+// Returns:
+// (map[string]int): A map of passphrases and their occurrences.
+func makePassphrase(input string) map[string]int {
+	newMap := make(map[string]int)
+	for i := models.WordStart; i <= models.WordEnd; i++ {
+		newKeyArray := utils.GeneratePassphrase(input, i)
+		for value, newKey := range newKeyArray {
+			if newMap[newKey] == 0 {
+				newMap[newKey] = value
+			} else {
+				newMap[newKey] += value
+			}
+		}
+	}
+
+	return newMap
+}
+
+// makeNGrams transforms the input string into a map of n-grams
+// and their occurrences.
+//
+// Args:
+// input (string): The input string to be transformed.
+//
+// Returns:
+// (map[string]int): A map of n-grams and their occurrences.
+func makeNGrams(input string) map[string]int {
+	newMap := make(map[string]int)
+	for i := models.WordStart; i <= models.WordEnd; i++ {
+		newKeyArray := utils.GenerateNGrams(input, i)
+		for value, newKey := range newKeyArray {
+			newKey = strings.TrimSpace(newKey)
+			newKey = strings.TrimLeft(newKey, ",")
+			newKey = strings.TrimRight(newKey, ",")
+			newKey = strings.TrimLeft(newKey, " ")
+
+			if newMap[newKey] == 0 {
+				newMap[newKey] = value
+			} else {
+				newMap[newKey] += value
+			}
+		}
+	}
+	return newMap
 }
