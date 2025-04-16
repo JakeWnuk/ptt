@@ -6,14 +6,15 @@ import (
 	"bufio"
 	"fmt"
 	"os"
-	"ptt/pkg/filter"
-	"ptt/pkg/mask"
-	"ptt/pkg/models"
-	"ptt/pkg/rule"
-	"ptt/pkg/utils"
 	"sort"
 	"strings"
 	"unicode"
+
+	"github.com/jakewnuk/ptt/pkg/filter"
+	"github.com/jakewnuk/ptt/pkg/mask"
+	"github.com/jakewnuk/ptt/pkg/models"
+	"github.com/jakewnuk/ptt/pkg/rule"
+	"github.com/jakewnuk/ptt/pkg/utils"
 
 	"launchpad.net/hcre"
 )

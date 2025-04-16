@@ -4,10 +4,11 @@ package mask
 import (
 	"fmt"
 	"os"
-	"ptt/pkg/models"
-	"ptt/pkg/validation"
 	"strings"
 	"unicode"
+
+	"github.com/jakewnuk/ptt/pkg/models"
+	"github.com/jakewnuk/ptt/pkg/validation"
 )
 
 // ConstructReplacements create an array mapping which characters to replace

@@ -3,9 +3,10 @@ package rule
 
 import (
 	"fmt"
-	"ptt/pkg/validation"
 	"strings"
 	"unicode"
+
+	"github.com/jakewnuk/ptt/pkg/validation"
 )
 
 // LenToRule converts a string to a rule by its length

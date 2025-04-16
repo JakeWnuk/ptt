@@ -1,7 +1,7 @@
 // Package filter provides a function to check if a string passes a filter
 package filter
 
-import "ptt/pkg/models"
+import "github.com/jakewnuk/ptt/pkg/models"
 
 // Pass checks if a string passes the filter function and returns the boolean
 // result.

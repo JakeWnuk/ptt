@@ -5,12 +5,13 @@ import (
 	"flag"
 	"fmt"
 	"os"
-	"ptt/pkg/mask"
-	"ptt/pkg/models"
-	"ptt/pkg/transform"
-	"ptt/pkg/utils"
 	"sort"
 	"strings"
+
+	"github.com/jakewnuk/ptt/pkg/mask"
+	"github.com/jakewnuk/ptt/pkg/models"
+	"github.com/jakewnuk/ptt/pkg/transform"
+	"github.com/jakewnuk/ptt/pkg/utils"
 )
 
 var version = "1.1.0"
