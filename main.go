@@ -3,9 +3,12 @@ package main
 
 import (
 	"flag"
+	"fmt"
+	"os"
 	"ptt/pkg/mask"
 	"ptt/pkg/models"
 	"ptt/pkg/transform"
+	"sort"
 	"strings"
 )
 
@@ -17,6 +20,50 @@ var intRange models.IntRange
 var lenRange models.IntRange
 
 func main() {
+	// Parse command line arguments
+	flag.Usage = func() {
+		fmt.Fprintf(os.Stderr, "Usage of Password Transformation Tool (ptt) version (%s):\n\n", version)
+		fmt.Fprintf(os.Stderr, "ptt [options] [...]\nAccepts standard input and/or additonal arguments.\n\n")
+		fmt.Fprintf(os.Stderr, "The -t flag can be used multiple times.\n")
+		fmt.Fprintf(os.Stderr, "\n")
+		fmt.Fprintf(os.Stderr, "Options:\n")
+		fmt.Fprintf(os.Stderr, "These modify or filter the transformation mode.\n\n")
+		flag.PrintDefaults()
+		fmt.Fprintf(os.Stderr, "\n")
+		fmt.Fprintf(os.Stderr, "Transformation Modes:\n")
+		fmt.Fprintf(os.Stderr, "These create or alter based on the selected mode.\n\n")
+		modes := map[string]string{
+			"rule-append":               "Transforms input by creating append rules.",
+			"rule-append-remove":        "Transforms input by creating append-remove rules.",
+			"rule-prepend":              "Transforms input by creating prepend rules.",
+			"rule-prepend-remove":       "Transforms input by creating prepend-remove rules.",
+			"rule-prepend-toggle":       "Transforms input by creating prepend-toggle rules.",
+			"rule-insert -i [index]":    "Transforms input by creating insert rules starting at index.",
+			"rule-overwrite -i [index]": "Transforms input by creating overwrite rules starting at index.",
+			"rule-toggle -i [index]":    "Transforms input by creating toggle rules starting at index.",
+			"mask -m [uldsb]":           "Transforms input by masking characters with provided mask.",
+			"mask-remove -m [uldsb]":    "Transforms input by removing characters with provided mask.",
+			"mask-pop -m [uldsbt]":      "Transforms input by popping tokens from character boundaries using the provided mask.",
+			"token-swap":                "Transforms input by swapping tokens.",
+			"passphrase -w [words]":     "Transforms input by generating passphrases from sentences with a given number of words.",
+			"regram -w [words]":         "Transforms input by regramming sentences into new n-grams with a given number of words.",
+			"rule-simplify":             "Transforms input by simplifying rules to efficient equivalents using the HCRE library.",
+		}
+
+		// Sort and print transformation modes
+		keys := make([]string, 0, len(modes))
+		for k := range modes {
+			keys = append(keys, k)
+		}
+		sort.Strings(keys)
+
+		for _, k := range keys {
+			fmt.Fprintf(os.Stderr, "  -t %s\n\t%s\n", k, modes[k])
+		}
+		fmt.Fprintf(os.Stderr, "\n")
+
+	}
+
 	flag.Var(&transformationModeArray, "t", "Transformation mode to be used. Can be specified multiple times.")
 	flag.Var(&intRange, "i", "Starting index for transformations if applicable. Accepts ranges separated by '-'.")
 	flag.Var(&wordRange, "w", "Number of words for transformations if applicable. Accepts ranges separated by '-'.")
