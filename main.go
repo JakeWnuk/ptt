@@ -60,9 +60,9 @@ func main() {
 	}
 
 	if *verbose {
-		models.VerboseOutput = make(map[string]int)
 		models.Verbose = true
 	}
 
+	models.VerboseOutput = make(map[string]int)
 	transform.ReadReturnStandardInput(transformationModeArray)
 }

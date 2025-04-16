@@ -9,6 +9,7 @@ import (
 	"ptt/pkg/models"
 	"ptt/pkg/rule"
 	"ptt/pkg/utils"
+	"sort"
 	"strings"
 	"unicode"
 
@@ -129,14 +130,14 @@ func Apply(input string, transform string) string {
 
 func Parse(input string, transform string) map[string]int {
 	switch transform {
-	case "pop":
+	case "pop", "mask-pop":
 		return maskPop(input)
-	case "passphrase":
+	case "passphrase", "phrase":
 		return makePassphrase(input)
-	case "regram":
+	case "regram", "n-gram":
 		return makeNGrams(input)
-	case "swap":
-		return map[string]int{}
+	case "swap", "token-swap":
+		return tokenSwap(input)
 	default:
 		return map[string]int{}
 	}
@@ -402,7 +403,7 @@ func maskPop(input string) map[string]int {
 	}
 
 	if models.DebugMode {
-		fmt.Fprintf(os.Stderr, "[?] transform.MaskPop(input):\n")
+		fmt.Fprintf(os.Stderr, "[?] transform.maskPop(input):\n")
 		fmt.Fprintf(os.Stderr, "Key: %s\n", input)
 		fmt.Fprintf(os.Stderr, "Token: %s\n", token)
 		fmt.Fprintf(os.Stderr, "Replacement Mask: %s\n", models.GlobalMask)
@@ -464,4 +465,44 @@ func makeNGrams(input string) map[string]int {
 		}
 	}
 	return newMap
+}
+
+func tokenSwap(input string) map[string]int {
+
+	// Using models.VerboseOutput to hold tokens to swap because it is
+	// allocated
+	poppedTokens := maskPop(input)
+	for i := range poppedTokens {
+		if filter.Pass(i) == false {
+			continue
+		}
+		if models.VerboseOutput[i] == 0 {
+			models.VerboseOutput[i] = 1
+		} else {
+			models.VerboseOutput[i] += 1
+		}
+	}
+
+	// Sort by frequency
+	p := make(models.PairList, len(models.VerboseOutput))
+	i := 0
+	for k, v := range models.VerboseOutput {
+		p[i] = models.Pair{k, v}
+		i++
+	}
+	sort.Sort(sort.Reverse(p))
+
+	// Create an array of the top 1000 tokens
+	topTokens := make(map[string]int)
+	for i := 0; i < 1000 && i < len(p); i++ {
+		topTokens[p[i].Key] = p[i].Value
+	}
+
+	// Create retained masks
+	retainedMasks := utils.MakeRetainMaskedMap(input, topTokens)
+
+	// Token swap
+	swappedTokens := utils.ShuffleMap(retainedMasks, models.VerboseOutput)
+
+	return swappedTokens
 }

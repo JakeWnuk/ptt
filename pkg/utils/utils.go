@@ -7,6 +7,8 @@ import (
 	"os"
 	"ptt/pkg/mask"
 	"ptt/pkg/models"
+	"ptt/pkg/validation"
+	"regexp"
 	"sort"
 	"strings"
 	"unicode"
@@ -451,4 +453,159 @@ func CreateBoxAndWhiskersPlot(data []int) (string, int, int, int, int, int) {
 
 	plot := fmt.Sprintf("|%s[%s|%s]%s|", strings.Repeat("-", normalizedQ1-normalizedMin), strings.Repeat("=", normalizedQ2-normalizedQ1), strings.Repeat("=", normalizedQ3-normalizedQ2), strings.Repeat("-", normalizedMax-normalizedQ3))
 	return plot, minBW, q1, q2, q3, maxBW
+}
+
+// MakeRetainMaskedMap replaces all characters in the input maps key with mask
+// values in the input map but retains keywords provided in the retain list
+//
+// Args:
+//
+//	input (string): String to mask
+//	retain (map[string]int): Map of keywords to retain
+//
+// Returns:
+//
+//	maskedMap (map[string]int): Masked retain map
+func MakeRetainMaskedMap(input string, retain map[string]int) map[string]int {
+	maskedMap := make(map[string]int)
+
+	for retainKey := range retain {
+		newKey := ""
+		if strings.Contains(input, retainKey) {
+			parts := splitBySeparatorString(input, retainKey)
+
+			// if the part is not the key replace it using replacer
+			for _, part := range parts {
+				if part != retainKey {
+					newPart := models.MaskReplacer.Replace(part)
+					if !validation.CheckASCIIString(newPart) && strings.Contains(models.GlobalMask, "b") {
+						newPart = validation.ConvertMultiByteMask(newPart)
+					}
+					newKey += newPart
+				} else {
+					newKey += part
+				}
+			}
+
+		} else {
+			// if the key is not in the string continue
+			continue
+		}
+
+		if oldValue, exists := maskedMap[newKey]; exists {
+			maskedMap[newKey] = oldValue + 1
+		} else {
+			maskedMap[newKey] = 1
+		}
+	}
+	return maskedMap
+}
+
+// splitBySeparatorString splits a string by a separator string and returns a slice
+// with the separator string included
+//
+// Args:
+//
+//	s (string): The string to split
+//	sep (string): The separator string
+//
+// Returns:
+//
+//	[]string: A slice of strings with the separator string included
+func splitBySeparatorString(s string, sep string) []string {
+	if !strings.Contains(s, sep) {
+		return []string{s}
+	}
+
+	// Limit to 2 to ensure we only split on the first instance of the separator
+	parts := strings.SplitN(s, sep, 2)
+	parts = append(parts[:1], append([]string{sep}, parts[1:]...)...)
+	return parts
+}
+
+// ShuffleMap shuffles the input map keys and replaces partially the masked
+// parts of the keys with matching mask keys from the input map. This function
+// resembles 'token-swapping' where the mask value is used to swap key words
+// into another.
+//
+// Args:
+//
+//	input (map[string]int): Input map
+//	swapMap (map[string]int): Items to swap with
+//
+// Returns:
+// (map[string]int): Shuffled map with swapped keys
+func ShuffleMap(input map[string]int, swapMap map[string]int) map[string]int {
+	shuffleMap := make(map[string]int)
+	re := regexp.MustCompile(`^(\?u|\?l|\?d|\?s|\?b)*$`)
+	reParser := regexp.MustCompile("(\\?[ludsb])")
+
+	for key, value := range input {
+		newKey := ""
+		// Make a new key with the masked parts
+		chars := reParser.FindAllString(key, -1)
+		match := strings.Join(chars, "")
+
+		if re.MatchString(match) {
+			newKey = match
+		}
+
+		// Check if the new key is in the swap map
+		for swapKey := range swapMap {
+			if models.DebugMode {
+				fmt.Fprintf(os.Stderr, "[?] utils.ShuffleMap(input, swapMap)\n")
+				fmt.Fprintf(os.Stderr, "Key: %s\n", key)
+				fmt.Fprintf(os.Stderr, "Match: %s\n", match)
+				fmt.Fprintf(os.Stderr, "Swap Token: %s\n", swapKey)
+				fmt.Fprintf(os.Stderr, "Replacement Mask: %s\n", models.GlobalMask)
+			}
+
+			maskedSwapKey := mask.MakeMask(swapKey)
+			if maskedSwapKey == newKey {
+
+				var shufKey string
+				shufKey = strings.Replace(key, newKey, swapKey, 1)
+
+				if models.DebugMode {
+					fmt.Fprintf(os.Stderr, "[?] utils.ShuffleMap(input, swapMap)\n")
+					fmt.Fprintf(os.Stderr, "Swap Token Mask: %s\n", maskedSwapKey)
+					fmt.Fprintf(os.Stderr, "Swap Result: %s\n", shufKey)
+				}
+
+				if shufKey == key {
+					if models.DebugMode {
+						fmt.Fprintf(os.Stderr, "[!] Swap failed invalid key:\n")
+						fmt.Fprintf(os.Stderr, "Key: %s\n", key)
+						fmt.Fprintf(os.Stderr, "Swap Result: %s\n", shufKey)
+					}
+
+					continue
+				}
+
+				// if the line ends or starts with ?[uldbs] then the swap failed
+				if strings.HasPrefix(shufKey, "?") || strings.HasSuffix(shufKey[len(shufKey)-2:len(shufKey)-1], "?") {
+
+					if strings.ContainsRune("uldbs", rune(shufKey[1])) && strings.HasPrefix(shufKey, "?") || strings.ContainsRune("uldbs", rune(shufKey[len(shufKey)-1])) && strings.HasSuffix(shufKey[len(shufKey)-2:len(shufKey)-1], "?") {
+
+						if models.DebugMode {
+							fmt.Fprintf(os.Stderr, "[!] Swap failed invalid key:\n")
+							fmt.Fprintf(os.Stderr, "Key: %s\n", key)
+							fmt.Fprintf(os.Stderr, "Swap Result: %s\n", shufKey)
+						}
+
+						continue
+
+					}
+				}
+
+				if oldValue, exists := shuffleMap[shufKey]; exists {
+					shuffleMap[shufKey] = oldValue + value
+				} else {
+					shuffleMap[shufKey] = value
+				}
+
+			}
+		}
+	}
+	return shuffleMap
 }
