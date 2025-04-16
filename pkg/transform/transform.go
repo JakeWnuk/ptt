@@ -1,327 +1,511 @@
-// Package transform contains logic for transforming input maps
+// Package transform provides functions to transform strings based on
+// various rules and operations.
 package transform
 
 import (
+	"bufio"
 	"fmt"
 	"os"
+	"sort"
 	"strings"
+	"unicode"
 
-	"github.com/jakewnuk/ptt/pkg/format"
+	"github.com/jakewnuk/ptt/pkg/filter"
 	"github.com/jakewnuk/ptt/pkg/mask"
+	"github.com/jakewnuk/ptt/pkg/models"
 	"github.com/jakewnuk/ptt/pkg/rule"
 	"github.com/jakewnuk/ptt/pkg/utils"
+
+	"launchpad.net/hcre"
 )
 
-// ----------------------------------------------------------------------------
-// TransformationController
-// ----------------------------------------------------------------------------
-
-// TransformationController is the main entry point for the CLI
-// application. Operates a switch statement to determine the
-// mode to use.
+// ReadReturnStandardInput reads from standard input and applies the given
+// transformation to each line.
 //
 // Args:
-//
-//	input (map[string]int): A map of input values
-//	mode (string): The mode to run the CLI in
-//	startingIndex (int): The starting index for the transformation if applicable
-//	endIndex (int): The ending index for the transformation if applicable
-//	verbose (bool): If true, the verbose information is printed when available
-//	replacementMask (string): The mask characters to use for masking operations
-//	transformationFilesMap (map[string]int): A map of transformation files to
-//	use for modes like retain-mask
-//	bypass (bool): If true, the map is not used for output or filtering
-//	debug (int): Different debug levels to use for debugging [0-2]
-//	wordRangeStart (int): The starting range for word operations
-//	wordRangeEnd (int): The ending range for word operations
+// transformation (models.MultiString): A list of transformation rules to be
+// applied to each line.
 //
 // Returns:
+// None
+func ReadReturnStandardInput(transformation models.MultiString) {
+	reader := bufio.NewScanner(os.Stdin)
+	for reader.Scan() {
+		readText := reader.Text()
+		line := readText
+
+		for _, operation := range transformation {
+			if strings.Contains(operation, "insert") || strings.Contains(operation, "overwrite") || strings.Contains(operation, "toggle") {
+				start := models.OperationStart
+				for models.OperationStart < models.OperationEnd+1 {
+					line = Apply(line, operation)
+
+					if filter.Pass(line) {
+						if models.Verbose {
+							if models.VerboseOutput[line] == 0 {
+								models.VerboseOutput[line] = 1
+							} else {
+								models.VerboseOutput[line]++
+							}
+						} else {
+							fmt.Println(line)
+						}
+					}
+
+					models.OperationStart++
+					line = readText
+				}
+				models.OperationStart = start
+			} else if strings.Contains(operation, "pop") || strings.Contains(operation, "passphrase") || strings.Contains(operation, "regram") || strings.Contains(operation, "swap") {
+				output := Parse(line, operation)
+				for item := range output {
+
+					if filter.Pass(item) {
+						if models.Verbose {
+							if models.VerboseOutput[item] == 0 {
+								models.VerboseOutput[item] = 1
+							} else {
+								models.VerboseOutput[item]++
+							}
+						} else {
+							fmt.Println(item)
+						}
+					}
+				}
+			} else {
+				line = Apply(line, operation)
+
+				if filter.Pass(line) {
+					fmt.Println(line)
+				}
+
+				line = readText
+			}
+		}
+	}
+	if models.Verbose {
+		utils.PrintStatsToSTDOUT(models.VerboseOutput)
+	}
+
+	if err := reader.Err(); err != nil {
+		fmt.Fprintf(os.Stderr, "Error reading input: %v\n", err)
+	}
+}
+
+// Apply applies a transformation function to the string and returns the
+// result.
 //
-//	(map[string]int): A map of transformed values
-func TransformationController(input map[string]int, mode string, startingIndex int, endingIndex int, verbose bool, replacementMask string, transformationFilesMap map[string]int, bypass bool, debug int, wordRangeStart int, wordRangeEnd int) (output map[string]int) {
-
-	functionDebug := false
-	if debug > 1 {
-		functionDebug = true
-	}
-
-	if debug > 0 {
-		fmt.Fprintf(os.Stderr, "[?] TransformationController: Starting debug mode:\n")
-		fmt.Fprintf(os.Stderr, "[?] TransformationController: Running in mode %s.\n", mode)
-		fmt.Fprintf(os.Stderr, "[?] TransformationController: Starting index is %d.\n", startingIndex)
-		fmt.Fprintf(os.Stderr, "[?] TransformationController: Ending index is %d.\n", endingIndex)
-		fmt.Fprintf(os.Stderr, "[?] TransformationController: Replacement mask is %s.\n", replacementMask)
-		fmt.Fprintf(os.Stderr, "[?] TransformationController: Bypass is %t.\n", bypass)
-		fmt.Fprintf(os.Stderr, "[?] TransformationController: Verbose is %t.\n", verbose)
-		fmt.Fprintf(os.Stderr, "[?] TransformationController: Transformation files map is %v.\n", transformationFilesMap)
-		fmt.Fprintf(os.Stderr, "[?] TransformationController: Input map is %v.\n", input)
-		fmt.Fprintf(os.Stderr, "[?] TransformationController: Starting transformation...\n")
-	}
-
-	switch mode {
-	case "rule-append", "rule-append-remove", "append", "append-remove":
-		output = rule.AppendRules(input, mode, bypass, functionDebug)
-	case "rule-prepend", "rule-prepend-remove", "rule-prepend-toggle", "prepend", "prepend-remove", "prepend-toggle":
-		output = rule.PrependRules(input, mode, bypass, functionDebug)
-	case "rule-insert", "insert":
-		strIndex := fmt.Sprintf("%d", startingIndex)
-		endIndex := fmt.Sprintf("%d", endingIndex)
-		output = rule.InsertRules(input, strIndex, endIndex, bypass, functionDebug)
-	case "rule-overwrite", "overwrite":
-		strIndex := fmt.Sprintf("%d", startingIndex)
-		endIndex := fmt.Sprintf("%d", endingIndex)
-		output = rule.OverwriteRules(input, strIndex, endIndex, bypass, functionDebug)
-	case "rule-toggle", "toggle":
-		strIndex := fmt.Sprintf("%d", startingIndex)
-		endIndex := fmt.Sprintf("%d", endingIndex)
-		output = rule.ToggleRules(input, strIndex, endIndex, bypass, functionDebug)
-	case "encode":
-		output = format.EncodeInputMap(input, bypass, functionDebug)
-	case "decode":
-		output = format.DecodeInputMap(input, bypass, functionDebug)
-	case "mask":
-		output = mask.MakeMaskedMap(input, replacementMask, verbose, bypass, functionDebug)
-	case "dehex":
-		output = format.DehexMap(input, bypass, functionDebug)
-	case "hex":
-		output = format.HexEncodeMap(input, bypass, functionDebug)
-	case "mask-remove", "remove":
-		input = mask.MakeMaskedMap(input, replacementMask, false, false, false)
-		output = mask.RemoveMaskedCharacters(input, replacementMask, bypass, functionDebug)
-	case "mask-retain", "retain":
-		if len(transformationFilesMap) == 0 {
-			fmt.Fprintf(os.Stderr, "[!] Retain masks require use of one or more -tf flags to specify one or more files.\n")
-			os.Exit(1)
-		}
-		output = mask.MakeRetainMaskedMap(input, replacementMask, transformationFilesMap, bypass, functionDebug, verbose)
-	case "mask-match", "match":
-		if len(transformationFilesMap) == 0 {
-			fmt.Fprintf(os.Stderr, "[!] Match masks require use of one or more -tf flags to specify one or more files.\n")
-			os.Exit(1)
-		}
-		output = mask.MakeMatchedMaskedMap(input, replacementMask, transformationFilesMap, bypass, functionDebug)
-	case "swap", "swap-single":
-		fmt.Fprintf(os.Stderr, "[*] This transformation mode requires a ':' separated list of keys to swap.\n")
-		if len(transformationFilesMap) == 0 {
-			fmt.Fprintf(os.Stderr, "[!] Swap operations require use of one or more -tf flags to specify one or more files.\n")
-			os.Exit(1)
-		}
-		output = ReplaceKeysInMap(input, transformationFilesMap, bypass, functionDebug)
-	case "mask-pop", "pop":
-		output = mask.BoundarySplitPopMap(input, replacementMask, bypass, functionDebug)
-	case "mask-swap":
-		fmt.Fprintf(os.Stderr, "[*] This transformation mode requires a retain mask file to use for swapping.\n")
-		if len(transformationFilesMap) == 0 {
-			fmt.Fprintf(os.Stderr, "[!] Mask-swap operations require use of one or more -tf flags to specify one or more files.\n")
-			os.Exit(1)
-		}
-		output = mask.ShuffleMap(input, replacementMask, transformationFilesMap, bypass, functionDebug)
-	case "passphrase":
-		fmt.Fprintf(os.Stderr, "[*] This transformation mode expects space separated content.\n")
-		if wordRangeStart == 0 {
-			fmt.Fprintf(os.Stderr, "[!] Passphrase operations require use of the -w flag to specify the number of words to use.\n")
-			os.Exit(1)
-		}
-		output = MakePassphraseMap(input, bypass, functionDebug, wordRangeStart, wordRangeEnd)
-	case "substring":
-		output = utils.SubstringMap(input, startingIndex, endingIndex, bypass, functionDebug)
-	case "replace-all", "replace":
-		if len(transformationFilesMap) == 0 {
-			fmt.Fprintf(os.Stderr, "[!] Replace operations require use of one or more -tf flags to specify one or more files.\n")
-			os.Exit(1)
-		}
-		output = ReplaceAllKeysInMap(input, transformationFilesMap, bypass, functionDebug)
-	case "regram":
-		fmt.Fprintf(os.Stderr, "[*] This transformation mode expects space separated content.\n")
-		if wordRangeStart == 0 {
-			fmt.Fprintf(os.Stderr, "[!] Regram operations require use of the -w flag to specify the number of words to use.\n")
-			os.Exit(1)
-		}
-		output = GenerateNGramMap(input, wordRangeStart, wordRangeEnd, bypass, functionDebug)
-	case "rule-apply", "apply":
-		fmt.Fprintf(os.Stderr, "[*] This transformation mode expects a rule file to apply.\n")
-		if len(transformationFilesMap) == 0 {
-			fmt.Fprintf(os.Stderr, "[!] Apply operations require use of one or more -tf flags to specify one or more files.\n")
-			os.Exit(1)
-		}
-		output = rule.ApplyRulesHCRE(input, transformationFilesMap, bypass, functionDebug)
-	case "rule-simplify", "simplify":
-		fmt.Fprintf(os.Stderr, "[*] This transformation mode expects rule input to simplify.\n")
-		output = rule.SimplifyRules(input, bypass, functionDebug)
+// Args:
+// input (string): The input string to be transformed.
+// transform (string): The transformation function to be applied.
+//
+// Returns:
+// (string): The transformed string.
+func Apply(input string, transform string) string {
+	switch transform {
+	case "append", "rule-append":
+		return appendRules(input)
+	case "append-remove", "rule-append-remove":
+		return appendRemoveRules(input)
+	case "prepend", "rule-prepend":
+		return prependRules(input)
+	case "prepend-remove", "rule-prepend-remove":
+		return prependRemoveRules(input)
+	case "prepend-toggle", "rule-prepend-toggle":
+		return prependToggleRules(input)
+	case "insert", "rule-insert":
+		return insertRules(input)
+	case "overwrite", "rule-overwrite":
+		return overwriteRules(input)
+	case "toggle", "rule-toggle":
+		return toggleRules(input)
+	case "simplify", "rule-simplify":
+		return ruleSimplify(input)
+	case "mask", "rule-mask":
+		return mask.MakeMask(input)
+	case "remove", "mask-remove":
+		return mask.RemoveMaskedCharacters(mask.MakeMask(input))
 	default:
-		output = input
+		return ""
 	}
-
-	if debug > 0 {
-		fmt.Fprintf(os.Stderr, "[?] TransformationController: Output map is %v.\n", output)
-		fmt.Fprintf(os.Stderr, "[?] TransformationController: Transformation complete. Resuming output.\n")
-	}
-
-	return output
 }
 
-// ----------------------------------------------------------------------------
-// Generation Functions
-// ----------------------------------------------------------------------------
+// Parse parses the input string based on the specified transformation.
+func Parse(input string, transform string) map[string]int {
+	switch transform {
+	case "pop", "mask-pop":
+		return maskPop(input)
+	case "passphrase", "phrase":
+		return makePassphrase(input)
+	case "regram", "n-gram":
+		return makeNGrams(input)
+	case "swap", "token-swap":
+		return tokenSwap(input)
+	default:
+		return map[string]int{}
+	}
+}
 
-// ReplaceKeysInMap takes a map of keys and values and replaces the keys
-// with replacements based on the replacement map. This is useful for
-// exact key swaps.
+// AppendRules transforms the input string into an append rule.
 //
 // Args:
-//
-//	originalMap (map[string]int): The original map to replace keys in
-//	replacements (map[string]int): The map of replacements to use
-//	bypass (bool): If true, the map is not used for output or filtering
-//	debug (bool): If true, print additional debug information to stderr
+// key (string): The input string to be transformed.
 //
 // Returns:
+// (string): The transformed string in the form of an append rule.
+func appendRules(key string) string {
+	keyRule := rule.CharToRule(key, "$")
+	appendRule := rule.FormatCharToRuleOutput(keyRule)
+
+	if models.DebugMode {
+		fmt.Fprintf(os.Stderr, "[?] transform.appendRules(key):\n")
+		fmt.Fprintf(os.Stderr, "Key: %s\n", key)
+		fmt.Fprintf(os.Stderr, "Rule: %s\n", keyRule)
+		fmt.Fprintf(os.Stderr, "Return: %s\n", appendRule)
+	}
+	return appendRule
+}
+
+// AppendRemoveRules transforms the input string into an append-remove rule.
 //
-//	(map[string]int): A new map with the keys replaced
-func ReplaceKeysInMap(originalMap map[string]int, replacements map[string]int, bypass bool, debug bool) map[string]int {
-	newMap := make(map[string]int)
-	for key, value := range originalMap {
-		newKeyArray := utils.ReplaceSubstring(key, replacements)
-		for _, newKey := range newKeyArray {
+// Args:
+// key (string): The input string to be transformed.
+//
+// Returns:
+// (string): The transformed string in the form of an append-remove rule.
+func appendRemoveRules(key string) string {
+	if len(key) > 15 {
+		if models.DebugMode {
+			fmt.Fprintf(os.Stderr, "[!] transform.appendRemoveRules(key):\n")
+			fmt.Fprintf(os.Stderr, "Key: %s\n", key)
+			fmt.Fprintf(os.Stderr, "Error: key is too long\n")
+		}
+		return ""
+	}
+	keyRule := rule.CharToRule(key, "$")
+	remove := rule.LenToRule(key, "]")
+	appendRemoveRule := rule.FormatCharToRuleOutput(remove, keyRule)
 
-			if debug {
-				fmt.Fprintf(os.Stderr, "Key: %s\n", key)
-				fmt.Fprintf(os.Stderr, "New Key: %s\n", newKey)
+	if models.DebugMode {
+		fmt.Fprintf(os.Stderr, "[?] transform.appendRemoveRules(key):\n")
+		fmt.Fprintf(os.Stderr, "Key: %s\n", key)
+		fmt.Fprintf(os.Stderr, "Rule: %s\n", keyRule)
+		fmt.Fprintf(os.Stderr, "Remove: %s\n", remove)
+		fmt.Fprintf(os.Stderr, "Return: %s\n", appendRemoveRule)
+	}
+	return appendRemoveRule
+}
+
+// prependRules transforms the input string into a prepend rule.
+//
+// Args:
+// key (string): The input string to be transformed.
+//
+// Returns:
+// (string): The transformed string in the form of a prepend rule.
+func prependRules(key string) string {
+	keyRule := rule.CharToRule(utils.ReverseString(key), "^")
+	prependRule := rule.FormatCharToRuleOutput(keyRule)
+
+	if models.DebugMode {
+		fmt.Fprintf(os.Stderr, "[?] transform.prependRules(key):\n")
+		fmt.Fprintf(os.Stderr, "Key: %s\n", key)
+		fmt.Fprintf(os.Stderr, "Rule: %s\n", keyRule)
+		fmt.Fprintf(os.Stderr, "Return: %s\n", prependRule)
+	}
+	return prependRule
+}
+
+// prependRemoveRules transforms the input string into a prepend-remove rule.
+//
+// Args:
+// key (string): The input string to be transformed.
+//
+// Returns:
+// (string): The transformed string in the form of a prepend-remove rule.
+func prependRemoveRules(key string) string {
+	if len(key) > 15 {
+		if models.DebugMode {
+			fmt.Fprintf(os.Stderr, "[!] transform.prependRemoveRules(key):\n")
+			fmt.Fprintf(os.Stderr, "Key: %s\n", key)
+			fmt.Fprintf(os.Stderr, "Error: key is too long\n")
+			return ""
+		}
+	}
+	keyRule := rule.CharToRule(utils.ReverseString(key), "^")
+	remove := rule.LenToRule(key, "[")
+	prependRemoveRule := rule.FormatCharToRuleOutput(remove, keyRule)
+
+	if models.DebugMode {
+		fmt.Fprintf(os.Stderr, "[?] transform.prependRemoveRules(key):\n")
+		fmt.Fprintf(os.Stderr, "Key: %s\n", key)
+		fmt.Fprintf(os.Stderr, "Rule: %s\n", keyRule)
+		fmt.Fprintf(os.Stderr, "Remove: %s\n", remove)
+		fmt.Fprintf(os.Stderr, "Return: %s\n", prependRemoveRule)
+	}
+	return prependRemoveRule
+}
+
+// prependToggleRules transforms the input string into a prepend-toggle rule.
+//
+// Args:
+// key (string): The input string to be transformed.
+//
+// Returns:
+// (string): The transformed string in the form of a prepend-toggle rule.
+func prependToggleRules(key string) string {
+	keyRule := rule.CharToRule(utils.ReverseString(key), "^")
+	toggle := rule.StringToToggleRule("A", "T", len(key))
+	prependToggleRule := rule.FormatCharToRuleOutput(keyRule, toggle)
+
+	if models.DebugMode {
+		fmt.Fprintf(os.Stderr, "[?] transform.prependToggleRules(key):\n")
+		fmt.Fprintf(os.Stderr, "Key: %s\n", key)
+		fmt.Fprintf(os.Stderr, "Rule: %s\n", keyRule)
+		fmt.Fprintf(os.Stderr, "Toggle: %s\n", toggle)
+		fmt.Fprintf(os.Stderr, "Return: %s\n", prependToggleRule)
+	}
+	return prependToggleRule
+}
+
+// insertRules transforms the input string into an insert rule.
+//
+// Args:
+// key (string): The input string to be transformed.
+//
+// Returns:
+// (string): The transformed string in the form of an insert rule.
+func insertRules(key string) string {
+	keyRule := rule.CharToIteratingRule(key, "i", models.OperationStart)
+	insertRule := rule.FormatCharToIteratingRuleOutput(models.OperationStart, keyRule)
+
+	if models.DebugMode {
+		fmt.Fprintf(os.Stderr, "[?] transform.insertRules(key):\n")
+		fmt.Fprintf(os.Stderr, "Key: %s\n", key)
+		fmt.Fprintf(os.Stderr, "Rule: %s\n", keyRule)
+		fmt.Fprintf(os.Stderr, "Return: %s\n", insertRule)
+	}
+	return insertRule
+}
+
+// overwriteRules transforms the input string into an overwrite rule.
+//
+// Args:
+// key (string): The input string to be transformed.
+//
+// Returns:
+// (string): The transformed string in the form of an overwrite rule.
+func overwriteRules(key string) string {
+	keyRule := rule.CharToIteratingRule(key, "o", models.OperationStart)
+	overwriteRule := rule.FormatCharToIteratingRuleOutput(models.OperationStart, keyRule)
+
+	if models.DebugMode {
+		fmt.Fprintf(os.Stderr, "[?] transform.overwriteRules(key):\n")
+		fmt.Fprintf(os.Stderr, "Key: %s\n", key)
+		fmt.Fprintf(os.Stderr, "Rule: %s\n", keyRule)
+		fmt.Fprintf(os.Stderr, "Return: %s\n", overwriteRule)
+	}
+	return overwriteRule
+}
+
+// toggleRules transforms the input string into a toggle rule.
+//
+// Args:
+// key (string): The input string to be transformed.
+//
+// Returns:
+// (string): The transformed string in the form of a toggle rule.
+func toggleRules(key string) string {
+	// if the key is all uppercase just set it to "u"
+	keyRule := ""
+	if strings.ToUpper(key) == key {
+		keyRule = "u"
+	} else {
+		keyRule = rule.StringToToggleRule(key, "T", models.OperationStart)
+	}
+
+	toggleRule := rule.FormatCharToIteratingRuleOutput(models.OperationStart, keyRule)
+
+	if models.DebugMode {
+		fmt.Fprintf(os.Stderr, "[?] transform.toggleRules(key):\n")
+		fmt.Fprintf(os.Stderr, "Key: %s\n", key)
+		fmt.Fprintf(os.Stderr, "Rule: %s\n", keyRule)
+		fmt.Fprintf(os.Stderr, "Return: %s\n", toggleRule)
+	}
+
+	return toggleRule
+}
+
+// ruleSimplify simplifies the input string into a simplified rule using the
+// HCRE library.
+//
+// Args:
+// key (string): The input string to be transformed.
+//
+// Returns:
+// (string): The transformed string in the form of a simplified rule.
+func ruleSimplify(key string) string {
+	rr, err := hcre.Compile(key)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "[!] transform.ruleSimplify(key):\n")
+		fmt.Fprintf(os.Stderr, "Key: %s\n", key)
+		fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+		os.Exit(1)
+	}
+	simplifyRule := rr.Simplify().String()
+
+	if models.DebugMode {
+		fmt.Fprintf(os.Stderr, "[?] transform.ruleSimplify(key):\n")
+		fmt.Fprintf(os.Stderr, "Key: %s\n", key)
+		fmt.Fprintf(os.Stderr, "Return: %s\n", simplifyRule)
+	}
+
+	return simplifyRule
+}
+
+// maskPop transforms the input string into a map of tokens and their
+// occurrences.
+//
+// Args:
+// input (string): The input string to be transformed.
+//
+// Returns:
+// (map[string]int): A map of tokens and their occurrences.
+func maskPop(input string) map[string]int {
+	result := make(map[string]int)
+	token := ""
+	var lastRuneType rune
+	var runeType rune
+	for _, r := range input {
+		switch {
+		case unicode.IsLower(r):
+			runeType = 'l'
+		case unicode.IsUpper(r):
+			runeType = 'u'
+		case unicode.IsDigit(r):
+			runeType = 'd'
+		// !\"#$%&\\()*+,-./:;<=>?@[\\]^_`{|}~'
+		case strings.ContainsRune("!\"#$%&\\()*+,-./:;<=>?@[\\]^_`{|}~'", r):
+			runeType = 's'
+		default:
+			runeType = 'b'
+		}
+
+		if (lastRuneType != 0 && lastRuneType != runeType) || !strings.ContainsRune(models.GlobalMask, runeType) {
+			if strings.ContainsRune(models.GlobalMask, 't') && lastRuneType == 'u' && runeType == 'l' {
+				// do nothing so the token continues
+			} else if token != "" {
+				result[token]++
+				token = ""
 			}
+		}
+		if strings.ContainsRune(models.GlobalMask, runeType) {
+			token += string(r)
+		}
+		lastRuneType = runeType
+	}
 
-			if !bypass {
+	if models.DebugMode {
+		fmt.Fprintf(os.Stderr, "[?] transform.maskPop(input):\n")
+		fmt.Fprintf(os.Stderr, "Key: %s\n", input)
+		fmt.Fprintf(os.Stderr, "Token: %s\n", token)
+		fmt.Fprintf(os.Stderr, "Replacement Mask: %s\n", models.GlobalMask)
+	}
+
+	if token != "" {
+		result[token]++
+	}
+	return result
+}
+
+// makePassphrase transforms the input string into a map of passphrases
+// and their occurrences.
+//
+// Args:
+// input (string): The input string to be transformed.
+//
+// Returns:
+// (map[string]int): A map of passphrases and their occurrences.
+func makePassphrase(input string) map[string]int {
+	newMap := make(map[string]int)
+	for i := models.WordStart; i <= models.WordEnd; i++ {
+		newKeyArray := utils.GeneratePassphrase(input, i)
+		for value, newKey := range newKeyArray {
+			if newMap[newKey] == 0 {
 				newMap[newKey] = value
 			} else {
-				fmt.Println(newKey)
+				newMap[newKey] += value
 			}
 		}
 	}
+
 	return newMap
 }
 
-// ReplaceAllKeysInMap takes a map of keys and values and replaces the keys
-// with replacements based on the replacement map. This is useful for
-// replacing all instances of a key with a new key.
+// makeNGrams transforms the input string into a map of n-grams
+// and their occurrences.
 //
 // Args:
+// input (string): The input string to be transformed.
 //
-//	originalMap (map[string]int): The original map to replace keys in
-//	replacements (map[string]int): The map of replacements to use
-//	bypass (bool): If true, the map is not used for output or filtering
-//	debug (bool): If true, print additional debug information to stderr
-//
-//	Returns:
-//
-//	(map[string]int): A new map with the keys replaced
-func ReplaceAllKeysInMap(originalMap map[string]int, replacements map[string]int, bypass bool, debug bool) map[string]int {
+// Returns:
+// (map[string]int): A map of n-grams and their occurrences.
+func makeNGrams(input string) map[string]int {
 	newMap := make(map[string]int)
-	for key, value := range originalMap {
-		newKeyArray := utils.ReplaceAllSubstring(key, replacements)
-		for _, newKey := range newKeyArray {
+	for i := models.WordStart; i <= models.WordEnd; i++ {
+		newKeyArray := utils.GenerateNGrams(input, i)
+		for value, newKey := range newKeyArray {
+			newKey = strings.TrimSpace(newKey)
+			newKey = strings.TrimLeft(newKey, ",")
+			newKey = strings.TrimRight(newKey, ",")
+			newKey = strings.TrimLeft(newKey, " ")
 
-			if debug {
-				fmt.Fprintf(os.Stderr, "Key: %s\n", key)
-				fmt.Fprintf(os.Stderr, "New Key: %s\n", newKey)
-			}
-
-			if !bypass {
+			if newMap[newKey] == 0 {
 				newMap[newKey] = value
 			} else {
-				fmt.Println(newKey)
+				newMap[newKey] += value
 			}
 		}
 	}
 	return newMap
 }
 
-// MakePassphraseMap takes a map of keys and creates a new map with new
-// passphrases for each key.
-//
-// Args:
-//
-//	input (map[string]int): The original map to replace keys in
-//	use for constructing the passphrases
-//	bypass (bool): If true, the map is not used for output or filtering
-//	debug (bool): If true, print additional debug information to stderr
-//	wordRangeStart (int): The starting number of words to use for passphrases
-//	wordRangeEnd (int): The ending iteration number of words to use for passphrases
-//
-// Returns:
-//
-//	(map[string]int): A new map with the keys replaced
-func MakePassphraseMap(input map[string]int, bypass bool, debug bool, wordRangeStart int, wordRangeEnd int) map[string]int {
-	newMap := make(map[string]int)
-	for key, value := range input {
+func tokenSwap(input string) map[string]int {
 
-		for i := wordRangeStart; i <= wordRangeEnd; i++ {
-			newKeyArray := utils.GeneratePassphrase(key, i)
-			for _, newKey := range newKeyArray {
-
-				if debug {
-					fmt.Fprintf(os.Stderr, "Key: %s\n", key)
-					fmt.Fprintf(os.Stderr, "New Key: %s\n", newKey)
-				}
-
-				if !bypass {
-					if newMap[newKey] == 0 {
-						newMap[newKey] = value
-					} else {
-						newMap[newKey] += value
-					}
-				} else {
-					fmt.Println(newKey)
-				}
-			}
+	// Using models.VerboseOutput to hold tokens to swap because it is
+	// allocated
+	poppedTokens := maskPop(input)
+	for i := range poppedTokens {
+		if i == "" || i == " " {
+			continue
+		}
+		if models.GlobalTokens[i] == 0 {
+			models.GlobalTokens[i] = 1
+		} else {
+			models.GlobalTokens[i]++
 		}
 	}
 
-	return newMap
-}
-
-// GenerateNGramMap takes a map of keys and values and generates a new map
-// using the utils.GenerateNGrams function and combines the results. This
-// function is used to generate n-grams from the input map for the regram
-// transformation mode.
-//
-// Args:
-//
-//	input (map[string]int): The original map to generate n-grams from
-//	wordRangeStart (int): The starting number of words to use for n-grams
-//	wordRangeEnd (int): The ending iteration number of words to use for n-grams
-//	bypass (bool): If true, the map is not used for output or filtering
-//	debug (bool): If true, print additional debug information to stderr
-//
-// Returns:
-//
-//	(map[string]int): A new map with the n-grams generated
-func GenerateNGramMap(input map[string]int, wordRangeStart int, wordRangeEnd int, bypass bool, debug bool) map[string]int {
-	newMap := make(map[string]int)
-	for key, value := range input {
-		for i := wordRangeStart; i <= wordRangeEnd; i++ {
-			newKeyArray := utils.GenerateNGrams(key, i)
-			for _, newKey := range newKeyArray {
-
-				if debug {
-					fmt.Fprintf(os.Stderr, "Key: %s\n", key)
-					fmt.Fprintf(os.Stderr, "New Key: %s\n", newKey)
-				}
-
-				newKey = strings.TrimSpace(newKey)
-				newKey = strings.TrimLeft(newKey, ",")
-				newKey = strings.TrimRight(newKey, ",")
-				newKey = strings.TrimLeft(newKey, " ")
-
-				if !bypass {
-					if newMap[newKey] == 0 {
-						newMap[newKey] = value
-					} else {
-						newMap[newKey] += value
-					}
-				} else {
-					fmt.Println(newKey)
-				}
-			}
-		}
+	// Sort by frequency
+	p := make(models.PairList, len(models.GlobalTokens))
+	i := 0
+	for k, v := range models.GlobalTokens {
+		p[i] = models.Pair{k, v}
+		i++
 	}
-	return newMap
+	sort.Sort(sort.Reverse(p))
+
+	// Create an array of the top 1000 tokens
+	topTokens := make(map[string]int)
+	for i := 0; i < 1000 && i < len(p); i++ {
+		topTokens[p[i].Key] = p[i].Value
+	}
+
+	// Create retained masks
+	retainedMasks := utils.MakeRetainMaskedMap(input, topTokens)
+
+	// Token swap
+	swappedTokens := utils.ShuffleMap(retainedMasks, models.GlobalTokens)
+
+	return swappedTokens
 }

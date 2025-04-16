@@ -1,983 +1,39 @@
-// Package utils provides utility functions for the application.
+// Package utils provides utility functions for various tasks
 package utils
 
 import (
-	"bufio"
-	"encoding/json"
+	"encoding/hex"
 	"fmt"
-	"io"
-	"math/rand"
-	"net/http"
 	"net/url"
 	"os"
-	"path/filepath"
 	"regexp"
 	"runtime"
 	"sort"
-	"strconv"
 	"strings"
-	"sync"
 	"time"
-	"unicode/utf8"
+	"unicode"
 
+	"github.com/jakewnuk/ptt/pkg/mask"
 	"github.com/jakewnuk/ptt/pkg/models"
+	"github.com/jakewnuk/ptt/pkg/validation"
 
-	"golang.org/x/net/html"
 	"golang.org/x/text/cases"
 	"golang.org/x/text/language"
 )
 
-// ----------------------------------------------------------------------------
-// Loading and Processing Functions
-// ----------------------------------------------------------------------------
-
-// TrackLoadTime tracks the time it takes to load the input and prints the time
-//
-// Args:
-// done (chan bool): channel to use to track tasks
-// work (string): string used in status printing
-//
-// Returns:
-// None
-func TrackLoadTime(done <-chan bool, work string) {
-	start := time.Now()
-	ticker := time.NewTicker(30 * time.Second)
-	for {
-		select {
-		case <-done:
-			ticker.Stop()
-			fmt.Fprintf(os.Stderr, "[-] Total %s Time: %02d:%02d:%02d.\n", work, int(time.Since(start).Hours()), int(time.Since(start).Minutes())%60, int(time.Since(start).Seconds())%60)
-			return
-		case t := <-ticker.C:
-			elapsed := t.Sub(start)
-			memUsage := GetMemoryUsage()
-			fmt.Fprintf(os.Stderr, "[-] Please wait loading. Elapsed: %02d:%02d:%02d.%03d. Memory Usage: %.2f MB.\n", int(t.Sub(start).Hours()), int(t.Sub(start).Minutes())%60, int(t.Sub(start).Seconds())%60, elapsed.Milliseconds()%1000, memUsage)
-		}
-	}
-}
-
-// GetMemoryUsage returns the current memory usage in megabytes
-func GetMemoryUsage() float64 {
-	var m runtime.MemStats
-	runtime.ReadMemStats(&m)
-	return float64(m.Alloc) / 1024 / 1024
-}
-
-// ReadFilesToMap reads the contents of the multiple files and returns a map of words
-//
-// Args:
-//
-//	fs (FileSystem): The filesystem to read the files from (used for testing)
-//	filenames ([]string): The names of the files to read
-//
-// Returns:
-//
-//	(map[string]int): A map of words from the files
-func ReadFilesToMap(fs models.FileSystem, filenames []string) map[string]int {
-	wordMap := make(map[string]int)
-	// 1 GB read buffer
-	chunkSize := int64(1 * 1024 * 1024 * 1024)
-
-	i := 0
-	for i < len(filenames) {
-		filename := filenames[i]
-		if IsFileSystemDirectory(filename) {
-			files, err := GetFilesInDirectory(filename)
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "[!] Error reading the directory %v: %v.\n", filename, err)
-				os.Exit(1)
-			}
-			filenames = append(filenames, files...)
-		} else {
-			file, err := fs.Open(filename)
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "[!] Error opening file %s.\n", filename)
-				os.Exit(1)
-			}
-			defer file.Close()
-
-			buffer := make([]byte, chunkSize)
-			for {
-				bytesRead, err := file.Read(buffer)
-				if err != nil && err != io.EOF {
-					fmt.Fprintf(os.Stderr, "[!] Error reading file %s.\n", filename)
-					os.Exit(1)
-				}
-				if bytesRead == 0 {
-					break
-				}
-
-				data := buffer[:bytesRead]
-
-				err = json.Unmarshal(data, &wordMap)
-				if err == nil {
-					fmt.Fprintf(os.Stderr, "[*] Detected ptt JSON output. Importing...\n")
-					continue
-				}
-
-				fileWords := strings.Split(string(data), "\n")
-				for _, word := range fileWords {
-					wordMap[word]++
-				}
-
-				if err == io.EOF {
-					break
-				}
-			}
-		}
-		i++
-	}
-
-	// Remove empty strings from the map
-	delete(wordMap, "")
-
-	return wordMap
-}
-
-// LoadStdinToMap reads the contents of stdin and returns a map[string]int
-// where the key is the line and the value is the frequency of the line
-// in the input
-//
-// Args:
-//
-//	scanner (models.Scanner): The scanner to read from stdin
-//
-// Returns:
-//
-//	map[string]int: A map of lines from stdin
-//	error: An error if one occurred
-func LoadStdinToMap(scanner models.Scanner) (map[string]int, error) {
-	m := make(map[string]int)
-	pttInput := false
-	line0 := false
-	reDetect := regexp.MustCompile(`^\d+\s(\w+|\W+)$`)
-	reParse := regexp.MustCompile(`^\d+`)
-
-	for scanner.Scan() {
-		if scanner.Text() == "" {
-			continue
-		}
-
-		// Detect ptt -v output
-		if matched := reDetect.MatchString(scanner.Text()); matched && pttInput == false && line0 == false {
-			fmt.Fprintf(os.Stderr, "[*] Detected ptt -v output. Importing...\n")
-			pttInput = true
-		}
-
-		if pttInput {
-			line := scanner.Text()
-			match := reParse.FindString(line)
-			value, err := strconv.Atoi(match)
-			if err != nil {
-				return nil, err
-			}
-			newLine := strings.TrimSpace(strings.Replace(line, match, "", 1))
-			m[newLine] += value
-
-		} else {
-			line := scanner.Text()
-			m[line]++
-		}
-		line0 = true
-	}
-
-	if err := scanner.Err(); err != nil {
-		return nil, err
-	}
-
-	return m, nil
-}
-
-// ReadURLsToMap reads the contents of the multiple URLs and returns a map of words
-// from the URLs. Supports files or directories containing URLs.
-//
-// Args:
-//
-//	urls ([]string): The URLs to read
-//	parsingMode (int): Change parsing mode for URL input. [0 = Strict, 1 = Permissive, 2 = Maximum] [0-2].
-//	debugMode (int): A flag to print debug information
-//
-// Returns:
-//
-//	map[string]int: A map of words from the URLs
-//	error: An error if one occurred
-func ReadURLsToMap(urls []string, parsingMode int, debugMode int) (map[string]int, error) {
-	wordMap := make(map[string]int)
-	var wg sync.WaitGroup
-
-	ch := make(chan string)
-
-	go func() {
-		for word := range ch {
-			wordMap[word]++
-		}
-	}()
-
-	sleepOnStart := true
-	for _, iURL := range urls {
-		if IsValidURL(iURL) {
-			wg.Add(1)
-			go ProcessURL(iURL, ch, &wg, parsingMode, debugMode, sleepOnStart)
-
-		} else if IsFileSystemDirectory(iURL) {
-			files, err := GetFilesInDirectory(iURL)
-			if err != nil {
-				return nil, err
-			}
-			for _, file := range files {
-				wg.Add(1)
-				go ProcessURLFile(file, ch, &wg, parsingMode, debugMode)
-			}
-		} else if IsValidFile(iURL) {
-			wg.Add(1)
-			go ProcessURLFile(iURL, ch, &wg, parsingMode, debugMode)
-		} else {
-			fmt.Fprintf(os.Stderr, "[!] Rejected URL or file: %s.\n", iURL)
-			return nil, fmt.Errorf("invalid input: %s", iURL)
-		}
-	}
-
-	wg.Wait()
-	close(ch)
-
-	delete(wordMap, "")
-
-	return wordMap, nil
-}
-
-// CombineMaps combines any number of maps into a single map combining values for common keys
-// and returning a new map
-//
-// Args:
-// maps ([]map[string]int): The maps to combine
-//
-// Returns:
-// map[string]int: A new map combining the values of the input maps
-func CombineMaps(maps ...map[string]int) map[string]int {
-	var result sync.Map
-
-	for _, m := range maps {
-		for k, v := range m {
-			if val, ok := result.Load(k); ok {
-				result.Store(k, val.(int)+v)
-			} else {
-				result.Store(k, v)
-			}
-		}
-	}
-
-	finalResult := make(map[string]int)
-	result.Range(func(k, v interface{}) bool {
-		finalResult[k.(string)] = v.(int)
-		return true
-	})
-
-	return finalResult
-}
-
-// ProcessURL reads the contents of a URL and sends each sentence to the channel
-//
-// Args:
-//
-//	url (string): The URL to read
-//	ch (chan<- string): The channel to send the sentences to
-//	wg (*sync.WaitGroup): The WaitGroup to signal when done
-//	parsingMode (int): Change parsing mode for URL input. [0 = Strict,
-//	1 = Permissive, 2 = Maximum] [0-2].
-//	debugMode (int): A flag to print debug information
-//	sleepOnStart (bool): A flag to sleep before starting the request
-//
-// Returns:
-//
-//	None
-func ProcessURL(url string, ch chan<- string, wg *sync.WaitGroup, parsingMode int, debugMode int, sleepOnStart bool) {
-	defer wg.Done()
-	var resp *http.Response
-	throttleInterval := 90
-	source := rand.NewSource(time.Now().UnixNano())
-	r := rand.New(source)
-	const maxRetries = 3
-	userAgents := []string{
-		"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3",
-		"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0.3 Safari/605.1.15",
-		"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36",
-		"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
-		"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.135 Safari/537.36",
-		"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.96 Safari/537.36",
-		"Mozilla/5.0 (iPhone; CPU iPhone OS 14_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0 Mobile/15A372 Safari/604.1",
-		"Mozilla/5.0 (iPad; CPU OS 14_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0 Mobile/15A5341f Safari/604.1",
-		"Mozilla/5.0 (Linux; Android 11; Pixel 4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.181 Mobile Safari/537.36",
-		"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:89.0) Gecko/20100101 Firefox/89.0",
-		"Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:89.0) Gecko/20100101 Firefox/89.0",
-		"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0.3 Safari/605.1.15",
-	}
-
-	if sleepOnStart {
-		time.Sleep(time.Second * time.Duration(r.Intn(throttleInterval)))
-	}
-
-	for attempts := 0; attempts <= maxRetries; attempts++ {
-
-		// Set a random user agent
-		randomUserAgent := userAgents[r.Intn(len(userAgents))]
-
-		// Fetch the URL
-		client := &http.Client{}
-		req, err := http.NewRequest("GET", url, nil)
-		req.Header.Set("User-Agent", randomUserAgent)
-		resp, err = client.Do(req)
-		if err != nil {
-			if debugMode >= 2 {
-				fmt.Fprintf(os.Stderr, "[!] Error fetching URL %s.\n", url)
-			}
-			return
-		}
-
-		if resp == nil {
-			if debugMode >= 2 {
-				fmt.Fprintf(os.Stderr, "[!] Error no response from URL %s.\n", url)
-			}
-			return
-		}
-
-		defer resp.Body.Close()
-
-		// Check the response code for throttling
-		if resp.StatusCode == http.StatusTooManyRequests {
-			throttleInterval += 30
-			time.Sleep(time.Second * time.Duration(throttleInterval*(r.Intn(3)+1)))
-			fmt.Fprintf(os.Stderr, "[!] Requested %s. Attempt [%d/%d]. Response Code: %s. Waiting %d seconds before retrying. \n", url, attempts, maxRetries, resp.Status, throttleInterval)
-		} else {
-			fmt.Fprintf(os.Stderr, "[+] Requested %s. Attempt [%d/%d]. Response Code: %s. Content-Type: %s. \n", url, attempts, maxRetries, resp.Status, resp.Header.Get("Content-Type"))
-		}
-
-		if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusNotFound {
-			// end the loop if the code is 300, 301, 302, 303, 307, 308, 400, 401, 403, 405, 500, 503
-			if resp.StatusCode == http.StatusMovedPermanently || resp.StatusCode == http.StatusFound || resp.StatusCode == http.StatusSeeOther || resp.StatusCode == http.StatusTemporaryRedirect || resp.StatusCode == http.StatusPermanentRedirect || resp.StatusCode == http.StatusBadRequest || resp.StatusCode == http.StatusUnauthorized || resp.StatusCode == http.StatusForbidden || resp.StatusCode == http.StatusMethodNotAllowed || resp.StatusCode == http.StatusInternalServerError || resp.StatusCode == http.StatusServiceUnavailable {
-
-				if debugMode >= 2 {
-					fmt.Fprintf(os.Stderr, "[!] Error fetching URL service returned %s. Removing target. %s\n", resp.Status, url)
-				}
-				return
-			}
-
-			if debugMode >= 2 {
-				fmt.Fprintf(os.Stderr, "[!] Error unexpected response code %s. Retrying... %s\n", resp.Status, url)
-			}
-			continue
-		}
-
-		break
-	}
-
-	if resp == nil {
-		if debugMode >= 1 {
-			fmt.Fprintf(os.Stderr, "[!] Error no response from URL %s.\n", url)
-		}
-		return
-	}
-
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		if debugMode >= 1 {
-			fmt.Fprintf(os.Stderr, "[!] Error reading response body from URL %s.\n", url)
-		}
-		return
-	}
-	text := string(body)
-	text = html.UnescapeString(text)
-	var lines []string
-
-	// Check the Content-Type of the response
-	contentType := resp.Header.Get("Content-Type")
-	if strings.Contains(contentType, "text/html") {
-		// Parse the HTML
-		doc, err := html.Parse(strings.NewReader(text))
-		if err != nil {
-			if debugMode >= 1 {
-				fmt.Fprintf(os.Stderr, "[!] Error parsing HTML from URL %s.\n", url)
-			}
-			return
-		}
-
-		// Traverse the HTML tree and extract the text
-		var f func(*html.Node)
-		f = func(n *html.Node) {
-			if n.Type == html.TextNode {
-				lines = append(lines, n.Data)
-			}
-			for c := n.FirstChild; c != nil; c = c.NextSibling {
-				f(c)
-			}
-		}
-		f(doc)
-	} else {
-		sentences := strings.Split(text, "\n")
-		for _, line := range sentences {
-			lines = append(lines, line)
-		}
-	}
-
-	if debugMode == 1 {
-		fmt.Fprintf(os.Stderr, "[?] URL: %s\n", url)
-		fmt.Fprintf(os.Stderr, "[?] Content-Type: %s\n", contentType)
-		fmt.Fprintf(os.Stderr, "[?] Parsing Mode: %d\n", parsingMode)
-	} else if debugMode == 2 {
-		fmt.Fprintf(os.Stderr, "[?] URL: %s\n", url)
-		fmt.Fprintf(os.Stderr, "[?] Content-Type: %s\n", contentType)
-		fmt.Fprintf(os.Stderr, "[?] Parsing Mode: %d\n", parsingMode)
-		fmt.Fprintf(os.Stderr, "[?] Line Count: %d\n", len(lines))
-		fmt.Fprintf(os.Stderr, "[?] Sample Lines:\n")
-		for i := 0; i < 5; i++ {
-			fmt.Fprintf(os.Stderr, "%s\n", lines[i])
-		}
-	}
-
-	// Iterate over the lines and split them
-	for _, line := range lines {
-		if parsingMode == 0 {
-			textMatch, _ := regexp.MatchString(`[^a-zA-Z0-9.,;:!? ]`, line)
-			if strings.Contains(contentType, "text/html") {
-				if textMatch {
-					continue
-				}
-			} else {
-				if !textMatch {
-					continue
-				}
-			}
-		} else if parsingMode >= 1 {
-			textMatch, _ := regexp.MatchString(`[^a-zA-Z0-9.,;:!?'"\- \/+_#@"\[\]]`, line)
-			if strings.Contains(contentType, "text/html") {
-				if textMatch {
-					continue
-				}
-			} else {
-				if !textMatch {
-					continue
-				}
-			}
-		}
-
-		sentences := strings.Split(line, ".")
-		for _, sentence := range sentences {
-
-			if parsingMode >= 1 {
-				phrases := strings.Split(sentence, ",")
-				for _, phrase := range phrases {
-					if phrase != "" {
-						phrase = strings.TrimSpace(phrase)
-						ch <- phrase
-					}
-				}
-
-				phrases = strings.Split(sentence, ";")
-				for _, phrase := range phrases {
-					if phrase != "" {
-						phrase = strings.TrimSpace(phrase)
-						ch <- phrase
-					}
-				}
-
-				phrases = strings.Split(sentence, ":")
-				for _, phrase := range phrases {
-					if phrase != "" {
-						phrase = strings.TrimSpace(phrase)
-						ch <- phrase
-					}
-				}
-
-				phrases = strings.Split(sentence, "!")
-				for _, phrase := range phrases {
-					if phrase != "" {
-						phrase = strings.TrimSpace(phrase)
-						ch <- phrase
-					}
-				}
-
-				phrases = strings.Split(sentence, "?")
-				for _, phrase := range phrases {
-					if phrase != "" {
-						phrase = strings.TrimSpace(phrase)
-						ch <- phrase
-					}
-				}
-			}
-
-			if parsingMode >= 2 {
-				phrases := strings.Split(sentence, " ")
-				for _, phrase := range phrases {
-					if phrase != "" {
-						phrase = strings.TrimSpace(phrase)
-						ch <- phrase
-					}
-				}
-
-				phrases = strings.Split(sentence, "-")
-				for _, phrase := range phrases {
-					if phrase != "" {
-						phrase = strings.TrimSpace(phrase)
-						ch <- phrase
-					}
-				}
-
-				phrases = strings.Split(sentence, "'")
-				for _, phrase := range phrases {
-					if phrase != "" {
-						phrase = strings.TrimSpace(phrase)
-						ch <- phrase
-					}
-				}
-
-				twoGrams := GenerateNGrams(sentence, 2)
-				threeGrams := GenerateNGrams(sentence, 3)
-				fourGrams := GenerateNGrams(sentence, 4)
-				fiveGrams := GenerateNGrams(sentence, 5)
-				sixGrams := GenerateNGrams(sentence, 6)
-				sevenGrams := GenerateNGrams(sentence, 7)
-				allNGrams := append(twoGrams, append(threeGrams, append(fourGrams, append(fiveGrams, append(sixGrams, sevenGrams...)...)...)...)...)
-				for _, nGram := range allNGrams {
-					if nGram != "" {
-						nGram = strings.TrimSpace(nGram)
-						ch <- nGram
-
-						noDot := strings.TrimRight(nGram, ".")
-						ch <- noDot
-
-						noComma := strings.TrimRight(nGram, ",")
-						ch <- noComma
-
-						frontParse := strings.TrimLeft(nGram, ", ")
-						ch <- frontParse
-
-						noSpace := strings.ReplaceAll(nGram, " ", "")
-						ch <- noSpace
-
-					}
-				}
-			}
-
-			if sentence != "" {
-				sentence = strings.TrimSpace(sentence)
-				ch <- sentence
-			}
-		}
-	}
-}
-
-// ReadJSONToArray reads the contents of a transformation template file and
-// returns a slice of template structs.
-//
-// Args:
-//
-//	fs (FileSystem): The filesystem to read the file from (used for testing)
-//	fileArray ([]string): The name of the files to read
-//
-// Returns:
-//
-//	templates ([]models.TemplateFileOperation): The slice of template structs
-func ReadJSONToArray(fs models.FileSystem, filenames []string) []models.TemplateFileOperation {
-	var combinedTemplate []models.TemplateFileOperation
-	var template []models.TemplateFileOperation
-
-	i := 0
-	for i < len(filenames) {
-		filename := filenames[i]
-		// Check to see if a directory was passed
-		// If so, read all files in the directory and append them to the filenames
-		// slice
-		if IsFileSystemDirectory(filename) {
-			err := filepath.Walk(filename, func(path string, info os.FileInfo, err error) error {
-				if err != nil {
-					return err
-				}
-				if !info.IsDir() && strings.HasSuffix(info.Name(), ".json") {
-					filenames = append(filenames, path)
-				}
-				return nil
-			})
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "[!] Error walking the path %v: %v.\n", filename, err)
-				os.Exit(1)
-			}
-		} else {
-			data, err := fs.ReadFile(filename)
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "[!] Error reading file %s.\n", filename)
-				os.Exit(1)
-			}
-
-			err = json.Unmarshal(data, &template)
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "[!] Error unmarshalling JSON file %s.\n", filename)
-				os.Exit(1)
-			}
-
-			combinedTemplate = append(combinedTemplate, template...)
-		}
-		i++
-	}
-
-	alphaRe := regexp.MustCompile(`[a-zA-Z]`)
-	numRe := regexp.MustCompile(`[0-9]`)
-
-	for _, template := range combinedTemplate {
-		if !numRe.MatchString(fmt.Sprintf("%v", template.StartIndex)) || !numRe.MatchString(fmt.Sprintf("%v", template.EndIndex)) {
-			fmt.Fprintf(os.Stderr, "[!] Error: StartIndex and EndIndex must be integers.\n")
-			os.Exit(1)
-		}
-
-		if !alphaRe.MatchString(fmt.Sprintf("%v", template.Verbose)) {
-			fmt.Fprintf(os.Stderr, "[!] Error: Verbose must be a boolean.\n")
-			os.Exit(1)
-		}
-
-		if !alphaRe.MatchString(fmt.Sprintf("%v", template.ReplacementMask)) {
-			fmt.Fprintf(os.Stderr, "[!] Error: ReplacementMask must be a string.\n")
-			os.Exit(1)
-		}
-
-		if !alphaRe.MatchString(fmt.Sprintf("%v", template.Bypass)) {
-			fmt.Fprintf(os.Stderr, "[!] Error: Bypass must be a boolean.\n")
-			os.Exit(1)
-		}
-
-		if !alphaRe.MatchString(fmt.Sprintf("%v", template.TransformationMode)) {
-			fmt.Fprintf(os.Stderr, "[!] Error: TransformationMode must be a string.\n")
-			os.Exit(1)
-		}
-
-		if !numRe.MatchString(fmt.Sprintf("%v", template.WordRangeStart)) || !numRe.MatchString(fmt.Sprintf("%v", template.WordRangeEnd)) {
-			fmt.Fprintf(os.Stderr, "[!] Error: WordRangeStart and WordRangeEnd must be integers.\n")
-			os.Exit(1)
-		}
-	}
-
-	return combinedTemplate
-}
-
-// ProcessURLFile reads the contents of a file containing URLs and sends each
-// URL to the channel
-//
-// Args:
-// filePath (string): The path to the file containing URLs
-// ch (chan<- string): The channel to send the URLs to
-// wg (*sync.WaitGroup): The WaitGroup to signal when done
-// parsingMode (int): Change parsing mode for URL input. [0 = Strict,
-// 1 = Permissive, 2 = Maximum] [0-2].
-// debugMode (int): A flag to print debug information
-//
-// Returns:
-// None
-func ProcessURLFile(filePath string, ch chan<- string, wg *sync.WaitGroup, parsingMode int, debugMode int) {
-	defer wg.Done()
-	sleepOnStart := false
-
-	file, err := os.Open(filePath)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "[!] Error opening file %v: %v.\n", filePath, err)
-		return
-	}
-	defer file.Close()
-
-	scanner := bufio.NewScanner(file)
-	for scanner.Scan() {
-		line := scanner.Text()
-		if IsValidURL(line) {
-			wg.Add(1)
-			go ProcessURL(line, ch, wg, parsingMode, debugMode, sleepOnStart)
-		} else {
-			fmt.Fprintf(os.Stderr, "[!] Rejected URL: %s.\n", line)
-		}
-	}
-
-	if err := scanner.Err(); err != nil {
-		fmt.Fprintf(os.Stderr, "[!] Error reading file %v: %v.\n", filePath, err)
-	}
-}
-
-// ----------------------------------------------------------------------------
-// Transformation Functions
-// ----------------------------------------------------------------------------
-
 // ReverseString will return a string in reverse
 //
 // Args:
-//
-//	str (string): Input string to transform
+// str (string): Input string to transform
 //
 // Returns:
-//
-//	(string): Transformed string
+// (string): Transformed string
 func ReverseString(s string) string {
 	runes := []rune(s)
 	for i, j := 0, len(runes)-1; i < j; i, j = i+1, j-1 {
 		runes[i], runes[j] = runes[j], runes[i]
 	}
 	return string(runes)
-}
-
-// ConvertMultiByteCharToRule converts non-ascii characters to a hashcat valid format
-// for rule.CharToRule functions
-//
-// Args:
-//
-//	str (string): Input string to transform
-//
-// Returns:
-//
-//	returnStr (string): Converted string
-func ConvertMultiByteCharToRule(str string) string {
-	returnStr := ""
-	deletedChar := ``
-	for i, r := range str {
-		if r > 127 {
-			if i > 0 {
-				deletedChar = string(returnStr[len(returnStr)-1])
-				returnStr = returnStr[:len(returnStr)-1]
-			}
-			byteArr := []byte(string(r))
-			if deletedChar == "^" {
-				for j := len(byteArr) - 1; j >= 0; j-- {
-					b := byteArr[j]
-					if j == 0 {
-						returnStr += fmt.Sprintf("%s\\x%X", deletedChar, b)
-					} else {
-						returnStr += fmt.Sprintf("%s\\x%X ", deletedChar, b)
-					}
-				}
-			} else {
-				for j, b := range byteArr {
-					if j == len(byteArr)-1 {
-						returnStr += fmt.Sprintf("%s\\x%X", deletedChar, b)
-					} else {
-						returnStr += fmt.Sprintf("%s\\x%X ", deletedChar, b)
-					}
-				}
-			}
-		} else {
-			returnStr += fmt.Sprintf("%c", r)
-		}
-	}
-	return returnStr
-}
-
-// IncrementIteratingRuleCall increments the last character of a string for
-// rules.CharToIteratingRules functions
-//
-// For example, "i4" will be incremented to "i5", "iA" will be incremented to
-// "IB"
-//
-// Args:
-//
-//	s (string): Input string to increment
-//
-// Returns:
-//
-//	output (string): Incremented string
-func IncrementIteratingRuleCall(s string) string {
-	if len(s) == 0 {
-		return s
-	}
-
-	lastChar := s[len(s)-1]
-	incChar := lastChar + 1
-
-	// Replace the last character with the incremented character
-	output := s[:len(s)-1] + string(incChar)
-
-	return output
-}
-
-// ConvertMultiByteCharToIteratingRule converts non-ascii characters to a hashcat valid format
-// for rule.CharToIteratingRule functions
-//
-// Args:
-//
-//	index (int): Index to start the iteration
-//	str (string): Input string to transform
-//
-// Returns:
-//
-//	returnStr (string): Converted string
-func ConvertMultiByteCharToIteratingRule(index int, str string) string {
-	output := ""
-	lastIterationSeen := fmt.Sprintf("%s%d", string([]rune(str)[0]), index)
-
-	re := regexp.MustCompile(`[io][\dA-Z]`)
-
-	for _, word := range strings.Split(str, " ") {
-		for _, c := range word {
-			if c > 127 {
-				// Convert to UTF-8 bytes
-				bytes := []byte(string(c))
-				firstByteOut := true
-				// Convert each byte to its hexadecimal representation
-				for i, b := range bytes {
-					if firstByteOut {
-						output += fmt.Sprintf("\\x%X ", b)
-						firstByteOut = false
-						continue
-					}
-					lastIterationSeen = IncrementIteratingRuleCall(lastIterationSeen)
-					if i == len(bytes)-1 {
-						output += fmt.Sprintf("%s\\x%X", lastIterationSeen, b)
-					} else {
-						output += fmt.Sprintf("%s\\x%X ", lastIterationSeen, b)
-					}
-				}
-			} else {
-				output += string(c)
-				if len(output) > 2 && re.MatchString(output[len(output)-2:]) {
-					lastIterationSeen = output[len(output)-2:]
-				}
-			}
-		}
-		output += " "
-	}
-
-	return output
-}
-
-// SplitBySeparatorString splits a string by a separator string and returns a slice
-// with the separator string included
-//
-// Args:
-//
-//	s (string): The string to split
-//	sep (string): The separator string
-//
-// Returns:
-//
-//	[]string: A slice of strings with the separator string included
-func SplitBySeparatorString(s string, sep string) []string {
-	if !strings.Contains(s, sep) {
-		return []string{s}
-	}
-
-	// Limit to 2 to ensure we only split on the first instance of the separator
-	parts := strings.SplitN(s, sep, 2)
-	parts = append(parts[:1], append([]string{sep}, parts[1:]...)...)
-	return parts
-}
-
-// ReplaceSubstring replaces all instances of a substring in a string with a new
-// substring if the substring is found in the original string. The new substring
-// is determined by the key in the replacements map separated by a colon
-// character.
-//
-// Args:
-//
-//	original (string): The original string
-//	replacements (map[string]int): A map of substrings to replace
-//
-// Returns:
-//
-//	[]string: The original string with all instances of the substring replaced
-func ReplaceSubstring(original string, replacements map[string]int) []string {
-	var newStrings []string
-	for newSubstr := range replacements {
-		// Split the new substring into the old and new strings by the colon character
-		if !strings.Contains(newSubstr, ":") {
-			continue
-		}
-		oldStr, newStr := strings.Split(newSubstr, ":")[0], strings.Split(newSubstr, ":")[1]
-		if strings.Contains(original, oldStr) {
-			newStrings = append(newStrings, strings.Replace(original, oldStr, newStr, -1))
-		}
-	}
-	return newStrings
-}
-
-// ReplaceAllSubstring replaces all instances of a substring in a string with
-// a new substring if the substring is found in the original string. All of the
-// replacements are applied to the original string. The new substring is
-// determined by the key in the replacements map separated by a colon
-// character.
-//
-// Args:
-//
-//	original (string): The original string
-//	replacements (map[string]int): A map of substrings to replace
-//
-// Returns:
-//
-// []string: The original string with all instances of the substring replaced
-func ReplaceAllSubstring(original string, replacements map[string]int) []string {
-	newStrings := []string{original}
-	for newSubstr := range replacements {
-		// Split the new substring into the old and new strings by the colon character
-		if !strings.Contains(newSubstr, ":") {
-			continue
-		}
-		oldStr, newStr := strings.Split(newSubstr, ":")[0], strings.Split(newSubstr, ":")[1]
-		var tempStrings []string
-		for _, s := range newStrings {
-			tempStrings = append(tempStrings, strings.Replace(s, oldStr, newStr, -1))
-		}
-		newStrings = tempStrings
-	}
-	return newStrings
-}
-
-// SubstringMap returns a map of substrings from a map of strings starting at
-// the start index and ending at the end index. If the bypass flag is set to
-// true, the function will print to stdout and return an empty map. If the
-// end index is greater than the length of the string, the function will use
-// the length of the string as the end index for that string.
-//
-// Args:
-//
-//	sMap (map[string]int): The map of substrings
-//	sIndex (int): The start index of the substring
-//	eIndex (int): The end index of the substring
-//	bypass (bool): Skip returning the map and print to stdout
-//	debug (bool): A flag to print debug information
-//
-// Returns:
-//
-//	map[string]int: A map of substrings
-func SubstringMap(sMap map[string]int, sIndex int, eIndex int, bypass bool, debug bool) map[string]int {
-	newMap := make(map[string]int)
-	for s := range sMap {
-		maxLen := eIndex
-		if sIndex > len(s) {
-			if debug {
-				fmt.Fprintf(os.Stderr, fmt.Sprintf("[!] Error: Start index is out of bounds: %s.\n", s))
-			}
-			continue
-		} else if eIndex > len(s) {
-			maxLen = len(s)
-		}
-
-		if bypass {
-			fmt.Fprintf(os.Stdout, "%s\n", s[sIndex:maxLen])
-			continue
-		}
-		newMap[s[sIndex:maxLen]]++
-	}
-	return newMap
-}
-
-// GenerateNGrams generates n-grams from a string of text
-// and returns a slice of n-grams
-//
-// Args:
-// text (string): The text to generate n-grams from
-// n (int): The number of words in each n-gram
-//
-// Returns:
-// []string: A slice of n-grams
-func GenerateNGrams(text string, n int) []string {
-	words := strings.Fields(text)
-	var nGrams []string
-
-	for i := 0; i <= len(words)-n; i++ {
-		nGram := strings.Join(words[i:i+n], " ")
-		nGrams = append(nGrams, nGram)
-	}
-
-	return nGrams
 }
 
 // GeneratePassphrase generates a passphrase from a string of text
@@ -1039,163 +95,559 @@ func GeneratePassphrase(text string, n int) []string {
 	return passphrases
 }
 
-// ----------------------------------------------------------------------------
-// Validation Functions
-// ----------------------------------------------------------------------------
-
-// CheckASCIIString checks to see if a string only contains ascii characters
+// GenerateNGrams generates n-grams from a string of text
+// and returns a slice of n-grams
 //
 // Args:
-//
-//	str (string): Input string to check
+// text (string): The text to generate n-grams from
+// n (int): The number of words in each n-gram
 //
 // Returns:
-//
-//	(bool): If the string only contained ASCII characters
-func CheckASCIIString(str string) bool {
-	if utf8.RuneCountInString(str) != len(str) {
-		return false
+// []string: A slice of n-grams
+func GenerateNGrams(text string, n int) []string {
+	words := strings.Fields(text)
+	var nGrams []string
+
+	for i := 0; i <= len(words)-n; i++ {
+		nGram := strings.Join(words[i:i+n], " ")
+		nGrams = append(nGrams, nGram)
 	}
-	return true
+
+	return nGrams
 }
 
-// CheckHexString is used to identify plaintext in the $HEX[...] format
+// PrintStatsToSTDOUT prints statistics about the frequency map to stdout
+// including several statistics about the frequency map. If verbose is true,
+// additional information is printed and increased number of items are
+// printed. Items are printed in graph format with a # for each unit of item.
 //
 // Args:
 //
-//	s (str): The string to be evaluated
+//	freq (map[string]int): A map of item frequencies
 //
 // Returns:
 //
-//	(bool): Returns true if it matches and false if it did not
-func CheckHexString(s string) bool {
-	var validateInput = regexp.MustCompile(`^\$HEX\[[a-zA-Z0-9]*\]$`).MatchString
-	if validateInput(s) == false {
-		return false
-	}
-	return true
-}
+//	None
+func PrintStatsToSTDOUT(freq map[string]int) {
 
-// CheckAreMapsEqual checks if two maps are equal by comparing the length of the maps
-// and the values of the keys in the maps. If the maps are equal, the function returns
-// true, otherwise it returns false.
-//
-// Args:
-//
-//	a (map[string]int): The first map to compare
-//	b (map[string]int): The second map to compare
-//
-// Returns:
-//
-//	bool: True if the maps are equal, false otherwise
-func CheckAreMapsEqual(a, b map[string]int) bool {
-	if len(a) != len(b) {
-		return false
+	// Sort by frequency
+	p := make(models.PairList, len(freq))
+	normalizedP := make(models.PairList, len(freq))
+	i := 0
+	for k, v := range freq {
+		p[i] = models.Pair{k, v}
+		normalizedP[i] = models.Pair{k, v}
+		i++
 	}
-	for k, v := range a {
-		if w, ok := b[k]; !ok || v != w {
-			return false
-		}
-	}
-	return true
-}
+	sort.Sort(sort.Reverse(p))
+	sort.Sort(sort.Reverse(normalizedP))
 
-// CheckAreArraysEqual checks if two arrays are equal by comparing the length of the arrays
-// and the values of the elements in the arrays. If the arrays are equal, the function returns
-// true, otherwise it returns false.
-//
-// Args:
-// a ([]string): The first array to compare
-// b ([]string): The second array to compare
-//
-// Returns:
-// bool: True if the arrays are equal, false otherwise
-func CheckAreArraysEqual(a, b []string) bool {
-	if len(a) != len(b) {
-		return false
-	}
-	sort.Strings(a)
-	sort.Strings(b)
-	for i, v := range a {
-		if v != b[i] {
-			return false
-		}
-	}
-	return true
-}
-
-// IsFileSystemDirectory checks to see if a string is a valid file system
-// directory by checking if the path exists and if it is a directory
-//
-// Args:
-//
-//	path (string): The path to check
-//
-// Returns:
-//
-//	bool: True if the path is a directory, false otherwise
-func IsFileSystemDirectory(path string) bool {
-	fileInfo, err := os.Stat(path)
-	if os.IsNotExist(err) {
-		return false
-	}
-	return fileInfo.IsDir()
-}
-
-// IsValidURL checks if a string is a valid URL by parsing the string
-//
-// Args:
-// str (string): The URL to check
-//
-// Returns:
-// bool: True if the URL is valid, false otherwise
-func IsValidURL(str string) bool {
-	_, err := url.Parse(str)
-	if err != nil {
-		return false
+	maxItems := 75
+	if maxItems > len(p) {
+		maxItems = len(p)
 	}
 
-	if !strings.Contains(str, "http://") && !strings.Contains(str, "https://") {
-		return false
+	if len(p) == 0 {
+		fmt.Println("[!] No items to print!")
+		return
 	}
 
-	return true
-}
+	// Print the statistics
+	fmt.Fprintf(os.Stderr, "[*] Starting statistics generation. Please wait...\n")
+	fmt.Println(fmt.Sprintf("Verbose Statistics: max=%d", maxItems))
+	fmt.Println("--------------------------------------------------")
+	fmt.Println(createVerboseStats(freq))
+	fmt.Println("--------------------------------------------------")
 
-// GetFilesInDirectory returns a slice of files in a directory
-// by reading the directory and appending the files to a slice
-// if they are not directories
-//
-// Args:
-// dir (string): The directory to read
-//
-// Returns:
-// []string: A slice of files in the directory
-func GetFilesInDirectory(dir string) ([]string, error) {
-	var files []string
-	items, err := os.ReadDir(dir)
-	if err != nil {
-		return nil, err
+	// Use the largest frequency value to normalize the graph
+	largest := p[0].Value
+	for index, value := range normalizedP {
+		normalizedValue := value.Value * 50 / largest
+		normalizedP[index].Value = normalizedValue
 	}
 
-	for _, item := range items {
-		if !item.IsDir() {
-			files = append(files, filepath.Join(dir, item.Name()))
+	// Use the longest key to normalize padding for the graph
+	longest := 0
+	for _, value := range p[0:maxItems] {
+		if len(value.Key) > longest {
+			longest = len(value.Key)
 		}
 	}
 
-	return files, nil
+	// Print the top items
+	for index, value := range p[0:maxItems] {
+		if value.Value == 1 && index == 0 {
+			fmt.Println("[!] No items with a frequency greater than 1!")
+			break
+		}
+		padding := longest - len(value.Key)
+		fmt.Printf("%s%s [%d]%s\n", value.Key, strings.Repeat(" ", padding), value.Value, strings.Repeat("=", normalizedP[index].Value))
+	}
 }
 
-// IsValidFile checks if a file exists and is not a directory
-// by checking if the file exists
+// createVerboseStats creates a string of verbose statistics about the frequency map
+// including several statistics about the frequency map.
 //
 // Args:
-// path (string): The path to the file
+//
+//	freq (map[string]int): A map of item frequencies
 //
 // Returns:
-// bool: True if the file is valid, false otherwise
-func IsValidFile(path string) bool {
-	info, err := os.Stat(path)
-	return err == nil && !info.IsDir()
+//
+//	string: A string of verbose statistics
+func createVerboseStats(freq map[string]int) string {
+	var stats string
+	// Sort by frequency
+	p := make(models.PairList, len(freq))
+	i := 0
+	for k, v := range freq {
+		p[i] = models.Pair{k, v}
+		i++
+	}
+	sort.Sort(sort.Reverse(p))
+
+	// Pull stats
+	totalWords := 0
+	totalItems := 0
+	lengths := make([]int, 0)
+	frequencies := make([]int, 0)
+	complexities := make([]int, 0)
+	categoryCounts := make(map[string]int)
+	for k, v := range freq {
+		totalWords += len(strings.Fields(k))
+		categories := StatClassifyToken(k)
+		frequencies = append(frequencies, v)
+		totalItems += v
+
+		for i := 0; i < v; i++ {
+			lengths = append(lengths, len(k))
+		}
+
+		m := mask.MakeMask(k)
+		complexity := mask.TestMaskComplexity(m)
+		complexities = append(complexities, complexity)
+
+		for _, category := range categories {
+			categoryCounts[category]++
+		}
+	}
+	stats += "General Stats:\n"
+	stats += fmt.Sprintf("Total Items: %d\n", totalItems)
+	stats += fmt.Sprintf("Total Unique items: %d\n", len(p))
+	stats += fmt.Sprintf("Total Words: %d\n", totalWords)
+	stats += fmt.Sprintf("Largest frequency: %d\n", p[0].Value)
+	stats += fmt.Sprintf("Smallest frequency: %d\n", p[len(p)-1].Value)
+
+	stats += "\nPlots:\n"
+	plot, minBW, q1, q2, q3, maxBW := CreateBoxAndWhiskersPlot(lengths)
+	stats += fmt.Sprintf("Item Length: %s\n", plot)
+	stats += fmt.Sprintf("Min: %d, Q1: %d, Q2: %d, Q3: %d, Max: %d\n", minBW, q1, q2, q3, maxBW)
+	plot, minBW, q1, q2, q3, maxBW = CreateBoxAndWhiskersPlot(frequencies)
+	stats += fmt.Sprintf("Item Frequency: %s\n", plot)
+	stats += fmt.Sprintf("Min: %d, Q1: %d, Q2: %d, Q3: %d, Max: %d\n", minBW, q1, q2, q3, maxBW)
+	plot, minBW, q1, q2, q3, maxBW = CreateBoxAndWhiskersPlot(complexities)
+	stats += fmt.Sprintf("Item Complexity: %s\n", plot)
+	stats += fmt.Sprintf("Min: %d, Q1: %d, Q2: %d, Q3: %d, Max: %d\n", minBW, q1, q2, q3, maxBW)
+
+	stats += "\nCategory Counts:\n"
+	for category, count := range categoryCounts {
+		stats += fmt.Sprintf("%s: %d\n", category, count)
+	}
+
+	return stats
+}
+
+// StatClassifyToken classifies a token into a set of categories
+// based on the token's content. "Short" and "long" are relative
+// to ten characters currently.
+//
+// Args:
+//
+//	s (string): The token to classify
+//
+// Returns:
+//
+//	[]string: A list of categories that the token belongs to
+func StatClassifyToken(s string) []string {
+	var categories []string
+
+	isAlpha := func(c rune) bool { return unicode.IsLetter(c) }
+	isDigit := func(c rune) bool { return unicode.IsDigit(c) }
+	isSpecial := func(c rune) bool { return !unicode.IsLetter(c) && !unicode.IsDigit(c) && !unicode.IsSpace(c) }
+
+	if strings.IndexFunc(s, isAlpha) >= 0 {
+		if strings.IndexFunc(s, isSpecial) >= 0 && (strings.IndexFunc(s, isAlpha) >= 0 || strings.IndexFunc(s, isDigit) >= 0) {
+			categories = append(categories, "alphanumeric-with-special")
+		} else if strings.IndexFunc(s, isAlpha) >= 0 && strings.IndexFunc(s, isDigit) >= 0 && strings.IndexFunc(s, isSpecial) == -1 {
+			categories = append(categories, "alphanumeric")
+		} else if strings.IndexFunc(s, isAlpha) >= 0 && strings.IndexFunc(s, isSpecial) >= 0 && strings.IndexFunc(s, isDigit) == -1 {
+			categories = append(categories, "alphabetical-with-special")
+		} else {
+			categories = append(categories, "alphabetical")
+		}
+	}
+
+	if strings.IndexFunc(s, isDigit) >= 0 && strings.IndexFunc(s, isAlpha) == -1 {
+		if strings.IndexFunc(s, isDigit) >= 0 && strings.IndexFunc(s, isSpecial) >= 0 {
+			categories = append(categories, "numeric-with-special")
+		} else {
+			categories = append(categories, "numeric")
+		}
+	}
+
+	if strings.Count(s, " ") >= 2 && strings.IndexFunc(s, isAlpha) >= 0 {
+		categories = append(categories, "phrase")
+	}
+
+	digitCount := 0
+	for _, c := range s {
+		if isDigit(c) {
+			digitCount++
+		}
+	}
+	if digitCount > len(s)*5/7 {
+		categories = append(categories, "high-numeric-ratio")
+	}
+
+	if strings.HasPrefix(s, "$HEX[") && strings.HasSuffix(s, "]") {
+		categories = append(categories, "$HEX[...]-format")
+	}
+
+	if _, err := hex.DecodeString(s); err == nil {
+		categories = append(categories, "hex-string")
+	}
+
+	if _, err := url.ParseRequestURI(s); err == nil && strings.Contains(s, "://") {
+		categories = append(categories, "URL")
+	}
+
+	if strings.IndexFunc(s, func(r rune) bool { return r >= 0x1F600 && r <= 0x1F64F }) >= 0 {
+		categories = append(categories, "emoji-characters")
+	}
+
+	if strings.IndexFunc(s, func(r rune) bool { return r >= 0x4E00 && r <= 0x9FFF }) >= 0 {
+		categories = append(categories, "CJK-characters")
+	}
+
+	if strings.IndexFunc(s, func(r rune) bool { return r >= 0x0400 && r <= 0x04FF }) >= 0 {
+		categories = append(categories, "cyrillic-characters")
+	}
+
+	if strings.IndexFunc(s, func(r rune) bool { return r >= 0x0600 && r <= 0x06FF }) >= 0 {
+		categories = append(categories, "arabic-characters")
+	}
+
+	if strings.IndexFunc(s, func(r rune) bool { return r >= 0x0590 && r <= 0x05FF }) >= 0 {
+		categories = append(categories, "hebrew-characters")
+	}
+
+	if strings.IndexFunc(s, func(r rune) bool { return r >= 0x0E00 && r <= 0x0E7F }) >= 0 {
+		categories = append(categories, "thai-characters")
+	}
+
+	if strings.IndexFunc(s, func(r rune) bool { return r >= 0x0370 && r <= 0x03FF }) >= 0 {
+		categories = append(categories, "greek-characters")
+	}
+
+	if strings.IndexFunc(s, func(r rune) bool { return r >= 0xAC00 && r <= 0xD7AF }) >= 0 {
+		categories = append(categories, "korean-characters")
+	}
+
+	if strings.IndexFunc(s, func(r rune) bool { return r >= 0x3040 && r <= 0x309F }) >= 0 {
+		categories = append(categories, "hiragana-characters")
+	}
+
+	if strings.IndexFunc(s, func(r rune) bool { return r >= 0x30A0 && r <= 0x30FF }) >= 0 {
+		categories = append(categories, "katakana-characters")
+	}
+
+	if strings.IndexFunc(s, func(r rune) bool { return r >= 0x31F0 && r <= 0x31FF }) >= 0 {
+		categories = append(categories, "katakana-extended-characters")
+	}
+
+	if strings.IndexFunc(s, unicode.IsUpper) >= 0 {
+		if strings.IndexFunc(s, unicode.IsUpper) == 0 {
+			categories = append(categories, "starts-uppercase")
+		} else {
+			categories = append(categories, "contains-uppercase")
+		}
+	}
+
+	if strings.IndexFunc(s, unicode.IsLower) == -1 && strings.IndexFunc(s, unicode.IsUpper) >= 0 {
+		categories = append(categories, "all-uppercase")
+	}
+
+	if strings.IndexFunc(s, unicode.IsUpper) == -1 && strings.IndexFunc(s, unicode.IsLower) >= 0 {
+		categories = append(categories, "all-lowercase")
+	}
+
+	if strings.IndexFunc(s, unicode.IsUpper) >= 0 && strings.IndexFunc(s, unicode.IsLower) >= 0 && strings.IndexFunc(s, isDigit) >= 0 && strings.IndexFunc(s, isSpecial) >= 0 {
+		categories = append(categories, "complex")
+		if len(s) > 10 {
+			categories = append(categories, "long-complex")
+		} else {
+			categories = append(categories, "short-complex")
+		}
+	} else {
+		categories = append(categories, "non-complex")
+		if len(s) > 10 {
+			categories = append(categories, "long-non-complex")
+		} else {
+			categories = append(categories, "short-non-complex")
+		}
+	}
+
+	for _, c := range s {
+		if c > 127 {
+			categories = append(categories, "non-ASCII")
+			break
+		}
+	}
+
+	return categories
+}
+
+// CalculateQuartiles calculates the first, second, and third quartiles of a
+// list of integers and returns the values.
+//
+// Args:
+// data ([]int): A list of integers
+//
+// Returns:
+// int: The first quartile value
+// int: The second quartile value
+// int: The third quartile value
+func CalculateQuartiles(data []int) (int, int, int) {
+	sort.Ints(data)
+	n := len(data)
+
+	q1 := data[n/4]
+	q2 := data[n/2]
+	q3 := data[3*n/4]
+
+	return q1, q2, q3
+}
+
+// CreateBoxAndWhiskersPlot creates a box and whiskers plot from a list of
+// integers.
+//
+// Args:
+//
+//	data ([]int): A list of integers
+//
+//	Returns:
+//	string: A string representation of the box and whiskers plot
+//	int: The minimum value
+//	int: The first quartile value
+//	int: The second quartile value
+//	int: The third quartile value
+//	int: The maximum value
+func CreateBoxAndWhiskersPlot(data []int) (string, int, int, int, int, int) {
+	q1, q2, q3 := CalculateQuartiles(data)
+	minBW := data[0]
+	maxBW := data[len(data)-1]
+
+	// Normalize the plot
+	largest := maxBW
+	normalizedQ1 := q1 * 50 / largest
+	normalizedQ2 := q2 * 50 / largest
+	normalizedQ3 := q3 * 50 / largest
+	normalizedMin := minBW * 50 / largest
+	normalizedMax := maxBW * 50 / largest
+
+	plot := fmt.Sprintf("|%s[%s|%s]%s|", strings.Repeat("-", normalizedQ1-normalizedMin), strings.Repeat("=", normalizedQ2-normalizedQ1), strings.Repeat("=", normalizedQ3-normalizedQ2), strings.Repeat("-", normalizedMax-normalizedQ3))
+	return plot, minBW, q1, q2, q3, maxBW
+}
+
+// MakeRetainMaskedMap replaces all characters in the input maps key with mask
+// values in the input map but retains keywords provided in the retain list
+//
+// Args:
+//
+//	input (string): String to mask
+//	retain (map[string]int): Map of keywords to retain
+//
+// Returns:
+//
+//	maskedMap (map[string]int): Masked retain map
+func MakeRetainMaskedMap(input string, retain map[string]int) map[string]int {
+	maskedMap := make(map[string]int)
+
+	for retainKey := range retain {
+		newKey := ""
+		if strings.Contains(input, retainKey) {
+			parts := splitBySeparatorString(input, retainKey)
+
+			// if the part is not the key replace it using replacer
+			for _, part := range parts {
+				if part != retainKey {
+					newPart := models.MaskReplacer.Replace(part)
+					if !validation.CheckASCIIString(newPart) && strings.Contains(models.GlobalMask, "b") {
+						newPart = validation.ConvertMultiByteMask(newPart)
+					}
+					newKey += newPart
+				} else {
+					newKey += part
+				}
+			}
+
+		} else {
+			// if the key is not in the string continue
+			continue
+		}
+
+		if oldValue, exists := maskedMap[newKey]; exists {
+			maskedMap[newKey] = oldValue + 1
+		} else {
+			maskedMap[newKey] = 1
+		}
+	}
+	return maskedMap
+}
+
+// splitBySeparatorString splits a string by a separator string and returns a slice
+// with the separator string included
+//
+// Args:
+//
+//	s (string): The string to split
+//	sep (string): The separator string
+//
+// Returns:
+//
+//	[]string: A slice of strings with the separator string included
+func splitBySeparatorString(s string, sep string) []string {
+	if !strings.Contains(s, sep) {
+		return []string{s}
+	}
+
+	// Limit to 2 to ensure we only split on the first instance of the separator
+	parts := strings.SplitN(s, sep, 2)
+	parts = append(parts[:1], append([]string{sep}, parts[1:]...)...)
+	return parts
+}
+
+// ShuffleMap shuffles the input map keys and replaces partially the masked
+// parts of the keys with matching mask keys from the input map. This function
+// resembles 'token-swapping' where the mask value is used to swap key words
+// into another.
+//
+// Args:
+//
+//	input (map[string]int): Input map
+//	swapMap (map[string]int): Items to swap with
+//
+// Returns:
+// (map[string]int): Shuffled map with swapped keys
+func ShuffleMap(input map[string]int, swapMap map[string]int) map[string]int {
+	shuffleMap := make(map[string]int)
+	re := regexp.MustCompile(`^(\?u|\?l|\?d|\?s|\?b)*$`)
+	reParser := regexp.MustCompile("(\\?[ludsb])")
+
+	for key, value := range input {
+		newKey := ""
+		// Make a new key with the masked parts
+		chars := reParser.FindAllString(key, -1)
+		match := strings.Join(chars, "")
+
+		if re.MatchString(match) {
+			newKey = match
+		}
+
+		// Check if the new key is in the swap map
+		for swapKey := range swapMap {
+			if models.DebugMode {
+				fmt.Fprintf(os.Stderr, "[?] utils.ShuffleMap(input, swapMap)\n")
+				fmt.Fprintf(os.Stderr, "Key: %s\n", key)
+				fmt.Fprintf(os.Stderr, "Match: %s\n", match)
+				fmt.Fprintf(os.Stderr, "Swap Token: %s\n", swapKey)
+				fmt.Fprintf(os.Stderr, "Replacement Mask: %s\n", models.GlobalMask)
+			}
+
+			maskedSwapKey := mask.MakeMask(swapKey)
+			if maskedSwapKey == newKey {
+
+				var shufKey string
+				shufKey = strings.Replace(key, newKey, swapKey, 1)
+
+				if models.DebugMode {
+					fmt.Fprintf(os.Stderr, "[?] utils.ShuffleMap(input, swapMap)\n")
+					fmt.Fprintf(os.Stderr, "Swap Token Mask: %s\n", maskedSwapKey)
+					fmt.Fprintf(os.Stderr, "Swap Result: %s\n", shufKey)
+				}
+
+				if shufKey == key {
+					if models.DebugMode {
+						fmt.Fprintf(os.Stderr, "[!] Swap failed invalid key:\n")
+						fmt.Fprintf(os.Stderr, "Key: %s\n", key)
+						fmt.Fprintf(os.Stderr, "Swap Result: %s\n", shufKey)
+					}
+
+					continue
+				}
+
+				// if the line ends or starts with ?[uldbs] then the swap failed
+				if strings.HasPrefix(shufKey, "?") || strings.HasSuffix(shufKey[len(shufKey)-2:len(shufKey)-1], "?") {
+
+					if strings.ContainsRune("uldbs", rune(shufKey[1])) && strings.HasPrefix(shufKey, "?") || strings.ContainsRune("uldbs", rune(shufKey[len(shufKey)-1])) && strings.HasSuffix(shufKey[len(shufKey)-2:len(shufKey)-1], "?") {
+
+						if models.DebugMode {
+							fmt.Fprintf(os.Stderr, "[!] Swap failed invalid key:\n")
+							fmt.Fprintf(os.Stderr, "Key: %s\n", key)
+							fmt.Fprintf(os.Stderr, "Swap Result: %s\n", shufKey)
+						}
+
+						continue
+
+					}
+				}
+
+				if oldValue, exists := shuffleMap[shufKey]; exists {
+					shuffleMap[shufKey] = oldValue + value
+				} else {
+					shuffleMap[shufKey] = value
+				}
+
+			}
+		}
+	}
+	return shuffleMap
+}
+
+// TrackLoadTime tracks the load time of a process and prints the elapsed time
+func TrackLoadTime(done <-chan bool, work string) {
+	start := time.Now()
+	interval := 10 * time.Second
+	ticker := time.NewTicker(interval)
+
+	for {
+		select {
+		case <-done:
+			ticker.Stop()
+			return
+
+		case t := <-ticker.C:
+			elapsed := t.Sub(start)
+			memUsage := GetMemoryUsage()
+			fmt.Fprintf(os.Stderr,
+				"[-] Please wait loading. Elapsed: %02d:%02d:%02d.%03d. Memory Usage: %.2f MB.\n",
+				int(elapsed.Hours()), int(elapsed.Minutes())%60, int(elapsed.Seconds())%60,
+				elapsed.Milliseconds()%1000, memUsage,
+			)
+
+			ticker.Stop()
+			// Increment the interval by 10 seconds, capped at 10 minutes
+			if interval < 10*time.Minute {
+				interval += 10 * time.Second
+			}
+			ticker = time.NewTicker(interval)
+		}
+	}
+}
+
+// GetMemoryUsage returns the current memory usage in megabytes
+func GetMemoryUsage() float64 {
+	var m runtime.MemStats
+	runtime.ReadMemStats(&m)
+	return float64(m.Alloc) / 1024 / 1024
 }
