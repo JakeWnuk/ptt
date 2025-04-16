@@ -1,5 +1,7 @@
 package filter
 
+import "ptt/pkg/models"
+
 // Pass checks if a string passes the filter function and returns the boolean
 // result.
 //
@@ -12,5 +14,10 @@ func Pass(input string) bool {
 	if input == "" {
 		return false
 	}
+
+	if len(input) < models.LengthStart || len(input) > models.LengthEnd {
+		return false
+	}
+
 	return true
 }

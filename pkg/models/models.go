@@ -1,3 +1,5 @@
+// Package models provides the data structures and models used in the
+// application.
 package models
 
 import (
@@ -13,7 +15,7 @@ import (
 // application in a structured way.
 
 // DebugMode is a boolean flag to enable or disable debug mode
-var DebugMode bool = false
+var DebugMode = false
 
 // OperationStart is a string flag to specify the start of an operation
 var OperationStart int
@@ -25,7 +27,7 @@ var OperationEnd int
 // for operations
 var MaskReplacer *strings.Replacer
 
-// Mask is a string flag to specify the mask replacement string
+// GlobalMask is a string flag to specify the mask replacement string
 // for operations
 var GlobalMask string
 
@@ -37,8 +39,23 @@ var WordStart int
 // operations
 var WordEnd int
 
+// LengthStart is a string flag to specify the start of the number of
+// characters
+var LengthStart int
+
+// LengthEnd is a string flag to specify the end of the number of characters
+var LengthEnd int
+
+// Verbose is a boolean flag to enable or disable verbose mode
+// for operations
+var Verbose bool
+
+// VerboseOutput is a map[string]int to hold the verbose output
+// for operations
+var VerboseOutput map[string]int
+
 // ----------------------------------------------------------------------------
-// Argument Flag Models
+// Flag Models
 // ----------------------------------------------------------------------------
 // These models are used to define the flags that are used in the command line
 // interface. The intention is to provide a way to define the flags can be used
@@ -82,3 +99,16 @@ func (i *IntRange) Set(value string) error {
 	}
 	return nil
 }
+
+// Pair is used to store the key value pair of the map[string]int
+type Pair struct {
+	Key   string
+	Value int
+}
+
+// PairList is a slice of Pairs that implements sort.Interface to sort by Value
+type PairList []Pair
+
+func (p PairList) Len() int           { return len(p) }
+func (p PairList) Less(i, j int) bool { return p[i].Value < p[j].Value }
+func (p PairList) Swap(i, j int)      { p[i], p[j] = p[j], p[i] }

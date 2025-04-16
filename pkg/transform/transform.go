@@ -9,7 +9,6 @@ import (
 	"ptt/pkg/models"
 	"ptt/pkg/rule"
 	"ptt/pkg/utils"
-	"ptt/pkg/validation"
 	"strings"
 	"unicode"
 
@@ -38,7 +37,15 @@ func ReadReturnStandardInput(transformation models.MultiString) {
 					line = Apply(line, operation)
 
 					if filter.Pass(line) {
-						fmt.Println(line)
+						if models.Verbose {
+							if models.VerboseOutput[line] == 0 {
+								models.VerboseOutput[line] = 1
+							} else {
+								models.VerboseOutput[line] += 1
+							}
+						} else {
+							fmt.Println(line)
+						}
 					}
 
 					models.OperationStart++
@@ -48,8 +55,17 @@ func ReadReturnStandardInput(transformation models.MultiString) {
 			} else if strings.Contains(operation, "pop") || strings.Contains(operation, "passphrase") || strings.Contains(operation, "regram") || strings.Contains(operation, "swap") {
 				output := Parse(line, operation)
 				for item, _ := range output {
+
 					if filter.Pass(item) {
-						fmt.Println(item)
+						if models.Verbose {
+							if models.VerboseOutput[item] == 0 {
+								models.VerboseOutput[item] = 1
+							} else {
+								models.VerboseOutput[item] += 1
+							}
+						} else {
+							fmt.Println(item)
+						}
 					}
 				}
 			} else {
@@ -61,6 +77,10 @@ func ReadReturnStandardInput(transformation models.MultiString) {
 
 				line = readText
 			}
+		}
+
+		if models.Verbose {
+			utils.PrintStatsToSTDOUT(models.VerboseOutput)
 		}
 	}
 
@@ -99,9 +119,9 @@ func Apply(input string, transform string) string {
 	case "simplify", "rule-simplify":
 		return ruleSimplify(input)
 	case "mask", "rule-mask":
-		return makeMask(input)
+		return mask.MakeMask(input)
 	case "remove", "mask-remove":
-		return mask.RemoveMaskedCharacters(makeMask(input))
+		return mask.RemoveMaskedCharacters(mask.MakeMask(input))
 	default:
 		return ""
 	}
@@ -337,31 +357,6 @@ func ruleSimplify(key string) string {
 	}
 
 	return simplifyRule
-}
-
-// makeMask transforms the input string into a mask using the global mask
-// defined in the models package.
-//
-// Args:
-// key (string): The input string to be transformed.
-//
-// Returns:
-// (string): The transformed string in the form of a mask.
-func makeMask(key string) string {
-	newKey := models.MaskReplacer.Replace(key)
-
-	if !validation.CheckASCIIString(newKey) && strings.Contains(models.GlobalMask, "b") {
-		newKey = validation.ConvertMultiByteMask(newKey)
-	}
-
-	if models.DebugMode {
-		fmt.Fprintf(os.Stderr, "[?] transform.MakeMask(key):\n")
-		fmt.Fprintf(os.Stderr, "Key: %s\n", key)
-		fmt.Fprintf(os.Stderr, "Replacement Mask: %s\n", models.GlobalMask)
-		fmt.Fprintf(os.Stderr, "Return: %s\n", newKey)
-	}
-
-	return newKey
 }
 
 // maskPop transforms the input string into a map of tokens and their

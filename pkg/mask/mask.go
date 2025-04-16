@@ -1,9 +1,12 @@
 package mask
 
 import (
+	"fmt"
+	"os"
 	"ptt/pkg/models"
 	"ptt/pkg/validation"
 	"strings"
+	"unicode"
 )
 
 // ConstructReplacements create an array mapping which characters to replace
@@ -58,6 +61,31 @@ func ConstructReplacements(str string) []string {
 	return args
 }
 
+// MakeMask transforms the input string into a mask using the global mask
+// defined in the models package.
+//
+// Args:
+// key (string): The input string to be transformed.
+//
+// Returns:
+// (string): The transformed string in the form of a mask.
+func MakeMask(key string) string {
+	newKey := models.MaskReplacer.Replace(key)
+
+	if !validation.CheckASCIIString(newKey) && strings.Contains(models.GlobalMask, "b") {
+		newKey = validation.ConvertMultiByteMask(newKey)
+	}
+
+	if models.DebugMode {
+		fmt.Fprintf(os.Stderr, "[?] transform.MakeMask(key):\n")
+		fmt.Fprintf(os.Stderr, "Key: %s\n", key)
+		fmt.Fprintf(os.Stderr, "Replacement Mask: %s\n", models.GlobalMask)
+		fmt.Fprintf(os.Stderr, "Return: %s\n", newKey)
+	}
+
+	return newKey
+}
+
 // RemoveMaskedCharacters removes masked characters from the input map
 // and returns a new map
 //
@@ -75,4 +103,73 @@ func RemoveMaskedCharacters(key string) string {
 	}
 
 	return newKey
+}
+
+// TestMaskComplexity tests the complexity of an input full mask or a partial
+// mask string and returns a score
+//
+// Args:
+//
+//	str (string): Input string to test
+//
+// Returns:
+//
+//	(int): Complexity score as an integer
+func TestMaskComplexity(str string) int {
+	score := 0
+	lowerBool := false
+	upperBool := false
+	digitBool := false
+	specialBool := false
+	byteBool := false
+	for i := 0; i < len(str); i++ {
+		if str[i] == '?' {
+			if i+1 < len(str) {
+				switch str[i+1] {
+				case 'l':
+					lowerBool = true
+				case 'u':
+					upperBool = true
+				case 'd':
+					digitBool = true
+				case 's':
+					specialBool = true
+				case 'b':
+					byteBool = true
+				}
+			}
+		} else {
+			if unicode.IsLower(rune(str[i])) {
+				lowerBool = true
+			}
+			if unicode.IsUpper(rune(str[i])) {
+				upperBool = true
+			}
+			if unicode.IsDigit(rune(str[i])) {
+				digitBool = true
+			}
+			if strings.ContainsRune(" !\"#$%&\\()*+,-./:;<=>?@[\\]^_`{|}~'", rune(str[i])) {
+				specialBool = true
+			}
+			if str[i] > 127 {
+				byteBool = true
+			}
+		}
+	}
+	if lowerBool {
+		score++
+	}
+	if upperBool {
+		score++
+	}
+	if digitBool {
+		score++
+	}
+	if specialBool {
+		score++
+	}
+	if byteBool {
+		score++
+	}
+	return score
 }
