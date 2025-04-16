@@ -1,3 +1,5 @@
+// Package transform provides functions to transform strings based on
+// various rules and operations.
 package transform
 
 import (
@@ -42,7 +44,7 @@ func ReadReturnStandardInput(transformation models.MultiString) {
 							if models.VerboseOutput[line] == 0 {
 								models.VerboseOutput[line] = 1
 							} else {
-								models.VerboseOutput[line] += 1
+								models.VerboseOutput[line]++
 							}
 						} else {
 							fmt.Println(line)
@@ -55,14 +57,14 @@ func ReadReturnStandardInput(transformation models.MultiString) {
 				models.OperationStart = start
 			} else if strings.Contains(operation, "pop") || strings.Contains(operation, "passphrase") || strings.Contains(operation, "regram") || strings.Contains(operation, "swap") {
 				output := Parse(line, operation)
-				for item, _ := range output {
+				for item := range output {
 
 					if filter.Pass(item) {
 						if models.Verbose {
 							if models.VerboseOutput[item] == 0 {
 								models.VerboseOutput[item] = 1
 							} else {
-								models.VerboseOutput[item] += 1
+								models.VerboseOutput[item]++
 							}
 						} else {
 							fmt.Println(item)
@@ -128,6 +130,7 @@ func Apply(input string, transform string) string {
 	}
 }
 
+// Parse parses the input string based on the specified transformation.
 func Parse(input string, transform string) map[string]int {
 	switch transform {
 	case "pop", "mask-pop":
@@ -473,20 +476,20 @@ func tokenSwap(input string) map[string]int {
 	// allocated
 	poppedTokens := maskPop(input)
 	for i := range poppedTokens {
-		if filter.Pass(i) == false {
+		if i == "" || i == " " {
 			continue
 		}
-		if models.VerboseOutput[i] == 0 {
-			models.VerboseOutput[i] = 1
+		if models.GlobalTokens[i] == 0 {
+			models.GlobalTokens[i] = 1
 		} else {
-			models.VerboseOutput[i] += 1
+			models.GlobalTokens[i]++
 		}
 	}
 
 	// Sort by frequency
-	p := make(models.PairList, len(models.VerboseOutput))
+	p := make(models.PairList, len(models.GlobalTokens))
 	i := 0
-	for k, v := range models.VerboseOutput {
+	for k, v := range models.GlobalTokens {
 		p[i] = models.Pair{k, v}
 		i++
 	}
@@ -502,7 +505,7 @@ func tokenSwap(input string) map[string]int {
 	retainedMasks := utils.MakeRetainMaskedMap(input, topTokens)
 
 	// Token swap
-	swappedTokens := utils.ShuffleMap(retainedMasks, models.VerboseOutput)
+	swappedTokens := utils.ShuffleMap(retainedMasks, models.GlobalTokens)
 
 	return swappedTokens
 }

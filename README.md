@@ -18,7 +18,6 @@ Usage documentation can be found in the `/docs/USAGE.md` directory or on the rep
 - [GitHub Link](https://github.com/JakeWnuk/ptt/tree/main/docs/USAGE.md)
 
 ### Install:
-
 From source with `go`:
 ```
 go install github.com/jakewnuk/ptt@latest
@@ -28,6 +27,7 @@ From `git` clone then build with `go`:
 git clone https://github.com/JakeWnuk/ptt && cd ptt && go build ./main.go && mv ./main ~/go/bin/ptt && ptt
 ```
 
+### Usage:
 ```
 Usage of Password Transformation Tool (ptt) version (1.1.0):
 

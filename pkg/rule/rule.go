@@ -1,3 +1,4 @@
+// Package rule provides functions to convert strings into rules
 package rule
 
 import (

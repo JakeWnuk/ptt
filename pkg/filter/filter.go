@@ -1,3 +1,4 @@
+// Package filter provides a function to check if a string passes a filter
 package filter
 
 import "ptt/pkg/models"

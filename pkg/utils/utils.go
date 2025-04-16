@@ -1,3 +1,4 @@
+// Package utils provides utility functions for various tasks
 package utils
 
 import (
@@ -9,8 +10,10 @@ import (
 	"ptt/pkg/models"
 	"ptt/pkg/validation"
 	"regexp"
+	"runtime"
 	"sort"
 	"strings"
+	"time"
 	"unicode"
 
 	"golang.org/x/text/cases"
@@ -608,4 +611,42 @@ func ShuffleMap(input map[string]int, swapMap map[string]int) map[string]int {
 		}
 	}
 	return shuffleMap
+}
+
+// TrackLoadTime tracks the load time of a process and prints the elapsed time
+func TrackLoadTime(done <-chan bool, work string) {
+	start := time.Now()
+	interval := 10 * time.Second
+	ticker := time.NewTicker(interval)
+
+	for {
+		select {
+		case <-done:
+			ticker.Stop()
+			return
+
+		case t := <-ticker.C:
+			elapsed := t.Sub(start)
+			memUsage := GetMemoryUsage()
+			fmt.Fprintf(os.Stderr,
+				"[-] Please wait loading. Elapsed: %02d:%02d:%02d.%03d. Memory Usage: %.2f MB.\n",
+				int(elapsed.Hours()), int(elapsed.Minutes())%60, int(elapsed.Seconds())%60,
+				elapsed.Milliseconds()%1000, memUsage,
+			)
+
+			ticker.Stop()
+			// Increment the interval by 10 seconds, capped at 10 minutes
+			if interval < 10*time.Minute {
+				interval += 10 * time.Second
+			}
+			ticker = time.NewTicker(interval)
+		}
+	}
+}
+
+// GetMemoryUsage returns the current memory usage in megabytes
+func GetMemoryUsage() float64 {
+	var m runtime.MemStats
+	runtime.ReadMemStats(&m)
+	return float64(m.Alloc) / 1024 / 1024
 }

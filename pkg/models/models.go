@@ -54,6 +54,10 @@ var Verbose bool
 // for operations
 var VerboseOutput map[string]int
 
+// GlobalTokens is a map[string]int to hold the global tokens for token
+// swapping if specified
+var GlobalTokens map[string]int
+
 // ----------------------------------------------------------------------------
 // Flag Models
 // ----------------------------------------------------------------------------

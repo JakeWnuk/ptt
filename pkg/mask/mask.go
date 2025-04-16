@@ -1,3 +1,4 @@
+// Package mask provides functions to handle masking and unmasking of strings
 package mask
 
 import (

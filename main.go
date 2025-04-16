@@ -8,6 +8,7 @@ import (
 	"ptt/pkg/mask"
 	"ptt/pkg/models"
 	"ptt/pkg/transform"
+	"ptt/pkg/utils"
 	"sort"
 	"strings"
 )
@@ -107,9 +108,14 @@ func main() {
 	}
 
 	if *verbose {
+		models.VerboseOutput = make(map[string]int)
 		models.Verbose = true
 	}
 
-	models.VerboseOutput = make(map[string]int)
+	models.GlobalTokens = make(map[string]int)
+	doneLoad := make(chan bool)
+	go utils.TrackLoadTime(doneLoad, "Run")
 	transform.ReadReturnStandardInput(transformationModeArray)
+	doneLoad <- true
+	close(doneLoad)
 }

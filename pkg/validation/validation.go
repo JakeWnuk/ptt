@@ -1,3 +1,4 @@
+// Package validation provides functions to validate and transform strings
 package validation
 
 import (
