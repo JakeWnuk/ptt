@@ -76,7 +76,15 @@ func ReadReturnStandardInput(transformation models.MultiString) {
 				line = Apply(line, operation)
 
 				if filter.Pass(line) {
-					fmt.Println(line)
+					if models.Verbose {
+						if models.VerboseOutput[line] == 0 {
+							models.VerboseOutput[line] = 1
+						} else {
+							models.VerboseOutput[line]++
+						}
+					} else {
+						fmt.Println(line)
+					}
 				}
 
 				line = readText
@@ -498,7 +506,10 @@ func tokenSwap(input string) map[string]int {
 	// Create an array of the top 1000 tokens
 	topTokens := make(map[string]int)
 	for i := 0; i < 1000 && i < len(p); i++ {
-		topTokens[p[i].Key] = p[i].Value
+		// Increase min token size to 3
+		if len(p[i].Key) > 2 {
+			topTokens[p[i].Key] = p[i].Value
+		}
 	}
 
 	// Create retained masks

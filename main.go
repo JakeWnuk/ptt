@@ -14,7 +14,7 @@ import (
 	"github.com/jakewnuk/ptt/pkg/utils"
 )
 
-var version = "1.1.0"
+var version = "1.1.1"
 var transformationModeArray models.MultiString
 var transformationFiles models.MultiString
 var wordRange models.IntRange
@@ -46,7 +46,7 @@ func main() {
 			"mask -m [uldsb]":           "Transforms input by masking characters with provided mask.",
 			"mask-remove -m [uldsb]":    "Transforms input by removing characters with provided mask.",
 			"mask-pop -m [uldsbt]":      "Transforms input by popping tokens from character boundaries using the provided mask.",
-			"token-swap":                "Transforms input by swapping tokens.",
+			"token-swap":                "Transforms input by performing token swapping using top tokens from input.",
 			"passphrase -w [words]":     "Transforms input by generating passphrases from sentences with a given number of words.",
 			"regram -w [words]":         "Transforms input by regramming sentences into new n-grams with a given number of words.",
 			"rule-simplify":             "Transforms input by simplifying rules to efficient equivalents using the HCRE library.",

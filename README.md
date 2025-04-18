@@ -29,7 +29,7 @@ git clone https://github.com/JakeWnuk/ptt && cd ptt && go build ./main.go && mv 
 
 ### Usage:
 ```
-Usage of Password Transformation Tool (ptt) version (1.1.0):
+Usage of Password Transformation Tool (ptt) version (1.1.1):
 
 ptt [options] [...]
 Accepts standard input and/or additonal arguments.
@@ -65,7 +65,8 @@ These create or alter based on the selected mode.
         Transforms input by generating passphrases from sentences with a given number of words.
   -t regram -w [words]
         Transforms input by regramming sentences into new n-grams with a given number of words.
-  -t rule-append                                                                                                                                                                                                                                                                          Transforms input by creating append rules.
+  -t rule-append
+        Transforms input by creating append rules.
   -t rule-append-remove
         Transforms input by creating append-remove rules.
   -t rule-insert -i [index]
@@ -83,5 +84,5 @@ These create or alter based on the selected mode.
   -t rule-toggle -i [index]
         Transforms input by creating toggle rules starting at index.
   -t token-swap
-        Transforms input by swapping tokens.
+        Transforms input by performing token swapping using top tokens from input.
 ```
