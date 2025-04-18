@@ -76,7 +76,15 @@ func ReadReturnStandardInput(transformation models.MultiString) {
 				line = Apply(line, operation)
 
 				if filter.Pass(line) {
-					fmt.Println(line)
+					if models.Verbose {
+						if models.VerboseOutput[line] == 0 {
+							models.VerboseOutput[line] = 1
+						} else {
+							models.VerboseOutput[line]++
+						}
+					} else {
+						fmt.Println(line)
+					}
 				}
 
 				line = readText
