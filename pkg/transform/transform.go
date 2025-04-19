@@ -478,10 +478,19 @@ func makeNGrams(input string) map[string]int {
 	return newMap
 }
 
+// tokenSwap transforms the input string by token swapping with the following method:
+//
+// 1. Pops tokens and adds them to a global list
+// 2. Take top 1000 tokens and look for retain masks in the string
+// 3. All found retain/partial masks are used for swapping
+// 4. swap with ALL of the popped tokens so far
+//
+// Args:
+// input (string): The input string to be transformed
+//
+// Returns:
+// (map[string]int): A map of token-swapped input strings
 func tokenSwap(input string) map[string]int {
-
-	// Using models.VerboseOutput to hold tokens to swap because it is
-	// allocated
 	poppedTokens := maskPop(input)
 	for i := range poppedTokens {
 		if i == "" || i == " " {
