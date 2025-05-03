@@ -12,6 +12,8 @@
 - **Hashcat Rule Simplification:** Apply rules to input data and simplify
   rules for optimization by using the [HCRE](https://git.launchpad.net/hcre/tree/README.md) library.
 
+> In `v1.1.0` a large code base change was started. If you prefer the last stable version: `go install github.com/jakewnuk/ptt@v1.0.0`
+
 ## Getting Started:
 
 Usage documentation can be found in the `/docs/USAGE.md` directory or on the repository here:
