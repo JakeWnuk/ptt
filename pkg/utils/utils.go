@@ -116,6 +116,28 @@ func GenerateNGrams(text string, n int) []string {
 	return nGrams
 }
 
+// PrintArrayToSTDOUT prints an array of items to stdout
+//
+// Args:
+//
+//	items (map[string]int): A map of item frequencies
+//
+// Returns:
+//
+//	None
+func PrintArrayToSTDOUT(freq map[string]int) {
+	p := make(models.PairList, len(freq))
+	i := 0
+	for k, v := range freq {
+		p[i] = models.Pair{k, v}
+		i++
+	}
+	sort.Sort(sort.Reverse(p))
+	for _, pair := range p {
+		fmt.Printf("%d %s\n", pair.Value, pair.Key)
+	}
+}
+
 // PrintStatsToSTDOUT prints statistics about the frequency map to stdout
 // including several statistics about the frequency map. If verbose is true,
 // additional information is printed and increased number of items are

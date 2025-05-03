@@ -1,5 +1,5 @@
 # Password Transformation Tool (PTT) Usage Guide
-> Version 1.1.1
+> Version 1.2.0
 ## Table of Contents
 - [Introduction](#introduction)
 - [Installation](#installation)
@@ -26,7 +26,7 @@ a transformation mode, use the `-t` flag along with a valid option. Multiple
 `-t` flags can be used at once.
 
 ```
-$ cat rockyou.txt | ptt -t mask -v
+$ cat rockyou.txt | ptt -t mask -vv
 [*] Starting statistics generation. Please wait...
 Verbose Statistics: max=75
 --------------------------------------------------
@@ -134,7 +134,7 @@ non-complex: 148329
 Some transformations use the `-m` flag to specify a mask to use for that
 transformation.
 ```
-$ cat rockyou.txt | ptt -t mask -m d -v
+$ cat rockyou.txt | ptt -t mask -m d -vv
 [*] Starting statistics generation. Please wait...
 Verbose Statistics: max=75
 --------------------------------------------------

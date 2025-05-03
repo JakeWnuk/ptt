@@ -2,6 +2,7 @@
 package mask
 
 import (
+	"encoding/hex"
 	"fmt"
 	"os"
 	"strings"
@@ -174,4 +175,26 @@ func TestMaskComplexity(str string) int {
 		score++
 	}
 	return score
+}
+
+// DeHex converts a $HEX[string] string to a normal string
+//
+// Args:
+// str (string): The input string to be converted.
+//
+// Returns:
+// (string): The converted string.
+func DeHex(str string) string {
+	if strings.HasPrefix(str, "$HEX[") && strings.HasSuffix(str, "]") {
+		str = str[5 : len(str)-1]
+	}
+	if len(str)%2 != 0 {
+		return str
+	}
+
+	decoded, err := hex.DecodeString(str)
+	if err != nil {
+		return str
+	}
+	return string(decoded)
 }

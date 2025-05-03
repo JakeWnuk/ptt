@@ -14,7 +14,7 @@ import (
 	"github.com/jakewnuk/ptt/pkg/utils"
 )
 
-var version = "1.1.1"
+var version = "1.2.0"
 var transformationModeArray models.MultiString
 var transformationFiles models.MultiString
 var wordRange models.IntRange
@@ -50,6 +50,7 @@ func main() {
 			"passphrase -w [words]":     "Transforms input by generating passphrases from sentences with a given number of words.",
 			"regram -w [words]":         "Transforms input by regramming sentences into new n-grams with a given number of words.",
 			"rule-simplify":             "Transforms input by simplifying rules to efficient equivalents using the HCRE library.",
+			"dehex":                     "Transforms input by decoding $HEX[...] formatted strings. Will not affect other transformations.",
 		}
 
 		// Sort and print transformation modes
@@ -73,6 +74,7 @@ func main() {
 	replacementMask := flag.String("m", "uldsbt", "Mask for transformations if applicable.")
 	debugMode := flag.Bool("d", false, "Enable debug mode.")
 	verbose := flag.Bool("v", false, "Show verbose report output. Warning: loads information into memory.")
+	veryVerbose := flag.Bool("vv", false, "Show very verbose report output. Warning: loads information into memory.")
 	flag.Parse()
 
 	if *debugMode {
@@ -111,6 +113,12 @@ func main() {
 	if *verbose {
 		models.VerboseOutput = make(map[string]int)
 		models.Verbose = true
+	}
+
+	if *veryVerbose {
+		models.VerboseOutput = make(map[string]int)
+		models.Verbose = true
+		models.VeryVerbose = true
 	}
 
 	models.GlobalTokens = make(map[string]int)

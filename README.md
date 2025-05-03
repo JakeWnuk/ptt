@@ -31,7 +31,7 @@ git clone https://github.com/JakeWnuk/ptt && cd ptt && go build ./main.go && mv 
 
 ### Usage:
 ```
-Usage of Password Transformation Tool (ptt) version (1.1.1):
+Usage of Password Transformation Tool (ptt) version (1.2.0):
 
 ptt [options] [...]
 Accepts standard input and/or additonal arguments.
@@ -51,12 +51,16 @@ These modify or filter the transformation mode.
   -t value
         Transformation mode to be used. Can be specified multiple times.
   -v    Show verbose report output. Warning: loads information into memory.
+  -vv
+        Show very verbose report output. Warning: loads information into memory.
   -w value
         Number of words for transformations if applicable. Accepts ranges separated by '-'.
 
 Transformation Modes:
 These create or alter based on the selected mode.
 
+  -t dehex
+        Transforms input by decoding $HEX[...] formatted strings. Will not affect other transformations.
   -t mask -m [uldsb]
         Transforms input by masking characters with provided mask.
   -t mask-pop -m [uldsbt]

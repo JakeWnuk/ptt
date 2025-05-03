@@ -35,7 +35,7 @@ func ReadReturnStandardInput(transformation models.MultiString) {
 		line := readText
 
 		for _, operation := range transformation {
-			if strings.Contains(operation, "insert") || strings.Contains(operation, "overwrite") || strings.Contains(operation, "toggle") {
+			if strings.Contains(operation, "insert") || strings.Contains(operation, "overwrite") || strings.Contains(operation, "toggle") || strings.Contains(operation, "hex") {
 				start := models.OperationStart
 				for models.OperationStart < models.OperationEnd+1 {
 					line = Apply(line, operation)
@@ -91,8 +91,10 @@ func ReadReturnStandardInput(transformation models.MultiString) {
 			}
 		}
 	}
-	if models.Verbose {
+	if models.VeryVerbose {
 		utils.PrintStatsToSTDOUT(models.VerboseOutput)
+	} else if models.Verbose {
+		utils.PrintArrayToSTDOUT(models.VerboseOutput)
 	}
 
 	if err := reader.Err(); err != nil {
@@ -133,6 +135,8 @@ func Apply(input string, transform string) string {
 		return mask.MakeMask(input)
 	case "remove", "mask-remove":
 		return mask.RemoveMaskedCharacters(mask.MakeMask(input))
+	case "dehex", "unhex":
+		return mask.DeHex(input)
 	default:
 		return ""
 	}

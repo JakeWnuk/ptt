@@ -50,6 +50,10 @@ var LengthEnd int
 // for operations
 var Verbose bool
 
+// VeryVerbose is a boolean flag to enable to disable very verbose output
+// for operations
+var VeryVerbose bool
+
 // VerboseOutput is a map[string]int to hold the verbose output
 // for operations
 var VerboseOutput map[string]int
