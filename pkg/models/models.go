@@ -66,6 +66,10 @@ var GlobalTokens map[string]int
 // GlobalTokensMutex is the mutex for GlobalTokens async
 var GlobalTokensMutex sync.Mutex
 
+// TokenSwapCount is the number of times to call tokenSwap per input
+// after iterating once
+var TokenSwapCount int = 10
+
 // ----------------------------------------------------------------------------
 // Flag Models
 // ----------------------------------------------------------------------------

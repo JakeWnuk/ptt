@@ -31,7 +31,7 @@ git clone https://github.com/JakeWnuk/ptt && cd ptt && go build ./main.go && mv 
 
 ### Usage:
 ```
-Usage of Password Transformation Tool (ptt) version (1.2.0):
+Usage of Password Transformation Tool (ptt) version (1.2.1):
 
 ptt [options] [...]
 Accepts standard input and/or additonal arguments.

@@ -84,6 +84,30 @@ func ReadReturnStandardInput(transformation models.MultiString) {
 						verboseOutputMutex.Unlock()
 					}
 				}(line, operation)
+			} else if strings.Contains(operation, "swap") {
+				wg.Add(1)
+
+				go func(line, operation string) {
+					defer wg.Done()
+					for i := 0; i < models.TokenSwapCount; i++ {
+						output := Parse(line, operation)
+						for item := range output {
+							if filter.Pass(item) {
+								if models.Verbose {
+									if models.VerboseOutput[item] == 0 {
+										models.VerboseOutput[item] = 1
+									} else {
+										models.VerboseOutput[item]++
+									}
+								} else {
+									fmt.Println(item)
+								}
+							}
+							verboseOutputMutex.Unlock()
+						}
+					}
+				}(line, operation)
+
 			} else {
 				line = Apply(line, operation)
 
@@ -497,7 +521,7 @@ func makeNGrams(input string) map[string]int {
 // tokenSwap transforms the input string by token swapping with the following method:
 //
 // 1. Pops tokens and adds them to a global list
-// 2. Take top 1000 tokens and look for retain masks in the string
+// 2. Take top 250k tokens and look for retain masks in the string
 // 3. All found retain/partial masks are used for swapping
 // 4. swap with ALL of the popped tokens so far
 //
@@ -528,9 +552,9 @@ func tokenSwap(input string) map[string]int {
 	}
 	sort.Sort(sort.Reverse(p))
 
-	// Create an array of the top 1000 tokens
+	// Create an array of the top 250,000 tokens
 	topTokens := make(map[string]int)
-	for i := 0; i < 1000 && i < len(p); i++ {
+	for i := 0; i < 250000 && i < len(p); i++ {
 		// Increase min token size to 3
 		if len(p[i].Key) > 2 {
 			topTokens[p[i].Key] = p[i].Value
