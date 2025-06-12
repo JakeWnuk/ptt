@@ -8,6 +8,7 @@ import (
 	"os"
 	"sort"
 	"strings"
+	"sync"
 	"unicode"
 
 	"github.com/jakewnuk/ptt/pkg/filter"
@@ -18,6 +19,8 @@ import (
 
 	"launchpad.net/hcre"
 )
+
+var verboseOutputMutex sync.Mutex
 
 // ReadReturnStandardInput reads from standard input and applies the given
 // transformation to each line.
@@ -30,6 +33,8 @@ import (
 // None
 func ReadReturnStandardInput(transformation models.MultiString) {
 	reader := bufio.NewScanner(os.Stdin)
+	var wg sync.WaitGroup
+
 	for reader.Scan() {
 		readText := reader.Text()
 		line := readText
@@ -57,21 +62,28 @@ func ReadReturnStandardInput(transformation models.MultiString) {
 				}
 				models.OperationStart = start
 			} else if strings.Contains(operation, "pop") || strings.Contains(operation, "passphrase") || strings.Contains(operation, "regram") || strings.Contains(operation, "swap") {
-				output := Parse(line, operation)
-				for item := range output {
+				wg.Add(1)
 
-					if filter.Pass(item) {
-						if models.Verbose {
-							if models.VerboseOutput[item] == 0 {
-								models.VerboseOutput[item] = 1
+				go func(line, operation string) {
+					defer wg.Done()
+
+					output := Parse(line, operation)
+					for item := range output {
+						verboseOutputMutex.Lock()
+						if filter.Pass(item) {
+							if models.Verbose {
+								if models.VerboseOutput[item] == 0 {
+									models.VerboseOutput[item] = 1
+								} else {
+									models.VerboseOutput[item]++
+								}
 							} else {
-								models.VerboseOutput[item]++
+								fmt.Println(item)
 							}
-						} else {
-							fmt.Println(item)
 						}
+						verboseOutputMutex.Unlock()
 					}
-				}
+				}(line, operation)
 			} else {
 				line = Apply(line, operation)
 
@@ -495,6 +507,7 @@ func makeNGrams(input string) map[string]int {
 // Returns:
 // (map[string]int): A map of token-swapped input strings
 func tokenSwap(input string) map[string]int {
+	models.GlobalTokensMutex.Lock()
 	poppedTokens := maskPop(input)
 	for i := range poppedTokens {
 		if i == "" || i == " " {
@@ -506,7 +519,6 @@ func tokenSwap(input string) map[string]int {
 			models.GlobalTokens[i]++
 		}
 	}
-
 	// Sort by frequency
 	p := make(models.PairList, len(models.GlobalTokens))
 	i := 0
@@ -530,6 +542,7 @@ func tokenSwap(input string) map[string]int {
 
 	// Token swap
 	swappedTokens := utils.ShuffleMap(retainedMasks, models.GlobalTokens)
+	models.GlobalTokensMutex.Unlock()
 
 	return swappedTokens
 }

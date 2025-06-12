@@ -5,6 +5,7 @@ package models
 import (
 	"fmt"
 	"strings"
+	"sync"
 )
 
 // ----------------------------------------------------------------------------
@@ -61,6 +62,9 @@ var VerboseOutput map[string]int
 // GlobalTokens is a map[string]int to hold the global tokens for token
 // swapping if specified
 var GlobalTokens map[string]int
+
+// GlobalTokensMutex is the mutex for GlobalTokens async
+var GlobalTokensMutex sync.Mutex
 
 // ----------------------------------------------------------------------------
 // Flag Models
