@@ -14,7 +14,7 @@ import (
 	"github.com/jakewnuk/ptt/pkg/utils"
 )
 
-var version = "1.2.0"
+var version = "1.2.1"
 var transformationModeArray models.MultiString
 var transformationFiles models.MultiString
 var wordRange models.IntRange
