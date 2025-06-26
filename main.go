@@ -15,7 +15,7 @@ import (
 	"github.com/jakewnuk/ptt/pkg/utils"
 )
 
-var version = "1.0.0"
+var version = "2.0.0"
 var wg sync.WaitGroup
 var mutex = &sync.Mutex{}
 var retain models.FileArgumentFlag
