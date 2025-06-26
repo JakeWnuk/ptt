@@ -1,0 +1,22 @@
+[
+    {
+        "StartIndex": 0,
+        "EndIndex": 0,
+        "Verbose": false,
+        "ReplacementMask": "uldsb",
+        "Bypass": false,
+        "TransformationMode": "rule-prepend",
+        "WordRangeStart": 0,
+        "WordRangeEnd": 0
+    },
+    {
+        "StartIndex": 0,
+        "EndIndex": 0,
+        "Verbose": false,
+        "ReplacementMask": "uldsb",
+        "Bypass": false,
+        "TransformationMode": "rule-prepend-remove",
+        "WordRangeStart": 0,
+        "WordRangeEnd": 0
+    }
+]
