@@ -1,6 +1,6 @@
 module github.com/jakewnuk/ptt
 
-go 1.24.1
+go 1.24.4
 
 require (
 	golang.org/x/net v0.24.0
