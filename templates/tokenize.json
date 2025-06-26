@@ -1,0 +1,42 @@
+[
+    {
+        "StartIndex": 0,
+        "EndIndex": 0,
+        "Verbose": false,
+        "ReplacementMask": "ult",
+        "Bypass": false,
+        "TransformationMode": "mask-pop",
+        "WordRangeStart": 0,
+        "WordRangeEnd": 0
+    },
+    {
+        "StartIndex": 0,
+        "EndIndex": 0,
+        "Verbose": false,
+        "ReplacementMask": "dsb",
+        "Bypass": false,
+        "TransformationMode": "mask-pop",
+        "WordRangeStart": 0,
+        "WordRangeEnd": 0
+    },
+    {
+        "StartIndex": 0,
+        "EndIndex": 0,
+        "Verbose": false,
+        "ReplacementMask": "ul",
+        "Bypass": false,
+        "TransformationMode": "mask-remove",
+        "WordRangeStart": 0,
+        "WordRangeEnd": 0
+    },
+    {
+        "StartIndex": 0,
+        "EndIndex": 0,
+        "Verbose": false,
+        "ReplacementMask": "dsb",
+        "Bypass": false,
+        "TransformationMode": "mask-remove",
+        "WordRangeStart": 0,
+        "WordRangeEnd": 0
+    }
+]
