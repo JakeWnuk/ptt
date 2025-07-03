@@ -11,6 +11,6 @@
 - `pkg/utils/utils.go:9` use of `crypto/rand` over `math/rand` is not needed in this module.
 
 ## Last SAST Scan:
-- `v1.0.0` (`v2.0.0` because it is restored from `v1.0.0`)
+- `v1.0.0` (`v1.3.0` because it is restored from `v1.0.0`)
 - `v0.4.1`
     - Included `hcre` library
